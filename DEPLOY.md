@@ -257,6 +257,29 @@ scroll; mobile menu button opens the nav.
 
 ---
 
+## Automatic deployment
+
+The repository deploys itself. `.github/workflows/deploy.yml` lints every push
+and, once the secrets below exist, uploads the theme over SFTP.
+
+Add these under *Settings -> Secrets and variables -> Actions*:
+
+| Secret | Example |
+|---|---|
+| `SFTP_HOST` | `sftp.yourhost.com` |
+| `SFTP_USER` | your SFTP username |
+| `SFTP_PASSWORD` | its password |
+| `REMOTE_PATH` | `/home/you/public_html/wp-content/themes/medzuro-wp/` |
+| `SFTP_PORT` | optional, defaults to `22` |
+
+Until all four required secrets exist the deploy is **skipped**, not failed —
+lint still runs, so you get syntax checking from day one.
+
+`REMOTE_PATH` must point at the theme directory itself, never the WordPress
+root. The workflow deliberately does not use `--delete`, so a wrong path
+cannot remove live files; once the path is proven you can add it to clear
+stale files.
+
 ## Keeping the port in sync
 
 While the Shopify theme in `../medzuro` is still the source of truth, do not

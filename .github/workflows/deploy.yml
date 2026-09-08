@@ -6,16 +6,22 @@ name: Deploy theme
 # takes its place: the repository stays the source of truth and the server is
 # updated from it, rather than editing files on the host.
 #
+# Until the secrets below exist the deploy is SKIPPED, not failed — there is no
+# server to deploy to yet, and a red cross on every push would be noise. Lint
+# still runs on every push.
+#
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
 #
 #   SFTP_HOST       sftp.yourhost.com
-#   SFTP_PORT       22
 #   SFTP_USER       the SFTP username
-#   SFTP_PASSWORD   its password  (or use SFTP_KEY instead, see below)
+#   SFTP_PASSWORD   its password
 #   REMOTE_PATH     /home/you/public_html/wp-content/themes/medzuro-wp/
 #
-# REMOTE_PATH must end with a trailing slash and point at the theme directory
-# itself, which the action creates if it does not exist.
+# Optional:
+#   SFTP_PORT       defaults to 22
+#
+# REMOTE_PATH must point at the theme directory itself, NOT at the WordPress
+# root. Double-check it before the first deploy.
 
 on:
   push:
@@ -48,33 +54,71 @@ jobs:
           done < <(find . -name '*.php' -not -path './.git/*')
           exit $status
 
+  configured:
+    name: Check deploy secrets
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - name: Look for SFTP settings
+        id: check
+        # The secrets context is not available to a job-level `if`, so the
+        # check happens in a step (where it is) and is passed on as an output.
+        env:
+          HOST: ${{ secrets.SFTP_HOST }}
+          USERNAME: ${{ secrets.SFTP_USER }}
+          PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+        run: |
+          if [ -n "$HOST" ] && [ -n "$USERNAME" ] && [ -n "$PASSWORD" ] && [ -n "$REMOTE_PATH" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "SFTP settings found — deploy will run."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "No SFTP settings — skipping deploy."
+            echo "Add SFTP_HOST, SFTP_USER, SFTP_PASSWORD and REMOTE_PATH under"
+            echo "Settings -> Secrets and variables -> Actions to enable it."
+          fi
+
   deploy:
     name: Deploy to production
-    needs: lint
+    needs: [lint, configured]
+    if: needs.configured.outputs.ready == 'true'
     runs-on: ubuntu-latest
-    # Create a "production" environment in repo settings to require manual
-    # approval before each deploy. Remove this line to deploy automatically.
-    environment: production
-
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
       - name: Upload over SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          port: ${{ secrets.SFTP_PORT }}
-          username: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          # To use a key instead of a password, delete the password line above
-          # and set ssh_private_key to a secret holding the private key.
-          local_path: './*'
-          remote_path: ${{ secrets.REMOTE_PATH }}
-          sftp_only: true
-          # Repository-only files must never reach the server.
-          exclude_list: >-
-            .git*
-            .github
-            tools
-            README.md
-            DEPLOY.md
+        env:
+          HOST: ${{ secrets.SFTP_HOST }}
+          PORT: ${{ secrets.SFTP_PORT }}
+          USERNAME: ${{ secrets.SFTP_USER }}
+          PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+
+          # mirror -R uploads the working tree. Repository-only files are
+          # excluded so they never reach the server.
+          #
+          # --delete is deliberately NOT used: if REMOTE_PATH were ever
+          # misconfigured to point above the theme directory, it would remove
+          # live files. Add it once the path is proven, to clear stale files.
+          lftp -c "
+            set sftp:auto-confirm yes;
+            set net:max-retries 2;
+            set net:timeout 20;
+            open -u '$USERNAME','$PASSWORD' sftp://$HOST:$PORT;
+            mirror -R --verbose --parallel=4 \
+              --exclude-glob .git* \
+              --exclude .github/ \
+              --exclude tools/ \
+              --exclude-glob *.md \
+              ./ '$REMOTE_PATH';
+          "
