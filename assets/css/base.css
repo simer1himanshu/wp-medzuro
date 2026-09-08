@@ -1,0 +1,58 @@
+/* Medzuro base layer.
+   Palette lifted from the Shopify build's config/settings_data.json so the
+   ported sections inherit identical brand colours. */
+
+:root {
+  --mz-navy:      #002964;  /* color_button, navbar */
+  --mz-red:       #e30a1b;  /* color_button_hov, nav link hover */
+  --mz-green:     #557d31;  /* footer link_hover */
+  --mz-ink:       #0b1b33;  /* color_body_text */
+  --mz-heading:   #111111;  /* headings_clr */
+  --mz-muted:     #2d3a52;
+  --mz-rule:      #e3e8ef;  /* navbarbdr */
+  --mz-wash:      #f5f7fa;  /* br_bg */
+  --mz-white:     #ffffff;
+
+  --mz-font: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system,
+             "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --mz-page-width: 1200px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--mz-font);
+  color: var(--mz-ink);
+  background: var(--mz-white);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 { color: var(--mz-heading); margin-top: 0; }
+
+img { max-width: 100%; height: auto; }
+
+a { color: inherit; }
+
+/* Shopify's .page-width / .fullwidth wrappers, which the ported sections use. */
+.page-width {
+  max-width: var(--mz-page-width);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.fullwidth { width: 100%; padding-inline: 20px; }
+
+.mz-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link:focus {
+  position: fixed; top: 8px; left: 8px; z-index: 999;
+  padding: 10px 16px; background: var(--mz-navy); color: #fff;
+}

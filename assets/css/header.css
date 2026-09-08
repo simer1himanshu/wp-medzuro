@@ -1,0 +1,189 @@
+/* Medzuro header.
+
+   Unlike the other files here, this is not a port. The Shopify header was
+   Avone's, styled across assets/theme.css (87KB) against Avone's class names
+   and driven by ~15 theme settings. header.php renders only the configuration
+   the store actually used, with its own markup, so this styles that markup
+   directly using the brand tokens in base.css.
+
+   Matches settings_data.json: topbar on, logo left, nav beside logo,
+   sticky header on, search/account/cart icons, no announcement bar. */
+
+/* Top bar */
+.mz-topbar {
+  background: var(--mz-navy);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.mz-topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 38px;
+  padding-block: 8px;
+}
+
+.mz-topbar__cell { flex: 1 1 0; }
+.mz-topbar__cell--center { text-align: center; }
+.mz-topbar__cell--right { text-align: right; }
+
+.mz-topbar a { color: #fff; }
+
+@media (max-width: 767px) {
+  .mz-topbar__cell--left,
+  .mz-topbar__cell--right { display: none; }
+  .mz-topbar__cell--center { text-align: center; }
+}
+
+/* Header bar */
+.mz-hd {
+  background: var(--mz-white);
+  border-bottom: 1px solid var(--mz-rule);
+}
+
+.mz-hd.is-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.mz-hd.is-scrolled { box-shadow: 0 2px 12px rgb(11 27 51 / 8%); }
+
+.mz-hd__bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 68px;
+}
+
+.mz-hd__logo { flex: 0 0 auto; }
+.mz-hd__logo-link { display: block; line-height: 0; }
+.mz-hd__logo img { width: 180px; height: auto; }
+
+/* Navigation */
+.mz-hd__nav { flex: 1 1 auto; }
+
+.mz-nav {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mz-nav li { position: relative; }
+
+.mz-nav a {
+  display: block;
+  padding: 8px 0;
+  color: var(--mz-heading);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+
+.mz-nav a:hover,
+.mz-nav .current-menu-item > a { color: var(--mz-red); }
+
+/* Submenus */
+.mz-nav .sub-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  display: none;
+  min-width: 220px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  background: var(--mz-white);
+  border: 1px solid var(--mz-rule);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(11 27 51 / 10%);
+}
+
+.mz-nav li:hover > .sub-menu,
+.mz-nav li:focus-within > .sub-menu { display: block; }
+
+.mz-nav .sub-menu a { padding: 8px 16px; font-weight: 400; }
+
+/* Icons */
+.mz-hd__icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.mz-hd__icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--mz-heading);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease;
+}
+
+.mz-hd__icon:hover { color: var(--mz-red); background: var(--mz-wash); }
+
+.mz-hd__cart-count {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  color: #fff;
+  background: var(--mz-navy);
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* Mobile toggle — a three-line bars glyph drawn with borders. */
+.mz-hd__mobile { display: none; }
+
+.mz-hd__bars,
+.mz-hd__bars::before,
+.mz-hd__bars::after {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: currentcolor;
+  border-radius: 2px;
+}
+
+.mz-hd__bars { position: relative; }
+
+.mz-hd__bars::before,
+.mz-hd__bars::after {
+  position: absolute;
+  content: "";
+}
+
+.mz-hd__bars::before { top: -6px; }
+.mz-hd__bars::after { top: 6px; }
+
+@media (max-width: 989px) {
+  .mz-hd__mobile { display: block; }
+  .mz-hd__nav { display: none; }
+  .mz-hd__bar { gap: 12px; min-height: 58px; }
+  .mz-hd__logo img { width: 140px; }
+}
+
+/* Main content */
+.mz-main { display: block; }

@@ -1,0 +1,26 @@
+# Normalise line endings.
+#
+# The theme is authored on Windows but deployed to a Linux host from a Linux
+# CI runner, so everything is stored as LF in the repository regardless of the
+# working copy. Without this, PHP and CSS land on the server with CRLF.
+
+* text=auto eol=lf
+
+# Binary — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Not part of a theme release.
+.github/    export-ignore
+tools/      export-ignore
+README.md   export-ignore
+DEPLOY.md   export-ignore
+.gitignore  export-ignore
+.gitattributes export-ignore

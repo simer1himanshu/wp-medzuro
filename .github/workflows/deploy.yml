@@ -1,0 +1,80 @@
+name: Deploy theme
+
+# Pushes the theme to the live site over SFTP whenever main changes.
+#
+# WordPress has no first-party GitHub integration the way Shopify does, so this
+# takes its place: the repository stays the source of truth and the server is
+# updated from it, rather than editing files on the host.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#
+#   SFTP_HOST       sftp.yourhost.com
+#   SFTP_PORT       22
+#   SFTP_USER       the SFTP username
+#   SFTP_PASSWORD   its password  (or use SFTP_KEY instead, see below)
+#   REMOTE_PATH     /home/you/public_html/wp-content/themes/medzuro-wp/
+#
+# REMOTE_PATH must end with a trailing slash and point at the theme directory
+# itself, which the action creates if it does not exist.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  # Never let two deploys write to the server at once.
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    name: Lint PHP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Check syntax
+        # Every .php file must parse under the theme's minimum PHP version.
+        run: |
+          status=0
+          while IFS= read -r file; do
+            php -l "$file" > /dev/null || status=1
+          done < <(find . -name '*.php' -not -path './.git/*')
+          exit $status
+
+  deploy:
+    name: Deploy to production
+    needs: lint
+    runs-on: ubuntu-latest
+    # Create a "production" environment in repo settings to require manual
+    # approval before each deploy. Remove this line to deploy automatically.
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload over SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server: ${{ secrets.SFTP_HOST }}
+          port: ${{ secrets.SFTP_PORT }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          # To use a key instead of a password, delete the password line above
+          # and set ssh_private_key to a secret holding the private key.
+          local_path: './*'
+          remote_path: ${{ secrets.REMOTE_PATH }}
+          sftp_only: true
+          # Repository-only files must never reach the server.
+          exclude_list: >-
+            .git*
+            .github
+            tools
+            README.md
+            DEPLOY.md
