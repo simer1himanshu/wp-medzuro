@@ -64,7 +64,7 @@ function medzuro_content() {
 			'blurb'             => 'We bring you premium wellness products from trusted brands, delivered to your door across Fiji. Your health, our priority.',
 			'badge_text'        => 'Authorized HolyOak Seller',
 			'show_seller_badge' => false,
-			'show_policies'     => false,
+			'show_policies'     => true,
 			'show_social'       => false,
 			'show_payment'      => true,
 			'columns'           => 3,
