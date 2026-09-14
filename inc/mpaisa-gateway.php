@@ -531,3 +531,115 @@ function medzuro_mpaisa_handle_callback( WP_REST_Request $request ) {
 	wp_safe_redirect( $order->get_checkout_payment_url() );
 	exit;
 }
+
+/**
+ * A dedicated settings screen for M-PAiSA.
+ *
+ * This WooCommerce version's redesigned "Payments" settings page only
+ * renders UI for a fixed, curated set of gateway ids (WooPayments, PayPal,
+ * bacs/cheque/cod, and a short suggestions list) — it silently shows a
+ * blank panel for any other registered gateway, custom ones included.
+ * Rather than depend on that, M-PAiSA gets its own simple settings page
+ * under WooCommerce's admin menu. It reads and writes the exact same
+ * `woocommerce_mpaisa_settings` option WC_Payment_Gateway::init_settings()
+ * already uses, so the gateway itself needs no special-casing.
+ */
+add_action(
+	'admin_menu',
+	function () {
+		add_submenu_page(
+			'woocommerce',
+			'M-PAiSA Settings',
+			'M-PAiSA',
+			'manage_woocommerce',
+			'medzuro-mpaisa-settings',
+			'medzuro_mpaisa_settings_page'
+		);
+	}
+);
+
+/**
+ * Renders (and saves) the M-PAiSA settings page.
+ */
+function medzuro_mpaisa_settings_page() {
+	if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		return;
+	}
+
+	$settings = get_option( 'woocommerce_mpaisa_settings', array() );
+
+	if ( isset( $_POST['medzuro_mpaisa_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['medzuro_mpaisa_nonce'] ) ), 'medzuro_mpaisa_save' ) ) {
+		$environment = isset( $_POST['environment'] ) && 'test' === $_POST['environment'] ? 'test' : 'live';
+
+		$settings = array(
+			'enabled'       => isset( $_POST['enabled'] ) ? 'yes' : 'no',
+			'title'         => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
+			'description'   => isset( $_POST['description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['description'] ) ) : '',
+			'environment'   => $environment,
+			'business_id'   => isset( $_POST['business_id'] ) ? sanitize_text_field( wp_unslash( $_POST['business_id'] ) ) : '',
+			'client_secret' => isset( $_POST['client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['client_secret'] ) ) : '',
+		);
+
+		update_option( 'woocommerce_mpaisa_settings', $settings );
+		echo '<div class="notice notice-success is-dismissible"><p>M-PAiSA settings saved.</p></div>';
+	}
+
+	$enabled       = isset( $settings['enabled'] ) ? $settings['enabled'] : 'no';
+	$title         = isset( $settings['title'] ) ? $settings['title'] : 'M-PAiSA (Vodafone Fiji Mobile Money)';
+	$description   = isset( $settings['description'] ) ? $settings['description'] : "Pay securely with M-PAiSA. You'll be taken to Vodafone's payment page to confirm with your mobile number and PIN.";
+	$environment   = isset( $settings['environment'] ) ? $settings['environment'] : 'live';
+	$business_id   = isset( $settings['business_id'] ) ? $settings['business_id'] : '';
+	$client_secret = isset( $settings['client_secret'] ) ? $settings['client_secret'] : '';
+	$callback_url  = class_exists( 'WC_Gateway_MPaisa' ) ? WC_Gateway_MPaisa::callback_url() : home_url( '/wp-json/mpaisa/v1/callback' );
+	?>
+	<div class="wrap">
+		<h1>M-PAiSA (Vodafone Fiji) Settings</h1>
+		<p>WooCommerce's built-in Payments screen doesn't display custom gateways in this version, so M-PAiSA is configured here instead — these are the same settings the gateway reads at checkout.</p>
+		<p>Callback URL Vodafone redirects customers back to: <code><?php echo esc_html( $callback_url ); ?></code></p>
+		<form method="post">
+			<?php wp_nonce_field( 'medzuro_mpaisa_save', 'medzuro_mpaisa_nonce' ); ?>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="mpaisa_enabled">Enable M-PAiSA</label></th>
+					<td><input type="checkbox" id="mpaisa_enabled" name="enabled" <?php checked( $enabled, 'yes' ); ?> /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mpaisa_title">Title</label></th>
+					<td>
+						<input type="text" class="regular-text" id="mpaisa_title" name="title" value="<?php echo esc_attr( $title ); ?>" />
+						<p class="description">Payment method name the customer sees at checkout.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mpaisa_description">Description</label></th>
+					<td>
+						<textarea class="large-text" rows="3" id="mpaisa_description" name="description"><?php echo esc_textarea( $description ); ?></textarea>
+						<p class="description">Payment method description the customer sees at checkout.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mpaisa_environment">Environment</label></th>
+					<td>
+						<select id="mpaisa_environment" name="environment">
+							<option value="live" <?php selected( $environment, 'live' ); ?>>Live (payments.m-paisa.com)</option>
+							<option value="test" <?php selected( $environment, 'test' ); ?>>Test / staging (payments-staging.m-paisa.com)</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mpaisa_business_id">Business ID (Client ID)</label></th>
+					<td><input type="text" class="regular-text" id="mpaisa_business_id" name="business_id" value="<?php echo esc_attr( $business_id ); ?>" autocomplete="off" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mpaisa_client_secret">Client Secret</label></th>
+					<td>
+						<input type="password" class="regular-text" id="mpaisa_client_secret" name="client_secret" value="<?php echo esc_attr( $client_secret ); ?>" autocomplete="off" />
+						<p class="description">Stored in the WordPress database only — never committed to source control.</p>
+					</td>
+				</tr>
+			</table>
+			<?php submit_button( 'Save M-PAiSA settings' ); ?>
+		</form>
+	</div>
+	<?php
+}
