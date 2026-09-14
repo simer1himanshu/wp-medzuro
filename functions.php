@@ -21,6 +21,7 @@ require_once get_template_directory() . '/inc/home-content.php';
 require_once get_template_directory() . '/inc/ref-icons.php';
 require_once get_template_directory() . '/inc/home.php';
 require_once get_template_directory() . '/inc/cart.php';
+require_once get_template_directory() . '/inc/mpaisa-gateway.php';
 
 /**
  * Theme supports.
