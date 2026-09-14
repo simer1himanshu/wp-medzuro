@@ -25,6 +25,62 @@ If the host offers a one-click WordPress installer, use it and skip to §3.
 
 ---
 
+## 1a. If you are on WordPress.com (Business or Commerce)
+
+Business and Commerce are the only WordPress.com tiers that allow custom
+themes, plugins and SFTP, so this theme works — but the setup differs from a
+cPanel host. Do this instead of sections 1 and 2, then continue from 3.
+
+Menu names move around as WordPress.com redesigns its dashboard; if a label
+below does not match, look for the same idea rather than the exact wording.
+
+### Trigger the hosting transfer
+
+The first custom plugin or theme you install moves the site onto
+WordPress.com's hosting infrastructure. It takes a few minutes and happens
+once. Until it has run, SFTP and the hosting settings are not available.
+
+If WooCommerce is not already active (Commerce includes it, Business does
+not), install it now — that alone triggers the transfer.
+
+### Check the PHP version
+
+*Settings -> Hosting Configuration* (sometimes under Tools). Set PHP to **8.1
+or newer**. The theme uses arrow functions and will fatal on 7.x.
+
+### Get the SFTP credentials
+
+Same screen, under SFTP/SSH. Create credentials if none exist, then note the
+host, port, username and password.
+
+These are what the GitHub deploy workflow needs. Connect once with an SFTP
+client first and find the `wp-content/themes/` directory — use whatever path
+your client shows for it as `REMOTE_PATH`, with `medzuro-wp/` on the end and a
+trailing slash. Do not guess the absolute path; read it off a real connection.
+
+### Install the theme
+
+Either works:
+
+- **Manual** — zip the folder and use *Appearance -> Themes -> Add New ->
+  Upload Theme*. Fine for a first look.
+- **Automatic** — add the four secrets to the GitHub repository (see
+  "Automatic deployment" below) and push. Every later change then deploys
+  itself, which is the point of having the repo.
+
+### Two WordPress.com quirks
+
+**Caching.** WordPress.com caches aggressively. After a deploy, CSS changes
+may not appear until you clear the cache from the hosting settings, or load
+the page with a hard refresh.
+
+**Disallowed plugins.** WordPress.com blocks plugins that conflict with its
+platform — caching, backup and security plugins especially. This does not
+affect the theme, but it may affect what you choose for the contact form or
+wishlist. Check the plugin installs before relying on it.
+
+---
+
 ## 2. Install WordPress
 
 1. Create a MySQL database and a user with full privileges on it. Note the
