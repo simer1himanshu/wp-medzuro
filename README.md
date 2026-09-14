@@ -4,6 +4,9 @@ Port of the Medzuro Shopify theme (`../medzuro`) to WordPress + WooCommerce.
 
 ## Install
 
+On WordPress.com, connect the repository first —
+[CONNECT-GITHUB.md](CONNECT-GITHUB.md) is a step-by-step runbook.
+
 For a real host, follow [DEPLOY.md](DEPLOY.md) — it covers hosting
 requirements, WooCommerce setup, payments, shipping and the pre-launch
 checklist. The short version:

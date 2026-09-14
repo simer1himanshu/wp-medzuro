@@ -60,7 +60,12 @@ trailing slash. Do not guess the absolute path; read it off a real connection.
 
 ### Install the theme
 
-Either works:
+If your dashboard has *Settings -> Repositories*, use the native GitHub
+integration instead of anything below — follow
+[CONNECT-GITHUB.md](CONNECT-GITHUB.md), then return here at section 3. It
+replaces both the manual upload and the SFTP workflow.
+
+Otherwise, either works:
 
 - **Manual** — zip the folder and use *Appearance -> Themes -> Add New ->
   Upload Theme*. Fine for a first look.
