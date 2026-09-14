@@ -133,7 +133,7 @@ defined( 'ABSPATH' ) || exit;
       </div>
 
       <div class="ct-page__form-card">
-        {% form 'contact', id: 'MedzuroContactForm' %}
+        <?php echo do_shortcode( '[contact-form-7 id="be5ef9a" title="Contact form 1"]' ); ?> <!--
           {% if form.posted_successfully? %}
             <p class="ct-page__notice">{{ 'contact.form.post_success' | t }}</p>
           {% endif %}
@@ -220,7 +220,7 @@ defined( 'ABSPATH' ) || exit;
               Your information is safe with us. We will never share your details.
             </span>
           </div>
-        {% endform %}
+        -->
       </div>
     </div>
   </div>
