@@ -697,6 +697,27 @@ function medzuro_mpaisa_settings_page() {
 		<h1>M-PAiSA (Vodafone Fiji) Settings</h1>
 		<p>WooCommerce's built-in Payments screen doesn't display custom gateways in this version, so M-PAiSA is configured here instead — these are the same settings the gateway reads at checkout.</p>
 		<p>Callback URL Vodafone redirects customers back to: <code><?php echo esc_html( $callback_url ); ?></code></p>
+		<?php
+		// TEMPORARY diagnostics for the Blocks-checkout integration — remove
+		// once the "no payment methods available" issue is root-caused.
+		?>
+		<div class="notice notice-info">
+			<p><strong>Blocks integration diagnostics (temporary):</strong></p>
+			<ul style="list-style:disc;margin-left:20px;">
+				<li>AbstractPaymentMethodType class exists: <code><?php echo class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ? 'YES' : 'NO'; ?></code></li>
+				<li>PaymentMethodRegistry class exists: <code><?php echo class_exists( '\Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry' ) ? 'YES' : 'NO'; ?></code></li>
+				<li>did_action('woocommerce_blocks_loaded'): <code><?php echo (int) did_action( 'woocommerce_blocks_loaded' ); ?></code></li>
+				<li>did_action('woocommerce_blocks_payment_method_type_registration'): <code><?php echo (int) did_action( 'woocommerce_blocks_payment_method_type_registration' ); ?></code></li>
+				<li>Medzuro_MPaisa_Blocks_Support class exists: <code><?php echo class_exists( 'Medzuro_MPaisa_Blocks_Support' ) ? 'YES' : 'NO'; ?></code></li>
+				<li>WC()->payment_gateways() has mpaisa: <code>
+					<?php
+					$diag_gateways = function_exists( 'WC' ) && WC()->payment_gateways ? WC()->payment_gateways()->payment_gateways() : array();
+					echo isset( $diag_gateways['mpaisa'] ) ? 'YES' : 'NO';
+					?>
+				</code></li>
+				<li>WooCommerce version: <code><?php echo defined( 'WC_VERSION' ) ? esc_html( WC_VERSION ) : 'unknown'; ?></code></li>
+			</ul>
+		</div>
 		<form method="post">
 			<?php wp_nonce_field( 'medzuro_mpaisa_save', 'medzuro_mpaisa_nonce' ); ?>
 			<table class="form-table" role="presentation">
