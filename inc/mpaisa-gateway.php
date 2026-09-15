@@ -417,81 +417,88 @@ add_filter(
  * WooCommerce core registers their Blocks support itself; custom gateways
  * have to do it themselves, via this integration class plus
  * assets/js/mpaisa-blocks.js.
+ *
+ * NOTE: this must NOT wait for the 'woocommerce_blocks_loaded' action — same
+ * class of bug as the 'plugins_loaded' one fixed above. Confirmed live via
+ * temporary diagnostics: did_action('woocommerce_blocks_loaded') was 1 (it
+ * fires, like 'plugins_loaded', while WooCommerce itself loads, before this
+ * theme's functions.php runs) yet Medzuro_MPaisa_Blocks_Support was never
+ * defined, because add_action('woocommerce_blocks_loaded', ...) registered
+ * from here is - again - registering for an event that already happened.
+ * The fix is the same one used above: since WooCommerce (and its bundled
+ * Blocks classes) have already fully loaded by the time this file runs,
+ * there's nothing to wait for — define the class directly, gated only by a
+ * class_exists() safety check, and hook the registration action directly
+ * too, without an intermediate 'woocommerce_blocks_loaded' wrapper.
  */
-add_action(
-	'woocommerce_blocks_loaded',
-	function () {
-		if ( ! class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-			return;
+if ( class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+
+	/**
+	 * Blocks checkout integration for M-PAiSA.
+	 */
+	class Medzuro_MPaisa_Blocks_Support extends \Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType {
+
+		/** @var WC_Gateway_MPaisa|null */
+		private $gateway;
+
+		/** @var string */
+		protected $name = 'mpaisa';
+
+		/**
+		 * Loads settings and the underlying classic gateway instance.
+		 */
+		public function initialize() {
+			$this->settings = get_option( 'woocommerce_mpaisa_settings', array() );
+			$gateways       = WC()->payment_gateways->payment_gateways();
+			$this->gateway  = isset( $gateways[ $this->name ] ) ? $gateways[ $this->name ] : null;
 		}
 
 		/**
-		 * Blocks checkout integration for M-PAiSA.
+		 * @return bool Whether M-PAiSA should appear at checkout.
 		 */
-		class Medzuro_MPaisa_Blocks_Support extends \Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType {
-
-			/** @var WC_Gateway_MPaisa|null */
-			private $gateway;
-
-			/** @var string */
-			protected $name = 'mpaisa';
-
-			/**
-			 * Loads settings and the underlying classic gateway instance.
-			 */
-			public function initialize() {
-				$this->settings = get_option( 'woocommerce_mpaisa_settings', array() );
-				$gateways       = WC()->payment_gateways->payment_gateways();
-				$this->gateway  = isset( $gateways[ $this->name ] ) ? $gateways[ $this->name ] : null;
-			}
-
-			/**
-			 * @return bool Whether M-PAiSA should appear at checkout.
-			 */
-			public function is_active() {
-				return $this->gateway && $this->gateway->is_available();
-			}
-
-			/**
-			 * Registers and returns the handle of the JS that renders this
-			 * payment method in the Checkout block.
-			 *
-			 * @return string[]
-			 */
-			public function get_payment_method_script_handles() {
-				wp_register_script(
-					'medzuro-mpaisa-blocks',
-					get_template_directory_uri() . '/assets/js/mpaisa-blocks.js',
-					array( 'wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities', 'wp-i18n' ),
-					wp_get_theme()->get( 'Version' ),
-					true
-				);
-
-				return array( 'medzuro-mpaisa-blocks' );
-			}
-
-			/**
-			 * Data exposed to the JS above as wc.wcSettings.getSetting('mpaisa_data').
-			 *
-			 * @return array
-			 */
-			public function get_payment_method_data() {
-				return array(
-					'title'       => $this->gateway ? $this->gateway->title : 'M-PAiSA (Vodafone Fiji Mobile Money)',
-					'description' => $this->gateway ? $this->gateway->description : '',
-					'supports'    => $this->gateway ? array_filter( array( 'products' ), array( $this->gateway, 'supports' ) ) : array(),
-				);
-			}
+		public function is_active() {
+			return $this->gateway && $this->gateway->is_available();
 		}
 
-		add_action(
-			'woocommerce_blocks_payment_method_type_registration',
-			function ( \Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $registry ) {
-				$registry->register( new Medzuro_MPaisa_Blocks_Support() );
-			}
-		);
+		/**
+		 * Registers and returns the handle of the JS that renders this
+		 * payment method in the Checkout block.
+		 *
+		 * @return string[]
+		 */
+		public function get_payment_method_script_handles() {
+			wp_register_script(
+				'medzuro-mpaisa-blocks',
+				get_template_directory_uri() . '/assets/js/mpaisa-blocks.js',
+				array( 'wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities', 'wp-i18n' ),
+				wp_get_theme()->get( 'Version' ),
+				true
+			);
+
+			return array( 'medzuro-mpaisa-blocks' );
+		}
+
+		/**
+		 * Data exposed to the JS above as wc.wcSettings.getSetting('mpaisa_data').
+		 *
+		 * @return array
+		 */
+		public function get_payment_method_data() {
+			return array(
+				'title'       => $this->gateway ? $this->gateway->title : 'M-PAiSA (Vodafone Fiji Mobile Money)',
+				'description' => $this->gateway ? $this->gateway->description : '',
+				'supports'    => $this->gateway ? array_filter( array( 'products' ), array( $this->gateway, 'supports' ) ) : array(),
+			);
+		}
 	}
-);
+
+	add_action(
+		'woocommerce_blocks_payment_method_type_registration',
+		function ( \Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $registry ) {
+			$registry->register( new Medzuro_MPaisa_Blocks_Support() );
+		}
+	);
+}
 
 /**
  * Adds a "Check M-PAiSA status" action to the Edit Order screen.
