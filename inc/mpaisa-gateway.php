@@ -19,7 +19,18 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'plugins_loaded', 'medzuro_mpaisa_init_gateway_class', 11 );
+// NOTE: this must NOT hook 'plugins_loaded'. This file is require_once'd from
+// the theme's functions.php, and WordPress loads a theme's functions.php
+// *after* the 'plugins_loaded' action has already fired (plugins load and
+// 'plugins_loaded' fires, then 'setup_theme', then functions.php, then
+// 'after_setup_theme', then 'init'). A 'plugins_loaded' callback registered
+// from here never actually runs, which silently left WC_Gateway_MPaisa
+// undefined and the gateway unregistered from checkout — confirmed live:
+// WooCommerce's REST payment_gateways list never included "mpaisa" at all.
+// WooCommerce itself (a plugin) has already finished loading by the time
+// this file's add_action() call executes, so 'init' is both safe
+// (WC_Payment_Gateway is long since defined) and guaranteed to actually fire.
+add_action( 'init', 'medzuro_mpaisa_init_gateway_class' );
 
 /**
  * Defines WC_Gateway_MPaisa once WooCommerce's base gateway class exists.
