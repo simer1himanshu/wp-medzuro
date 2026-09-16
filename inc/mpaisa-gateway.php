@@ -304,7 +304,23 @@ function medzuro_mpaisa_init_gateway_class() {
 			$expected_digest = self::digest( array( $tid, $amt, $idet, $this->client_secret, $response_code ) );
 
 			if ( ! hash_equals( $expected_digest, (string) $body['authdigestv2'] ) ) {
-				medzuro_mpaisa_log( 'Handshake digest mismatch for order ' . $order->get_id() );
+				// TEMPORARY diagnostic: log every non-secret input that went
+				// into our digest, plus both digests, a secret length/hash
+				// fingerprint (never the secret itself), and requestID/cID
+				// so a credential problem can be told apart from a
+				// parameter-formatting problem without ever logging the
+				// actual client secret. Remove once handshake verification
+				// is confirmed working end-to-end.
+				medzuro_mpaisa_log(
+					'Handshake digest mismatch for order ' . $order->get_id() .
+					' tid=' . $tid . ' amt=' . $amt . ' idet=' . $idet .
+					' cID=' . $this->business_id . ' responseCode=' . $response_code .
+					' requestID=' . $body['requestID'] .
+					' secret_len=' . strlen( (string) $this->client_secret ) .
+					' secret_sha256=' . hash( 'sha256', (string) $this->client_secret ) .
+					' expected=' . $expected_digest .
+					' actual=' . $body['authdigestv2']
+				);
 				return new WP_Error( 'mpaisa_digest_mismatch', 'M-PAiSA responded with a signature that did not verify. Payment was not started, for your safety.' );
 			}
 
