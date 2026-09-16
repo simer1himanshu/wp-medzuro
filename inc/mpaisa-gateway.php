@@ -303,7 +303,14 @@ function medzuro_mpaisa_init_gateway_class() {
 			$response_code   = isset( $body['response'] ) ? (string) $body['response'] : '101';
 			$expected_digest = self::digest( array( $tid, $amt, $idet, $this->client_secret, $response_code ) );
 
-			if ( ! hash_equals( $expected_digest, (string) $body['authdigestv2'] ) ) {
+			// M-PAiSA sends authdigestv2 as UPPERCASE hex, while PHP's
+			// hash('sha256', ...) returns lowercase — confirmed live via a
+			// captured mismatch where $expected and $actual were the exact
+			// same digest, differing only in case. hash_equals() compares
+			// raw bytes, so it (rightly) rejects that as a mismatch; case
+			// carries no meaning for a hex digest, so normalize both sides
+			// before comparing.
+			if ( ! hash_equals( strtolower( $expected_digest ), strtolower( (string) $body['authdigestv2'] ) ) ) {
 				// TEMPORARY diagnostic: log every non-secret input that went
 				// into our digest, plus both digests, a secret length/hash
 				// fingerprint (never the secret itself), and requestID/cID
@@ -695,10 +702,12 @@ function medzuro_mpaisa_handle_callback( WP_REST_Request $request ) {
 
 	$expected = hash( 'sha256', $tid . $stored_amt . $stored_idet . $stored_rid . $secret . $rcode );
 
+	// Same case-sensitivity fix as handshake(): M-PAiSA's tokenv2 comes back
+	// as UPPERCASE hex; hash() produces lowercase. Normalize both sides.
 	$verified = $stored_rid
 		&& $tid === $stored_tid
 		&& $rid === $stored_rid
-		&& hash_equals( $expected, $tokenv2 );
+		&& hash_equals( strtolower( $expected ), strtolower( $tokenv2 ) );
 
 	if ( ! $verified ) {
 		medzuro_mpaisa_log( 'Callback signature did not verify for order ' . $order->get_id() . ' (rCode ' . $rcode . ')' );
