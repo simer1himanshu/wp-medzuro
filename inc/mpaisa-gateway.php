@@ -263,6 +263,13 @@ function medzuro_mpaisa_init_gateway_class() {
 			$amt  = self::format_amount( $order );
 			$idet = self::item_detail( $order );
 
+			// API guide §4.1.2 ("API Sample Structure") gives this as
+			// {base}/live/API/?url=...&tID=...&amt=...&cID=...&iDet=... —
+			// the same "/live/" prefix generateAuth needs. (§4.2.2's own
+			// worked example omits it and 404s in practice — confirmed
+			// live against production, so §4.1.2's pattern is the one that
+			// actually matches Vodafone's server; treating that omission
+			// as a documentation typo rather than following it.)
 			$url = add_query_arg(
 				array(
 					'url'  => self::callback_url(),
@@ -271,7 +278,7 @@ function medzuro_mpaisa_init_gateway_class() {
 					'cID'  => $this->business_id,
 					'iDet' => $idet,
 				),
-				$this->api_base() . '/API/'
+				$this->api_base() . '/live/API/'
 			);
 
 			$response = wp_remote_get(
