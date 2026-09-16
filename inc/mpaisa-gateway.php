@@ -208,8 +208,17 @@ function medzuro_mpaisa_init_gateway_class() {
 		 * @return string|WP_Error
 		 */
 		private function get_token() {
+			// Per the official "M-PAiSA Payments Gateway API Guide" v1.3
+			// (§4.2.1), the generateAuth endpoint lives at
+			// {base}/live/API/generateAuth — note the literal "/live/" path
+			// segment is present even against the *staging* host; it is not
+			// related to which environment (test vs live) is selected. This
+			// file previously called {base}/API/generateAuth (missing that
+			// segment), which 404'd against Vodafone's own Next.js front end
+			// instead of ever reaching their API — confirmed live via a raw
+			// HTTP 404 + HTML body captured in the mpaisa log.
 			$response = wp_remote_post(
-				$this->api_base() . '/API/generateAuth',
+				$this->api_base() . '/live/API/generateAuth',
 				array(
 					'timeout' => 20,
 					'headers' => array( 'Content-Type' => 'application/json' ),
@@ -293,10 +302,17 @@ function medzuro_mpaisa_init_gateway_class() {
 			}
 
 			return array(
-				'requestID' => $body['requestID'],
-				'tid'       => $tid,
-				'amt'       => $amt,
-				'idet'      => $idet,
+				'requestID'    => $body['requestID'],
+				'tid'          => $tid,
+				'amt'          => $amt,
+				'idet'         => $idet,
+				// The handshake response hands back the exact hosted-page
+				// base URL to redirect the customer to (API guide §4.2.2
+				// example: "paymentspage": "https://payments-staging.m-paisa.com/live/").
+				// Preferring this over reconstructing it ourselves means we
+				// always follow Vodafone's own live value rather than an
+				// assumption baked into this file.
+				'paymentspage' => ! empty( $body['paymentspage'] ) ? (string) $body['paymentspage'] : null,
 			);
 		}
 
@@ -343,6 +359,13 @@ function medzuro_mpaisa_init_gateway_class() {
 			$order->update_status( 'pending', 'Awaiting M-PAiSA payment confirmation.' );
 			$order->save();
 
+			// API guide §4.2.3 ("Load Payments Page"): the customer-facing
+			// hosted page is {base}/live/?url=...&tID=...&amt=...&cID=...
+			// &iDet=...&rID=... — NOT the {base}/API/ path used for the
+			// server-to-server handshake call above. Prefer the exact
+			// "paymentspage" base the handshake response handed back;
+			// fall back to the documented {base}/live/ only if a given
+			// response ever omits it.
 			$pay_url = add_query_arg(
 				array(
 					'url'  => self::callback_url(),
@@ -352,7 +375,7 @@ function medzuro_mpaisa_init_gateway_class() {
 					'iDet' => $handshake['idet'],
 					'rID'  => $handshake['requestID'],
 				),
-				$this->api_base() . '/API/'
+				$handshake['paymentspage'] ? $handshake['paymentspage'] : $this->api_base() . '/live/'
 			);
 
 			return array(
@@ -383,13 +406,17 @@ function medzuro_mpaisa_init_gateway_class() {
 				return;
 			}
 
+			// API guide §4.2.4: the status-checker endpoint is
+			// {base}/live/requeststatus/?rID=...&tID=...&cID=..., same
+			// "/live/" path segment as the generateAuth and payments-page
+			// endpoints above — not {base}/requeststatus/.
 			$url = add_query_arg(
 				array(
 					'rID' => $rid,
 					'tID' => $tid,
 					'cID' => $this->business_id,
 				),
-				$this->api_base() . '/requeststatus/'
+				$this->api_base() . '/live/requeststatus/'
 			);
 
 			$response = wp_remote_get(
