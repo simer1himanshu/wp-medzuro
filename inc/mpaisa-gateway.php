@@ -19,18 +19,37 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// NOTE: this must NOT hook 'plugins_loaded'. This file is require_once'd from
-// the theme's functions.php, and WordPress loads a theme's functions.php
-// *after* the 'plugins_loaded' action has already fired (plugins load and
+// NOTE: this must NOT hook 'plugins_loaded' *or* 'init'. This file is
+// require_once'd from the theme's functions.php, which WordPress loads
+// *after* 'plugins_loaded' has already fired (plugins load and
 // 'plugins_loaded' fires, then 'setup_theme', then functions.php, then
 // 'after_setup_theme', then 'init'). A 'plugins_loaded' callback registered
-// from here never actually runs, which silently left WC_Gateway_MPaisa
-// undefined and the gateway unregistered from checkout — confirmed live:
-// WooCommerce's REST payment_gateways list never included "mpaisa" at all.
-// WooCommerce itself (a plugin) has already finished loading by the time
-// this file's add_action() call executes, so 'init' is both safe
-// (WC_Payment_Gateway is long since defined) and guaranteed to actually fire.
-add_action( 'init', 'medzuro_mpaisa_init_gateway_class' );
+// from here never runs at all — that was the first version of this bug,
+// confirmed live via WooCommerce's REST payment_gateways list never
+// including "mpaisa".
+//
+// Hooking 'init' instead "worked" in the sense that the callback did fire,
+// but it introduced a second, subtler bug: WC_Payment_Gateways::init()
+// (which turns the 'woocommerce_payment_gateways' filter's class-name
+// strings into objects via `class_exists($gateway) ? new $gateway() : ...`,
+// silently dropping any name that isn't a real class *at that exact
+// moment*) runs at a point that is not guaranteed to be after our own
+// 'init' callback — WordPress does not order same-hook callbacks across
+// files by registration time alone once priorities/other init hooks are
+// involved. The result: the classic add_filter() below correctly returned
+// the string 'WC_Gateway_MPaisa', but WooCommerce's own gateway loader ran
+// before medzuro_mpaisa_init_gateway_class() had defined that class, so
+// class_exists('WC_Gateway_MPaisa') was false at the moment it mattered and
+// the gateway was silently dropped from WC()->payment_gateways() — even
+// though calling `new WC_Gateway_MPaisa()` directly, later in the request,
+// worked perfectly fine.
+//
+// The fix is the same one already used for the Blocks integration below:
+// don't hook anything. WooCommerce (a plugin) has fully finished loading,
+// including defining WC_Payment_Gateway, by the time this file itself
+// loads (theme functions.php always loads after all plugins). So just
+// define the class immediately, unconditionally, right now.
+medzuro_mpaisa_init_gateway_class();
 
 /**
  * Defines WC_Gateway_MPaisa once WooCommerce's base gateway class exists.
