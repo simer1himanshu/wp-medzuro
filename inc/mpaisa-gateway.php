@@ -226,10 +226,17 @@ function medzuro_mpaisa_init_gateway_class() {
 				return $response;
 			}
 
-			$code = wp_remote_retrieve_response_code( $response );
-			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+			$code     = wp_remote_retrieve_response_code( $response );
+			$raw_body = wp_remote_retrieve_body( $response );
+			$body     = json_decode( $raw_body, true );
 
 			if ( 200 !== (int) $code || empty( $body['success'] ) || empty( $body['token'] ) ) {
+				// TEMPORARY diagnostic: log the actual HTTP status + raw response
+				// body from Vodafone's generateAuth endpoint (no secrets are in
+				// the response body) so we can tell a credentials problem apart
+				// from an API-contract or connectivity problem. Remove once the
+				// live handshake is confirmed working end-to-end.
+				medzuro_mpaisa_log( 'generateAuth raw response: HTTP ' . $code . ' body=' . substr( (string) $raw_body, 0, 1000 ) . ' url=' . $this->api_base() . '/API/generateAuth' );
 				return new WP_Error( 'mpaisa_auth_failed', 'M-PAiSA authentication failed. Check the Business ID and Client Secret in WooCommerce > Settings > Payments > M-PAiSA.' );
 			}
 
