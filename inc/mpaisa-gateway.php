@@ -747,6 +747,31 @@ function medzuro_mpaisa_settings_page() {
 					?>
 				</code></li>
 				<li>Last Blocks registration error: <code><?php echo esc_html( get_option( 'medzuro_mpaisa_blocks_last_error', '(none recorded)' ) ); ?></code></li>
+				<li>Direct <code>new WC_Gateway_MPaisa()</code> test: <code>
+					<?php
+					try {
+						$diag_direct = class_exists( 'WC_Gateway_MPaisa' ) ? new WC_Gateway_MPaisa() : null;
+						echo $diag_direct ? ( 'OK, id=' . esc_html( $diag_direct->id ) ) : 'class does not exist';
+					} catch ( \Throwable $diag_e ) {
+						echo 'THREW: ' . esc_html( $diag_e->getMessage() . ' @ ' . $diag_e->getFile() . ':' . $diag_e->getLine() );
+					}
+					?>
+				</code></li>
+				<li>Direct <code>new Medzuro_MPaisa_Blocks_Support()</code> test: <code>
+					<?php
+					try {
+						$diag_blocks = class_exists( 'Medzuro_MPaisa_Blocks_Support' ) ? new Medzuro_MPaisa_Blocks_Support() : null;
+						if ( $diag_blocks ) {
+							$diag_blocks->initialize();
+							echo 'OK, is_active=' . ( $diag_blocks->is_active() ? 'true' : 'false' );
+						} else {
+							echo 'class does not exist';
+						}
+					} catch ( \Throwable $diag_e2 ) {
+						echo 'THREW: ' . esc_html( $diag_e2->getMessage() . ' @ ' . $diag_e2->getFile() . ':' . $diag_e2->getLine() );
+					}
+					?>
+				</code></li>
 			</ul>
 		</div>
 		<form method="post">
