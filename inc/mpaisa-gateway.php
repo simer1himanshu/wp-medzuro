@@ -240,12 +240,7 @@ function medzuro_mpaisa_init_gateway_class() {
 			$body     = json_decode( $raw_body, true );
 
 			if ( 200 !== (int) $code || empty( $body['success'] ) || empty( $body['token'] ) ) {
-				// TEMPORARY diagnostic: log the actual HTTP status + raw response
-				// body from Vodafone's generateAuth endpoint (no secrets are in
-				// the response body) so we can tell a credentials problem apart
-				// from an API-contract or connectivity problem. Remove once the
-				// live handshake is confirmed working end-to-end.
-				medzuro_mpaisa_log( 'generateAuth raw response: HTTP ' . $code . ' body=' . substr( (string) $raw_body, 0, 1000 ) . ' url=' . $this->api_base() . '/API/generateAuth' );
+				medzuro_mpaisa_log( 'generateAuth failed: HTTP ' . $code . ' body=' . substr( (string) $raw_body, 0, 500 ) );
 				return new WP_Error( 'mpaisa_auth_failed', 'M-PAiSA authentication failed. Check the Business ID and Client Secret in WooCommerce > Settings > Payments > M-PAiSA.' );
 			}
 
@@ -311,23 +306,7 @@ function medzuro_mpaisa_init_gateway_class() {
 			// carries no meaning for a hex digest, so normalize both sides
 			// before comparing.
 			if ( ! hash_equals( strtolower( $expected_digest ), strtolower( (string) $body['authdigestv2'] ) ) ) {
-				// TEMPORARY diagnostic: log every non-secret input that went
-				// into our digest, plus both digests, a secret length/hash
-				// fingerprint (never the secret itself), and requestID/cID
-				// so a credential problem can be told apart from a
-				// parameter-formatting problem without ever logging the
-				// actual client secret. Remove once handshake verification
-				// is confirmed working end-to-end.
-				medzuro_mpaisa_log(
-					'Handshake digest mismatch for order ' . $order->get_id() .
-					' tid=' . $tid . ' amt=' . $amt . ' idet=' . $idet .
-					' cID=' . $this->business_id . ' responseCode=' . $response_code .
-					' requestID=' . $body['requestID'] .
-					' secret_len=' . strlen( (string) $this->client_secret ) .
-					' secret_sha256=' . hash( 'sha256', (string) $this->client_secret ) .
-					' expected=' . $expected_digest .
-					' actual=' . $body['authdigestv2']
-				);
+				medzuro_mpaisa_log( 'Handshake digest mismatch for order ' . $order->get_id() . ' (requestID ' . $body['requestID'] . ')' );
 				return new WP_Error( 'mpaisa_digest_mismatch', 'M-PAiSA responded with a signature that did not verify. Payment was not started, for your safety.' );
 			}
 
@@ -806,59 +785,6 @@ function medzuro_mpaisa_settings_page() {
 		<h1>M-PAiSA (Vodafone Fiji) Settings</h1>
 		<p>WooCommerce's built-in Payments screen doesn't display custom gateways in this version, so M-PAiSA is configured here instead — these are the same settings the gateway reads at checkout.</p>
 		<p>Callback URL Vodafone redirects customers back to: <code><?php echo esc_html( $callback_url ); ?></code></p>
-		<?php
-		// TEMPORARY diagnostics for the Blocks-checkout integration — remove
-		// once the "no payment methods available" issue is root-caused.
-		?>
-		<div class="notice notice-info">
-			<p><strong>Blocks integration diagnostics (temporary):</strong></p>
-			<ul style="list-style:disc;margin-left:20px;">
-				<li>AbstractPaymentMethodType class exists: <code><?php echo class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ? 'YES' : 'NO'; ?></code></li>
-				<li>PaymentMethodRegistry class exists: <code><?php echo class_exists( '\Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry' ) ? 'YES' : 'NO'; ?></code></li>
-				<li>did_action('woocommerce_blocks_loaded'): <code><?php echo (int) did_action( 'woocommerce_blocks_loaded' ); ?></code></li>
-				<li>did_action('woocommerce_blocks_payment_method_type_registration'): <code><?php echo (int) did_action( 'woocommerce_blocks_payment_method_type_registration' ); ?></code></li>
-				<li>Medzuro_MPaisa_Blocks_Support class exists: <code><?php echo class_exists( 'Medzuro_MPaisa_Blocks_Support' ) ? 'YES' : 'NO'; ?></code></li>
-				<li>WC()->payment_gateways() has mpaisa: <code>
-					<?php
-					$diag_gateways = function_exists( 'WC' ) && WC()->payment_gateways ? WC()->payment_gateways()->payment_gateways() : array();
-					echo isset( $diag_gateways['mpaisa'] ) ? 'YES' : 'NO';
-					?>
-				</code></li>
-				<li>WooCommerce version: <code><?php echo defined( 'WC_VERSION' ) ? esc_html( WC_VERSION ) : 'unknown'; ?></code></li>
-				<li>All registered gateway IDs: <code>
-					<?php
-					$diag_all_gateways = function_exists( 'WC' ) && WC()->payment_gateways ? WC()->payment_gateways()->payment_gateways() : array();
-					echo esc_html( implode( ', ', array_keys( $diag_all_gateways ) ) );
-					?>
-				</code></li>
-				<li>Last Blocks registration error: <code><?php echo esc_html( get_option( 'medzuro_mpaisa_blocks_last_error', '(none recorded)' ) ); ?></code></li>
-				<li>Direct <code>new WC_Gateway_MPaisa()</code> test: <code>
-					<?php
-					try {
-						$diag_direct = class_exists( 'WC_Gateway_MPaisa' ) ? new WC_Gateway_MPaisa() : null;
-						echo $diag_direct ? ( 'OK, id=' . esc_html( $diag_direct->id ) ) : 'class does not exist';
-					} catch ( \Throwable $diag_e ) {
-						echo 'THREW: ' . esc_html( $diag_e->getMessage() . ' @ ' . $diag_e->getFile() . ':' . $diag_e->getLine() );
-					}
-					?>
-				</code></li>
-				<li>Direct <code>new Medzuro_MPaisa_Blocks_Support()</code> test: <code>
-					<?php
-					try {
-						$diag_blocks = class_exists( 'Medzuro_MPaisa_Blocks_Support' ) ? new Medzuro_MPaisa_Blocks_Support() : null;
-						if ( $diag_blocks ) {
-							$diag_blocks->initialize();
-							echo 'OK, is_active=' . ( $diag_blocks->is_active() ? 'true' : 'false' );
-						} else {
-							echo 'class does not exist';
-						}
-					} catch ( \Throwable $diag_e2 ) {
-						echo 'THREW: ' . esc_html( $diag_e2->getMessage() . ' @ ' . $diag_e2->getFile() . ':' . $diag_e2->getLine() );
-					}
-					?>
-				</code></li>
-			</ul>
-		</div>
 		<form method="post">
 			<?php wp_nonce_field( 'medzuro_mpaisa_save', 'medzuro_mpaisa_nonce' ); ?>
 			<table class="form-table" role="presentation">
