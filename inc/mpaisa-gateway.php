@@ -494,8 +494,25 @@ if ( class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\Abstrac
 
 	add_action(
 		'woocommerce_blocks_payment_method_type_registration',
-		function ( \Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $registry ) {
-			$registry->register( new Medzuro_MPaisa_Blocks_Support() );
+		function ( $registry ) {
+			// No type hint on $registry: WC has renamed/relocated Blocks
+			// payment classes across versions, and a strict-type mismatch
+			// here would throw a fatal TypeError from inside this hook,
+			// which (on at least one observed request) aborted the rest of
+			// that request's payment-gateway setup entirely — the classic
+			// "mpaisa" gateway briefly vanished from
+			// WC()->payment_gateways()->payment_gateways() as a result.
+			// register() is called defensively so a mismatch here degrades
+			// to "Blocks checkout support missing" rather than breaking
+			// checkout altogether.
+			if ( is_object( $registry ) && method_exists( $registry, 'register' ) ) {
+				try {
+					$registry->register( new Medzuro_MPaisa_Blocks_Support() );
+				} catch ( \Throwable $e ) {
+					update_option( 'medzuro_mpaisa_blocks_last_error', $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine() );
+					medzuro_mpaisa_log( 'Blocks registration failed: ' . $e->getMessage() );
+				}
+			}
 		}
 	);
 }
@@ -723,6 +740,13 @@ function medzuro_mpaisa_settings_page() {
 					?>
 				</code></li>
 				<li>WooCommerce version: <code><?php echo defined( 'WC_VERSION' ) ? esc_html( WC_VERSION ) : 'unknown'; ?></code></li>
+				<li>All registered gateway IDs: <code>
+					<?php
+					$diag_all_gateways = function_exists( 'WC' ) && WC()->payment_gateways ? WC()->payment_gateways()->payment_gateways() : array();
+					echo esc_html( implode( ', ', array_keys( $diag_all_gateways ) ) );
+					?>
+				</code></li>
+				<li>Last Blocks registration error: <code><?php echo esc_html( get_option( 'medzuro_mpaisa_blocks_last_error', '(none recorded)' ) ); ?></code></li>
 			</ul>
 		</div>
 		<form method="post">
