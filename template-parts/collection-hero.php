@@ -12,13 +12,13 @@
 defined( 'ABSPATH' ) || exit;
 
 $term        = is_product_category() || is_product_tag() ? get_queried_object() : null;
-$title       = $term ? single_term_title( '', false ) : __( 'Products', 'medzuro' );
+$title       = $term ? single_term_title( '', false ) : __( 'Shop Wellness', 'medzuro' );
 $description = $term ? term_description( $term ) : '';
 ?>
 <div class="mz-collection-hero">
 	<div class="mz-collection-shell mz-collection-hero__inner">
 		<div class="mz-collection-hero__copy">
-			<p class="mz-collection-eyebrow">Medzuro Retail</p>
+			<p class="mz-collection-eyebrow">Genuine. Trusted. Local.</p>
 			<h1><?php echo esc_html( $title ); ?></h1>
 
 			<?php if ( $description ) : ?>
@@ -29,20 +29,6 @@ $description = $term ? term_description( $term ) : '';
 				</p>
 			<?php endif; ?>
 
-			<div class="mz-collection-hero__actions">
-				<a class="mz-collection-btn mz-collection-btn--primary" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">
-					<span aria-hidden="true">
-						<svg viewBox="0 0 24 24" role="img"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-					</span>
-					Shop All
-				</a>
-				<a class="mz-collection-btn mz-collection-btn--secondary" href="<?php echo esc_url( get_permalink( get_page_by_path( 'contact' ) ) ); ?>">
-					<span aria-hidden="true">
-						<svg viewBox="0 0 24 24" role="img"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
-					</span>
-					Ask Support
-				</a>
-			</div>
 		</div>
 
 		<div class="mz-collection-hero__media" aria-hidden="true">

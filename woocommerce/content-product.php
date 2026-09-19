@@ -25,6 +25,8 @@ if ( ! $product || ! $product->is_visible() ) {
 $permalink = $product->get_permalink();
 $on_sale   = $product->is_on_sale();
 $brand     = medzuro_product_brand( $product );
+$rating    = (float) $product->get_average_rating();
+$reviews   = (int) $product->get_review_count();
 ?>
 <article class="mz-product-card">
 	<a class="mz-product-card__media" href="<?php echo esc_url( $permalink ); ?>"
@@ -59,6 +61,13 @@ $brand     = medzuro_product_brand( $product );
 		<?php endif; ?>
 
 		<h3><a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
+
+		<?php if ( $rating > 0 ) : ?>
+			<div class="mz-product-card__rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %s out of 5', 'medzuro' ), $rating ) ); ?>">
+				<?php echo wp_kses_post( wc_get_rating_html( $rating, $reviews ) ); ?>
+				<small><?php echo esc_html( '(' . $reviews . ')' ); ?></small>
+			</div>
+		<?php endif; ?>
 
 		<div class="mz-product-card__price">
 			<?php echo wp_kses_post( $product->get_price_html() ); ?>

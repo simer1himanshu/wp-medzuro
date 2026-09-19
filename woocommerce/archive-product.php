@@ -35,30 +35,29 @@ $last     = min( $paged * $per_page, $total );
 		<?php get_template_part( 'template-parts/collection-highlights' ); ?>
 
 		<?php
-		// Shopify drove this from a linklist chosen in the theme editor
-		// (section.settings.category_menu, which was left unset). Here it is a
-		// menu location, so it renders only once one is assigned.
-		if ( has_nav_menu( 'product_categories' ) ) :
+		$categories = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => true,
+				'parent'     => 0,
+			)
+		);
+
+		if ( ! is_wp_error( $categories ) && $categories ) :
 			?>
 			<nav class="mz-collection-categories" aria-label="<?php esc_attr_e( 'Product categories', 'medzuro' ); ?>">
-				<?php
-				wp_nav_menu(
-					array(
-						'theme_location' => 'product_categories',
-						'container'      => false,
-						'items_wrap'     => '%3$s',
-						'depth'          => 1,
-						'fallback_cb'    => false,
-						'walker'         => new Medzuro_Flat_Link_Walker(),
-					)
-				);
-				?>
+				<a class="<?php echo is_shop() ? 'is-active' : ''; ?>" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php esc_html_e( 'All products', 'medzuro' ); ?></a>
+				<?php foreach ( $categories as $category ) : ?>
+					<a class="<?php echo is_product_category( $category->slug ) ? 'is-active' : ''; ?>" href="<?php echo esc_url( get_term_link( $category ) ); ?>">
+						<?php echo esc_html( $category->name ); ?> <small><?php echo esc_html( $category->count ); ?></small>
+					</a>
+				<?php endforeach; ?>
 			</nav>
 		<?php endif; ?>
 
 		<div class="mz-collection-toolbar">
 			<div class="mz-collection-toolbar__title">
-				<p class="mz-collection-eyebrow"><?php esc_html_e( 'Shop Wellness', 'medzuro' ); ?></p>
+				<p class="mz-collection-eyebrow"><?php esc_html_e( 'Our catalogue', 'medzuro' ); ?></p>
 				<h2>
 					<?php
 					if ( $total > 0 ) {
@@ -70,7 +69,7 @@ $last     = min( $paged * $per_page, $total );
 							(int) $total
 						);
 					} else {
-						esc_html_e( 'Best Sellers', 'medzuro' );
+						esc_html_e( 'Products coming soon', 'medzuro' );
 					}
 					?>
 				</h2>
