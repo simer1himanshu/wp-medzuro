@@ -29,14 +29,14 @@ function medzuro_home() {
 
 	$home = array(
 		'settings' => array(
-			'hero_kicker'            => 'Your wellness store in Fiji',
+			'hero_kicker'            => 'Pure. Trusted. Local.',
 			'hero_heading'           => 'Your wellness store,',
 			'hero_accent'            => 'right here in Fiji.',
-			'hero_text'              => 'Genuine HolyOak supplements, available locally with same-day delivery across most of Suva and local pickup.',
+			'hero_text'              => 'Genuine HolyOak supplements, available locally with fast delivery across Fiji.',
 			'primary_label'          => 'Shop all products',
 			'primary_url'            => '/collections/all',
-			'secondary_label'        => 'Local pickup & delivery',
-			'secondary_url'          => '/pages/delivery',
+			'secondary_label'        => 'Learn about HolyOak',
+			'secondary_url'          => '/pages/holyoak',
 			'collection'             => 'all',
 			'product_limit'          => 5,
 			'lab_url'                => '/pages/lab-test-and-purity',
@@ -83,9 +83,9 @@ function medzuro_home() {
 					'text'  => 'Authentic products you can trust',
 				),
 				array(
-					'icon'  => 'headset',
-					'title' => 'Fiji customer support',
-					'text'  => 'Call or Viber, we are here for you',
+					'icon'  => 'card',
+					'title' => 'Secure checkout',
+					'text'  => 'Safe and convenient payment',
 				),
 			),
 			'stat'      => array(

@@ -54,46 +54,52 @@
   }
 
   .mz-home-hero {
-    position:relative; min-height:430px; overflow:hidden; background:#fbfaf6;
+    position:relative; min-height:430px; overflow:hidden; background:#f8f8f6;
   }
   .mz-home-hero__photo {
-    position:absolute; inset:0; background-image:linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.92) 31%, rgba(255,255,255,.18) 54%, rgba(255,255,255,0) 100%), url(../img/);
-    background-repeat:no-repeat; background-position:center right; background-size:cover; z-index:0;
+    position:absolute; inset:0; background-image:linear-gradient(90deg, rgba(255,255,255,.99) 0%, rgba(255,255,255,.94) 29%, rgba(255,255,255,.32) 48%, rgba(255,255,255,0) 68%), url(../img/medzuro-home-hero.png);
+    background-repeat:no-repeat; background-position:center; background-size:cover; z-index:0;
   }
   .mz-home-hero__wrap { position:relative; z-index:1; min-height:430px; display:flex; align-items:center; }
   .mz-home-hero__copy { width:min(510px, 100%); padding:40px 0 52px; }
   .mz-home-hero__title {
     margin:0; color:var(--mz-navy); font-size:50px; line-height:1.08; letter-spacing:0; font-weight:800;
   }
-  .mz-home-hero__title span { display:block; color:var(--mz-green); }
+  .mz-home-hero__title span { display:block; color:var(--mz-red); }
   .mz-home-hero__text {
     margin:20px 0 0; max-width:440px; color:#213047; font-size:17px; line-height:1.75; font-weight:500;
   }
   .mz-home-hero__actions { display:flex; flex-wrap:wrap; gap:14px; margin-top:28px; }
   .mz-home-btn {
     min-height:52px; display:inline-flex; align-items:center; justify-content:center; gap:9px;
-    padding:0 25px; border-radius:6px; font-size:12px; font-weight:800; line-height:1; letter-spacing:0;
-    text-transform:uppercase; text-decoration:none !important;
+    padding:0 25px; border-radius:6px; font-size:15px; font-weight:700; line-height:1; letter-spacing:0;
+    text-transform:none; text-decoration:none !important;
   }
-  .mz-home-btn--solid { background:var(--mz-navy); border:2px solid var(--mz-navy); color:#fff !important; }
+  .mz-home-btn--solid { background:#1587c7; border:2px solid #1587c7; color:#fff !important; }
   .mz-home-btn--outline { background:#fff; border:2px solid #aeb8c5; color:#081735 !important; }
   .mz-home-btn svg { width:18px; height:18px; }
+  .mz-home-btn__arrow { font-size:22px; line-height:1; }
 
-  .mz-home-trust { position:relative; z-index:2; margin-top:-7px; margin-bottom:26px; }
+  .mz-home-trust { position:relative; z-index:2; max-width:none !important; margin:0 0 26px; padding:0 !important; }
   .mz-home-trust__list,
   .mz-home-help__list {
     margin:0; padding:0; list-style:none; display:grid; background:#fff; border:1px solid rgba(13,31,64,.08);
     border-radius:8px; box-shadow:0 12px 30px rgba(11,27,51,.08);
   }
-  .mz-home-trust__list { grid-template-columns:repeat(4,minmax(0,1fr)); padding:24px 28px; }
+  .mz-home-trust__list { grid-template-columns:repeat(4,minmax(0,1fr)); padding:24px max(34px, calc((100vw - 1212px) / 2)); background:#168bc8; border:0; border-radius:0; box-shadow:none; }
   .mz-home-trust__list li,
   .mz-home-help__list li { display:flex; align-items:center; gap:17px; min-width:0; color:var(--mz-navy); }
+  .mz-home-trust__list li { color:#fff; }
+  .mz-home-trust__list li > svg { width:34px; height:34px; flex:0 0 34px; }
   .mz-home-trust__list li + li,
   .mz-home-help__list li + li { border-left:1px solid var(--mz-line); padding-left:27px; }
+  .mz-home-trust__list li + li { border-left-color:rgba(255,255,255,.48); }
   .mz-home-trust__list strong,
   .mz-home-help__list strong { display:block; color:#0b1832; font-size:14px; line-height:1.25; }
+  .mz-home-trust__list strong { color:#fff; }
   .mz-home-trust__list small,
   .mz-home-help__list small { display:block; margin-top:7px; color:#24344c; font-size:12px; line-height:1.45; font-weight:600; }
+  .mz-home-trust__list small { color:rgba(255,255,255,.9); }
 
   .mz-home-section-title { display:flex; justify-content:center; margin-bottom:26px; text-align:center; }
   .mz-home-section-title h2 {
@@ -228,7 +234,7 @@
     display:grid; grid-template-columns:1.02fr 1.55fr; overflow:hidden; border-radius:8px; min-height:300px;
     background:linear-gradient(90deg,#f7f9fb 0%,#eef3f9 100%); border:1px solid #e5ebf1;
   }
-  .mz-home-lab__image { min-height:300px; background:url(../img/) center / cover no-repeat; }
+  .mz-home-lab__image { min-height:300px; background:url(../img/medzuro-eurofins-building.png) center / cover no-repeat; }
   .mz-home-lab__copy { position:relative; padding:38px 44px; min-width:0; }
   .mz-home-lab__copy h2 { margin:0; color:var(--mz-navy); font-size:35px; line-height:1.14; letter-spacing:0; font-weight:900; }
   .mz-home-lab__copy h2 span { color:var(--mz-green); }
@@ -342,7 +348,7 @@
     .mz-home-hero,
     .mz-home-hero__wrap { min-height:650px; }
     .mz-home-hero__photo {
-      background-image:linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.96) 42%, rgba(255,255,255,.15) 70%, rgba(255,255,255,0) 100%), url(../img/);
+      background-image:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(255,255,255,.96) 42%, rgba(255,255,255,.15) 70%, rgba(255,255,255,0) 100%), url(../img/medzuro-home-hero.png);
       background-position:70% bottom; background-size:auto 60%;
     }
     .mz-home-hero__wrap { align-items:flex-start; }

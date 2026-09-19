@@ -33,10 +33,9 @@ $s = medzuro_home()['settings'];
 				<p class="mz-home-hero__text"><?php echo esc_html( $s['hero_text'] ); ?></p>
 				<div class="mz-home-hero__actions">
 					<a class="mz-home-btn mz-home-btn--solid" href="<?php echo esc_url( medzuro_home_url( $s['primary_url'] ) ); ?>">
-						<?php echo esc_html( $s['primary_label'] ); ?>
+						<span><?php echo esc_html( $s['primary_label'] ); ?></span><span class="mz-home-btn__arrow" aria-hidden="true">&rarr;</span>
 					</a>
 					<a class="mz-home-btn mz-home-btn--outline" href="<?php echo esc_url( medzuro_home_url( $s['secondary_url'] ) ); ?>">
-						<?php medzuro_ref_icon( 'pin' ); ?>
 						<span><?php echo esc_html( $s['secondary_label'] ); ?></span>
 					</a>
 				</div>
