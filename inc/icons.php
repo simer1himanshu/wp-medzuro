@@ -48,6 +48,8 @@ function medzuro_icon_paths() {
 		'gift'   => '<path d="M20 12v8H4v-8"/><path d="M2 7h20v5H2z"/><path d="M12 7v13"/><path d="M12 7H8.5A2.5 2.5 0 1 1 11 4.5c0 1.8 1 2.5 1 2.5z"/><path d="M12 7h3.5A2.5 2.5 0 1 0 13 4.5c0 1.8-1 2.5-1 2.5z"/>',
 		'tag'    => '<path d="M3 12V4h8l9 9-8 8-9-9Z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
 		'truck'  => '<path d="M3 7h10v8H3z"/><path d="M13 10h4l3 3.2V15h-7z"/><circle cx="7" cy="17.3" r="1.7"/><circle cx="16.7" cy="17.3" r="1.7"/>',
+		'pin'    => '<path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/>',
+		'headset'=> '<path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13v3a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2Z"/><path d="M20 13v3a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2Z"/>',
 		'lock'   => '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
 		'close'  => '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
 		'chev'   => '<path d="m6 9 6 6 6-6"/>',

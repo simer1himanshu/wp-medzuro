@@ -1107,3 +1107,91 @@
       padding: 15px;
     }
   }
+
+  /* Current WooCommerce-native PDP. */
+  .mz-pdp { background:#fff; }
+  .mz-pdp-shell { width:min(1212px, calc(100% - 48px)); }
+  .mz-pdp-top { grid-template-columns:minmax(0,1.06fr) minmax(390px,.94fr); gap:48px; padding:8px 0 58px; }
+  .mz-pdp-gallery--single { grid-template-columns:1fr; }
+  .mz-pdp-main-media { min-height:540px; border-radius:6px; background:#f7f8f6; box-shadow:none; }
+  .mz-pdp-main-media img { max-height:540px; }
+  .mz-pdp-main-media--empty { flex-direction:column; gap:22px; padding:48px; }
+  .mz-pdp-main-media--empty .mz-pdp-placeholder { width:min(320px,75%); height:auto; padding:0; object-fit:contain; opacity:.72; }
+  .mz-pdp-main-media--empty p { margin:0; color:#687792; font-size:13px; font-weight:700; }
+  .mz-pdp-buybox { top:82px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+  .mz-pdp-status-row { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:28px; margin-bottom:12px; }
+  .mz-pdp-brand { color:#147fb9; font-size:12px; font-weight:900; text-transform:uppercase; }
+  .mz-pdp-status-row .stock { margin:0; color:#39731d; font-size:12px; font-weight:800; }
+  .mz-pdp-status-row .out-of-stock { color:#b42318; }
+  .mz-pdp-buybox h1 { font-size:40px; line-height:1.1; }
+  .mz-pdp-subtitle { margin-top:16px; }
+  .mz-pdp-subtitle p { margin:0; }
+  .mz-pdp-rating { margin-top:14px; }
+  .mz-pdp-rating .star-rating { color:#d69816; }
+  .mz-pdp-rating > span { color:#5f6f87; font-size:13px; font-weight:700; }
+  .mz-pdp-price { margin-top:22px; padding:18px 0; border-top:1px solid var(--mz-line); border-bottom:1px solid var(--mz-line); }
+  .mz-pdp-price .price { margin:0; color:var(--mz-navy); font-size:28px; font-weight:900; }
+  .mz-pdp-price del { color:#7b8797; font-size:17px; font-weight:700; }
+  .mz-pdp-price ins { text-decoration:none; }
+  .mz-pdp-purchase { margin-top:22px; }
+  .mz-pdp-purchase form.cart { display:flex; flex-wrap:wrap; gap:12px; margin:0; }
+  .mz-pdp-purchase .quantity { flex:0 0 84px; }
+  .mz-pdp-purchase .qty { width:84px; height:50px; border:1px solid #c8d2de; border-radius:4px; background:#fff; color:var(--mz-navy); text-align:center; font-weight:800; }
+  .mz-pdp-purchase .single_add_to_cart_button { min-height:50px; flex:1 1 220px; border:0; border-radius:4px; background:#158dcc; color:#fff; padding:0 24px; font-size:14px; font-weight:900; cursor:pointer; }
+  .mz-pdp-purchase .single_add_to_cart_button:hover { background:var(--mz-navy); }
+  .mz-pdp-purchase .single_add_to_cart_button.disabled { opacity:.55; cursor:not-allowed; }
+  .mz-pdp-purchase .variations { width:100%; margin:0 0 16px; border-collapse:collapse; }
+  .mz-pdp-purchase .variations th,
+  .mz-pdp-purchase .variations td { display:block; padding:0; text-align:left; }
+  .mz-pdp-purchase .variations th { margin-bottom:7px; font-size:13px; }
+  .mz-pdp-purchase .variations tr + tr th { margin-top:14px; }
+  .mz-pdp-purchase .variations select { width:100%; min-height:46px; border:1px solid #c8d2de; border-radius:4px; background:#fff; padding:0 40px 0 13px; }
+  .mz-pdp-purchase .reset_variations { display:inline-block; margin-top:7px; font-size:12px; }
+  .mz-pdp-purchase .single_variation_wrap { width:100%; }
+  .mz-pdp-purchase .woocommerce-variation-price { margin-bottom:14px; font-size:20px; font-weight:900; }
+  .mz-pdp-purchase .woocommerce-variation-add-to-cart { display:flex; gap:12px; }
+  .mz-pdp-assurances { display:grid; gap:0; margin:24px 0 0; padding:0; border-top:1px solid var(--mz-line); list-style:none; }
+  .mz-pdp-assurances li { display:grid; grid-template-columns:24px 1fr; gap:12px; padding:14px 0; border-bottom:1px solid var(--mz-line); color:#506079; font-size:12px; line-height:1.45; }
+  .mz-pdp-assurances svg { margin-top:2px; color:#158dcc; }
+  .mz-pdp-assurances strong { display:block; margin-bottom:2px; color:var(--mz-navy); font-size:13px; }
+  .mz-pdp-meta { margin-top:16px; color:#687792; font-size:12px; }
+  .mz-pdp-meta .product_meta { display:grid; gap:5px; }
+  .mz-pdp-meta a { color:var(--mz-blue); }
+  .mz-pdp-details { padding:56px 0 70px; border-top:1px solid var(--mz-line); background:#f7f9fc; }
+  .mz-pdp-description { max-width:820px; margin-bottom:38px; }
+  .mz-pdp-description h2,
+  .mz-pdp-specifications h2 { margin:0 0 16px; color:var(--mz-navy); font-size:30px; line-height:1.2; }
+  .mz-pdp-description .rte { color:#304463; font-size:16px; line-height:1.75; }
+  .mz-pdp-info-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+  .mz-pdp-info-grid article { min-width:0; padding:24px; border:1px solid var(--mz-line); border-radius:6px; background:#fff; }
+  .mz-pdp-info-icon { width:44px; height:44px; display:grid; place-items:center; margin-bottom:18px; border-radius:50%; background:#eaf6fc; color:#158dcc; }
+  .mz-pdp-info-grid h3 { margin:0; color:var(--mz-navy); font-size:18px; }
+  .mz-pdp-info-grid p { min-height:66px; margin:10px 0 16px; color:#506079; font-size:14px; line-height:1.55; }
+  .mz-pdp-info-grid a { color:#075b94; font-size:13px; font-weight:800; }
+  .mz-pdp-specifications { margin-top:42px; padding:28px; border:1px solid var(--mz-line); border-radius:6px; background:#fff; }
+  .mz-pdp-specifications table { width:100%; border-collapse:collapse; }
+  .mz-pdp-specifications th,
+  .mz-pdp-specifications td { padding:12px 0; border-bottom:1px solid var(--mz-line); text-align:left; font-size:14px; }
+
+  @media (max-width:989px) {
+    .mz-pdp-shell { width:min(100% - 32px,780px); }
+    .mz-pdp-top { grid-template-columns:1fr; gap:30px; }
+    .mz-pdp-buybox { position:static; }
+    .mz-pdp-info-grid { grid-template-columns:1fr; }
+    .mz-pdp-info-grid p { min-height:0; }
+  }
+
+  @media (max-width:639px) {
+    .mz-pdp-shell { width:min(100% - 24px,560px); }
+    .mz-pdp-main-media { min-height:330px; }
+    .mz-pdp-main-media img { max-height:330px; }
+    .mz-pdp-main-media--empty { min-height:300px; padding:30px; }
+    .mz-pdp-buybox h1 { font-size:30px; }
+    .mz-pdp-purchase form.cart,
+    .mz-pdp-purchase .woocommerce-variation-add-to-cart { display:grid; grid-template-columns:84px 1fr; }
+    .mz-pdp-purchase .single_add_to_cart_button { width:100%; }
+    .mz-pdp-details { padding:40px 0 48px; }
+    .mz-pdp-description h2,
+    .mz-pdp-specifications h2 { font-size:25px; }
+    .mz-pdp-specifications { padding:20px; }
+  }
