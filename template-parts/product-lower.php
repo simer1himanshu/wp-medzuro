@@ -25,9 +25,11 @@ if ( ! $product ) {
 	return;
 }
 
-$description = $product->get_description();
-$brand       = medzuro_product_brand( $product );
-$is_holyoak  = false !== stripos( $brand, 'holyoak' )
+$description     = $product->get_description();
+$hero_banner_id  = absint( get_post_meta( $product->get_id(), 'medzuro_pdp_hero_banner', true ) );
+$hero_banner_url = $hero_banner_id ? wp_get_attachment_image_url( $hero_banner_id, 'large' ) : '';
+$brand           = medzuro_product_brand( $product );
+$is_holyoak      = false !== stripos( $brand, 'holyoak' )
 	|| false !== stripos( $product->get_name(), 'holyoak' )
 	|| has_term( 'holyoak', 'product_cat', $product->get_id() );
 ?>
@@ -71,6 +73,14 @@ $is_holyoak  = false !== stripos( $brand, 'holyoak' )
 		<?php endif; ?>
 	</div>
 </section>
+
+<?php if ( $hero_banner_url ) : ?>
+<div class="mz-pdp-section mz-pdp-hero-banner">
+	<div class="mz-pdp-shell">
+		<img src="<?php echo esc_url( $hero_banner_url ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>" loading="lazy">
+	</div>
+</div>
+<?php endif; ?>
 
 <?php if ( $is_holyoak ) : ?>
 <div class="mz-pdp-section mz-pdp-usage">

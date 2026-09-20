@@ -616,6 +616,13 @@
     border-top: 1px solid var(--mz-line);
   }
 
+  .mz-pdp-hero-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
   .mz-pdp-section:nth-of-type(2n) {
     background: #f7f9fc;
   }
