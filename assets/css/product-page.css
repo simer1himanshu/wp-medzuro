@@ -1147,6 +1147,7 @@
   .mz-pdp-purchase .single_add_to_cart_button { min-height:50px; flex:1 1 220px; border:0; border-radius:4px; background:#158dcc; color:#fff; padding:0 24px; font-size:14px; font-weight:900; cursor:pointer; }
   .mz-pdp-purchase .single_add_to_cart_button:hover { background:var(--mz-navy); }
   .mz-pdp-purchase .single_add_to_cart_button.disabled { opacity:.55; cursor:not-allowed; }
+  .mz-pdp-purchase .single_add_to_cart_button.is-loading { opacity:.7; cursor:wait; }
   .mz-pdp-purchase .variations { width:100%; margin:0 0 16px; border-collapse:collapse; }
   .mz-pdp-purchase .variations th,
   .mz-pdp-purchase .variations td { display:block; padding:0; text-align:left; }

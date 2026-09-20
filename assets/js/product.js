@@ -121,5 +121,77 @@
         }
       });
     });
+
+    /*
+     * Keep the product URL as a GET entry in browser history. A normal
+     * WooCommerce form POST followed by a cart redirect can leave Chrome with
+     * a POST entry, which triggers ERR_CACHE_MISS when the customer presses
+     * Back from the cart.
+     */
+    var cartForm = root.querySelector('.mz-pdp-purchase form.cart:not(.grouped_form)');
+    var config = window.medzuroPdp || {};
+
+    if (cartForm && config.addToCartUrl && config.cartUrl) {
+      cartForm.addEventListener('submit', function (event) {
+        var submitButton = cartForm.querySelector('.single_add_to_cart_button');
+
+        if (submitButton && (submitButton.disabled || submitButton.classList.contains('disabled'))) {
+          return;
+        }
+
+        if (typeof cartForm.checkValidity === 'function' && !cartForm.checkValidity()) {
+          return;
+        }
+
+        event.preventDefault();
+
+        var data = new FormData(cartForm);
+        var addToCart = data.get('add-to-cart') || (submitButton && submitButton.value);
+
+        if (addToCart && !data.get('product_id')) {
+          data.set('product_id', addToCart);
+        }
+
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.classList.add('is-loading');
+          submitButton.setAttribute('aria-busy', 'true');
+        }
+
+        fetch(config.addToCartUrl, {
+          method: 'POST',
+          body: data,
+          credentials: 'same-origin',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+          .then(function (response) {
+            if (!response.ok) throw new Error('Add to cart request failed');
+            return response.json();
+          })
+          .then(function (response) {
+            if (response && response.error) {
+              throw new Error('Product validation failed');
+            }
+
+            window.location.assign(config.cartUrl);
+          })
+          .catch(function () {
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.classList.remove('is-loading');
+              submitButton.removeAttribute('aria-busy');
+            }
+
+            var existing = cartForm.querySelector('.mz-pdp-form-error');
+            if (!existing) {
+              existing = document.createElement('p');
+              existing.className = 'mz-pdp-form-error';
+              existing.setAttribute('role', 'alert');
+              cartForm.appendChild(existing);
+            }
+            existing.textContent = config.errorText || 'We could not add this item. Please try again.';
+          });
+      });
+    }
   });
 })();

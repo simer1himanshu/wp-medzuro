@@ -118,8 +118,24 @@ function medzuro_assets() {
 	wp_enqueue_script( 'medzuro-theme', get_template_directory_uri() . '/assets/js/theme.js', array(), MEDZURO_VERSION, true );
 
 	if ( function_exists( 'is_product' ) && is_product() ) {
+		$product_script = get_theme_file_path( '/assets/js/product.js' );
 		medzuro_style( 'product-page' );
-		wp_enqueue_script( 'medzuro-product', get_template_directory_uri() . '/assets/js/product.js', array(), MEDZURO_VERSION, true );
+		wp_enqueue_script(
+			'medzuro-product',
+			get_template_directory_uri() . '/assets/js/product.js',
+			array(),
+			file_exists( $product_script ) ? filemtime( $product_script ) : MEDZURO_VERSION,
+			true
+		);
+		wp_localize_script(
+			'medzuro-product',
+			'medzuroPdp',
+			array(
+				'addToCartUrl' => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '',
+				'cartUrl'      => wc_get_cart_url(),
+				'errorText'    => __( 'We could not add this item. Please try again.', 'medzuro' ),
+			)
+		);
 	}
 
 	if ( function_exists( 'is_woocommerce' ) && ( is_shop() || is_product_taxonomy() ) ) {
