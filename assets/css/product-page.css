@@ -1148,6 +1148,9 @@
   .mz-pdp-purchase .single_add_to_cart_button:hover { background:var(--mz-navy); }
   .mz-pdp-purchase .single_add_to_cart_button.disabled { opacity:.55; cursor:not-allowed; }
   .mz-pdp-purchase .single_add_to_cart_button.is-loading { opacity:.7; cursor:wait; }
+  .mz-pdp-purchase .mz-pdp-buy-now { min-height:50px; flex:1 1 180px; border:1px solid var(--mz-navy); border-radius:4px; background:#fff; color:var(--mz-navy); padding:0 24px; font-size:14px; font-weight:900; cursor:pointer; }
+  .mz-pdp-purchase .mz-pdp-buy-now:hover { background:var(--mz-navy); color:#fff; }
+  .mz-pdp-purchase .mz-pdp-buy-now.is-loading { opacity:.7; cursor:wait; }
   .mz-pdp-purchase .variations { width:100%; margin:0 0 16px; border-collapse:collapse; }
   .mz-pdp-purchase .variations th,
   .mz-pdp-purchase .variations td { display:block; padding:0; text-align:left; }
@@ -1198,6 +1201,7 @@
     .mz-pdp-purchase form.cart,
     .mz-pdp-purchase .woocommerce-variation-add-to-cart { display:grid; grid-template-columns:84px 1fr; }
     .mz-pdp-purchase .single_add_to_cart_button { width:100%; }
+    .mz-pdp-purchase .mz-pdp-buy-now { grid-column:1 / -1; width:100%; }
     .mz-pdp-details { padding:40px 0 48px; }
     .mz-pdp-description h2,
     .mz-pdp-specifications h2 { font-size:25px; }

@@ -133,6 +133,7 @@ function medzuro_assets() {
 			array(
 				'addToCartUrl' => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '',
 				'cartUrl'      => wc_get_cart_url(),
+				'checkoutUrl'  => wc_get_checkout_url(),
 				'errorText'    => __( 'We could not add this item. Please try again.', 'medzuro' ),
 			)
 		);
@@ -148,6 +149,31 @@ function medzuro_assets() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'medzuro_assets' );
+
+/**
+ * Add a direct-to-checkout action beside the standard PDP cart button.
+ */
+function medzuro_buy_now_button() {
+	echo '<button type="submit" name="medzuro_buy_now" value="1" class="button alt mz-pdp-buy-now">'
+		. esc_html__( 'Buy Now', 'medzuro' )
+		. '</button>';
+}
+add_action( 'woocommerce_after_add_to_cart_button', 'medzuro_buy_now_button' );
+
+/**
+ * Preserve Buy Now behavior when JavaScript is unavailable.
+ *
+ * @param string $url WooCommerce redirect URL.
+ * @return string
+ */
+function medzuro_buy_now_redirect( $url ) {
+	if ( isset( $_POST['medzuro_buy_now'] ) && '1' === wc_clean( wp_unslash( $_POST['medzuro_buy_now'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		return wc_get_checkout_url();
+	}
+
+	return $url;
+}
+add_filter( 'woocommerce_add_to_cart_redirect', 'medzuro_buy_now_redirect' );
 
 /**
  * WooCommerce wrappers.

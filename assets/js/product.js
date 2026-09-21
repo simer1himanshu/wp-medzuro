@@ -134,6 +134,8 @@
     if (cartForm && config.addToCartUrl && config.cartUrl) {
       cartForm.addEventListener('submit', function (event) {
         var submitButton = cartForm.querySelector('.single_add_to_cart_button');
+        var pressedButton = event.submitter || document.activeElement;
+        var buyNow = pressedButton && pressedButton.classList.contains('mz-pdp-buy-now');
 
         if (submitButton && (submitButton.disabled || submitButton.classList.contains('disabled'))) {
           return;
@@ -151,11 +153,17 @@
         if (addToCart && !data.get('product_id')) {
           data.set('product_id', addToCart);
         }
+        if (buyNow) data.set('medzuro_buy_now', '1');
 
         if (submitButton) {
           submitButton.disabled = true;
           submitButton.classList.add('is-loading');
           submitButton.setAttribute('aria-busy', 'true');
+        }
+        if (pressedButton && pressedButton !== submitButton) {
+          pressedButton.disabled = true;
+          pressedButton.classList.add('is-loading');
+          pressedButton.setAttribute('aria-busy', 'true');
         }
 
         fetch(config.addToCartUrl, {
@@ -173,13 +181,18 @@
               throw new Error('Product validation failed');
             }
 
-            window.location.assign(config.cartUrl);
+            window.location.assign(buyNow && config.checkoutUrl ? config.checkoutUrl : config.cartUrl);
           })
           .catch(function () {
             if (submitButton) {
               submitButton.disabled = false;
               submitButton.classList.remove('is-loading');
               submitButton.removeAttribute('aria-busy');
+            }
+            if (pressedButton && pressedButton !== submitButton) {
+              pressedButton.disabled = false;
+              pressedButton.classList.remove('is-loading');
+              pressedButton.removeAttribute('aria-busy');
             }
 
             var existing = cartForm.querySelector('.mz-pdp-form-error');
