@@ -14,5 +14,7 @@ defined( 'ABSPATH' ) || exit;
 medzuro_style( 'holyoak-page' );
 
 get_header();
+echo '<div class="mz-holyoak">';
 get_template_part( 'template-parts/holyoak-page' );
+echo '</div>';
 get_footer();
