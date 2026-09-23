@@ -1,7 +1,7 @@
 /* Ported from sections/medzuro-collection-page.liquid — scoped to .mz-collection-page */
 .mz-collection-page {
-    --mz-navy: #071c43;
-    --mz-blue: #064caf;
+    --mz-navy: #002964;
+    --mz-blue: #002964;
     --mz-green: #5c7f2d;
     --mz-gold: #a36c21;
     --mz-line: #dfe7f1;
@@ -39,7 +39,7 @@
 
   .mz-collection-eyebrow {
     margin: 0 0 9px;
-    color: #167fba;
+    color: #002964;
     font-size: 13px;
     font-weight: 800;
     line-height: 1.25;
@@ -154,7 +154,7 @@
     margin: 0 0 34px;
     position: relative;
     z-index: 2;
-    background: #158dcc;
+    background: #002964;
     border: 0;
     border-radius: 0 0 6px 6px;
     box-shadow: none;
@@ -453,8 +453,8 @@
 
   .mz-product-card__button:hover,
   .mz-product-card__button:focus {
-    background: #158dcc;
-    border-color:#158dcc;
+    background: #002964;
+    border-color:#002964;
     color: #fff !important;
     text-decoration: none;
   }

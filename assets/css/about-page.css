@@ -1,7 +1,7 @@
 /* Ported from sections/medzuro-about-page.liquid — scoped to .mz-about */
 .mz-about {
-    --mz-navy: #071a3f;
-    --mz-blue: #102f66;
+    --mz-navy: #002964;
+    --mz-blue: #002964;
     --mz-green: #5f7f1c;
     --mz-red: #dd2029;
     --mz-ink: #14213d;
@@ -493,7 +493,7 @@
   .mz-about .mz-about__dark-section {
     padding: 78px 0;
     background:
-      linear-gradient(135deg, rgba(7,26,63,.98), rgba(10,39,84,.96)),
+      linear-gradient(135deg, rgba(0,41,100,.98), rgba(0,41,100,.96)),
       var(--mz-navy);
   }
 

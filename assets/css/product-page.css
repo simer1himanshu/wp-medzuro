@@ -1,7 +1,7 @@
 /* Ported from sections/medzuro-product-page.liquid — scoped to .mz-pdp */
 .mz-pdp {
-    --mz-navy: #071c43;
-    --mz-blue: #064caf;
+    --mz-navy: #002964;
+    --mz-blue: #002964;
     --mz-green: #5c7f2d;
     --mz-gold: #a36c21;
     --mz-line: #dfe7f1;
@@ -1127,7 +1127,7 @@
   .mz-pdp-main-media--empty p { margin:0; color:#687792; font-size:13px; font-weight:700; }
   .mz-pdp-buybox { top:82px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
   .mz-pdp-status-row { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:28px; margin-bottom:12px; }
-  .mz-pdp-brand { color:#147fb9; font-size:12px; font-weight:900; text-transform:uppercase; }
+  .mz-pdp-brand { color:#002964; font-size:12px; font-weight:900; text-transform:uppercase; }
   .mz-pdp-status-row .stock { margin:0; color:#39731d; font-size:12px; font-weight:800; }
   .mz-pdp-status-row .out-of-stock { color:#b42318; }
   .mz-pdp-buybox h1 { font-size:40px; line-height:1.1; }
@@ -1144,7 +1144,7 @@
   .mz-pdp-purchase form.cart { display:flex; flex-wrap:wrap; gap:12px; margin:0; }
   .mz-pdp-purchase .quantity { flex:0 0 84px; }
   .mz-pdp-purchase .qty { width:84px; height:50px; border:1px solid #c8d2de; border-radius:4px; background:#fff; color:var(--mz-navy); text-align:center; font-weight:800; }
-  .mz-pdp-purchase .single_add_to_cart_button { min-height:50px; flex:1 1 220px; border:0; border-radius:4px; background:#158dcc; color:#fff; padding:0 24px; font-size:14px; font-weight:900; cursor:pointer; }
+  .mz-pdp-purchase .single_add_to_cart_button { min-height:50px; flex:1 1 220px; border:0; border-radius:4px; background:#002964; color:#fff; padding:0 24px; font-size:14px; font-weight:900; cursor:pointer; }
   .mz-pdp-purchase .single_add_to_cart_button:hover { background:var(--mz-navy); }
   .mz-pdp-purchase .single_add_to_cart_button.disabled { opacity:.55; cursor:not-allowed; }
   .mz-pdp-purchase .single_add_to_cart_button.is-loading { opacity:.7; cursor:wait; }
@@ -1163,7 +1163,7 @@
   .mz-pdp-purchase .woocommerce-variation-add-to-cart { display:flex; gap:12px; }
   .mz-pdp-assurances { display:grid; gap:0; margin:24px 0 0; padding:0; border-top:1px solid var(--mz-line); list-style:none; }
   .mz-pdp-assurances li { display:grid; grid-template-columns:24px 1fr; gap:12px; padding:14px 0; border-bottom:1px solid var(--mz-line); color:#506079; font-size:12px; line-height:1.45; }
-  .mz-pdp-assurances svg { margin-top:2px; color:#158dcc; }
+  .mz-pdp-assurances svg { margin-top:2px; color:#002964; }
   .mz-pdp-assurances strong { display:block; margin-bottom:2px; color:var(--mz-navy); font-size:13px; }
   .mz-pdp-meta { margin-top:16px; color:#687792; font-size:12px; }
   .mz-pdp-meta .product_meta { display:grid; gap:5px; }
@@ -1175,10 +1175,10 @@
   .mz-pdp-description .rte { color:#304463; font-size:16px; line-height:1.75; }
   .mz-pdp-info-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
   .mz-pdp-info-grid article { min-width:0; padding:24px; border:1px solid var(--mz-line); border-radius:6px; background:#fff; }
-  .mz-pdp-info-icon { width:44px; height:44px; display:grid; place-items:center; margin-bottom:18px; border-radius:50%; background:#eaf6fc; color:#158dcc; }
+  .mz-pdp-info-icon { width:44px; height:44px; display:grid; place-items:center; margin-bottom:18px; border-radius:50%; background:#f5f7fa; color:#002964; }
   .mz-pdp-info-grid h3 { margin:0; color:var(--mz-navy); font-size:18px; }
   .mz-pdp-info-grid p { min-height:66px; margin:10px 0 16px; color:#506079; font-size:14px; line-height:1.55; }
-  .mz-pdp-info-grid a { color:#075b94; font-size:13px; font-weight:800; }
+  .mz-pdp-info-grid a { color:#002964; font-size:13px; font-weight:800; }
   .mz-pdp-specifications { margin-top:42px; padding:28px; border:1px solid var(--mz-line); border-radius:6px; background:#fff; }
   .mz-pdp-specifications table { width:100%; border-collapse:collapse; }
   .mz-pdp-specifications th,

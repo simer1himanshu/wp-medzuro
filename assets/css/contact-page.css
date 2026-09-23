@@ -1,8 +1,8 @@
 /* Ported from sections/medzuro-contact-page.liquid — scoped to .mz-contact */
 .mz-contact {
-    --ct-navy: #071f52;
-    --ct-blue: #004aad;
-    --ct-deep: #003074;
+    --ct-navy: #002964;
+    --ct-blue: #002964;
+    --ct-deep: #002964;
     --ct-orange: #dd7b21;
     --ct-ink: #0c2145;
     --ct-muted: #53627a;
@@ -125,7 +125,7 @@
   }
 
   .mz-contact .ct-page__map-dot {
-    fill: #bdd7f4;
+    fill: #002964;
   }
 
   .mz-contact .ct-page__map-arc {
@@ -281,14 +281,14 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: #e8f1fb;
+    background: #f5f7fa;
     font-size: 24px;
     box-shadow: inset 0 0 0 1px rgba(0,74,173,.12);
   }
 
   .mz-contact .ct-page__flag--india {
     background: linear-gradient(#ff9933 0 33%, #fff 33% 66%, #138808 66% 100%);
-    color: #071f52;
+    color: #002964;
     font-size: 14px;
     font-weight: 900;
   }

@@ -34,7 +34,7 @@
   .template-index .favCount { background:#100b07 !important; color:#fff !important; top:-4px !important; right:-2px !important; }
 
   .mz-home-ref {
-    --mz-navy:#06173b;
+    --mz-navy:#002964;
     --mz-green:#567f32;
     --mz-red:#e01b2f;
     --mz-ink:#091735;
@@ -75,7 +75,7 @@
     padding:0 25px; border-radius:6px; font-size:15px; font-weight:700; line-height:1; letter-spacing:0;
     text-transform:none; text-decoration:none !important;
   }
-  .mz-home-btn--solid { background:#1587c7; border:2px solid #1587c7; color:#fff !important; }
+  .mz-home-btn--solid { background:#002964; border:2px solid #002964; color:#fff !important; }
   .mz-home-btn--outline { background:#fff; border:2px solid #aeb8c5; color:#081735 !important; }
   .mz-home-btn svg { width:18px; height:18px; }
   .mz-home-btn__arrow { font-size:22px; line-height:1; }
@@ -86,7 +86,7 @@
     margin:0; padding:0; list-style:none; display:grid; background:#fff; border:1px solid rgba(13,31,64,.08);
     border-radius:8px; box-shadow:0 12px 30px rgba(11,27,51,.08);
   }
-  .mz-home-trust__list { grid-template-columns:repeat(4,minmax(0,1fr)); padding:24px max(34px, calc((100vw - 1212px) / 2)); background:#168bc8; border:0; border-radius:0; box-shadow:none; }
+  .mz-home-trust__list { grid-template-columns:repeat(4,minmax(0,1fr)); padding:24px max(34px, calc((100vw - 1212px) / 2)); background:#002964; border:0; border-radius:0; box-shadow:none; }
   .mz-home-trust__list li,
   .mz-home-help__list li { display:flex; align-items:center; gap:17px; min-width:0; color:var(--mz-navy); }
   .mz-home-trust__list li { color:#fff; }
@@ -218,15 +218,15 @@
   .mz-home-flags li { display:flex; flex-direction:column; align-items:center; gap:7px; color:#17243f; font-weight:800; }
   .mz-flag { position:relative; display:block; width:34px; height:22px; border-radius:2px; overflow:hidden; box-shadow:0 0 0 1px rgba(11,27,51,.14); background:#ddd; }
   .mz-flag--usa { background:repeating-linear-gradient(180deg,#c8313f 0 2px,#fff 2px 4px); }
-  .mz-flag--usa:before { content:""; position:absolute; left:0; top:0; width:15px; height:12px; background:#244f9e; }
+  .mz-flag--usa:before { content:""; position:absolute; left:0; top:0; width:15px; height:12px; background:#002964; }
   .mz-flag--canada { background:linear-gradient(90deg,#d61f2a 0 25%,#fff 25% 75%,#d61f2a 75%); }
   .mz-flag--canada:after { content:""; position:absolute; width:7px; height:7px; left:13px; top:7px; background:#d61f2a; transform:rotate(45deg); }
-  .mz-flag--uk { background:linear-gradient(90deg,transparent 42%,#fff 42% 58%,transparent 58%),linear-gradient(0deg,transparent 39%,#fff 39% 61%,transparent 61%),linear-gradient(90deg,transparent 46%,#c82333 46% 54%,transparent 54%),linear-gradient(0deg,transparent 44%,#c82333 44% 56%,transparent 56%),#16366f; }
+  .mz-flag--uk { background:linear-gradient(90deg,transparent 42%,#fff 42% 58%,transparent 58%),linear-gradient(0deg,transparent 39%,#fff 39% 61%,transparent 61%),linear-gradient(90deg,transparent 46%,#c82333 46% 54%,transparent 54%),linear-gradient(0deg,transparent 44%,#c82333 44% 56%,transparent 56%),#002964; }
   .mz-flag--uae { background:linear-gradient(90deg,#cc1f2f 0 25%,transparent 25%),linear-gradient(180deg,#158343 0 33%,#fff 33% 66%,#101010 66%); }
   .mz-flag--qatar { background:linear-gradient(90deg,#fff 0 30%,#8a1242 30%); }
-  .mz-flag--sa { background:linear-gradient(180deg,#d52b1e 0 33%,#fff 33% 40%,#007749 40% 60%,#fff 60% 67%,#002395 67%); }
+  .mz-flag--sa { background:linear-gradient(180deg,#d52b1e 0 33%,#fff 33% 40%,#007749 40% 60%,#fff 60% 67%,#002964 67%); }
   .mz-flag--kenya { background:linear-gradient(180deg,#000 0 29%,#fff 29% 35%,#bb101c 35% 65%,#fff 65% 71%,#15853f 71%); }
-  .mz-flag--europe { background:#21468b; }
+  .mz-flag--europe { background:#002964; }
   .mz-flag--europe:after { content:""; position:absolute; left:14px; top:8px; width:5px; height:5px; border-radius:50%; background:#ffcc28; box-shadow:8px 0 #ffcc28,-8px 0 #ffcc28,0 7px #ffcc28,0 -7px #ffcc28; }
 
   .mz-home-lab { padding-bottom:24px; }
@@ -241,11 +241,11 @@
   .mz-home-lab__copy p { margin:16px 0 0; max-width:575px; color:#26364e; line-height:1.7; font-size:14px; font-weight:600; }
   .mz-home-eurofins {
     position:absolute; top:45px; right:40px; width:180px; display:grid; grid-template-columns:38px 1fr; gap:0 8px; align-items:center;
-    color:#18346f; text-transform:uppercase;
+    color:#002964; text-transform:uppercase;
   }
   .mz-home-eurofins__mark {
     grid-row:1 / span 2; width:34px; height:34px; border-radius:50%;
-    background:radial-gradient(circle at 50% 7px,#fb6b24 0 3px,transparent 4px),radial-gradient(circle at 15px 13px,#3155a4 0 3px,transparent 4px),radial-gradient(circle at 24px 16px,#3155a4 0 3px,transparent 4px),radial-gradient(circle at 13px 24px,#fb6b24 0 3px,transparent 4px),radial-gradient(circle at 25px 26px,#3155a4 0 3px,transparent 4px);
+    background:radial-gradient(circle at 50% 7px,#fb6b24 0 3px,transparent 4px),radial-gradient(circle at 15px 13px,#002964 0 3px,transparent 4px),radial-gradient(circle at 24px 16px,#002964 0 3px,transparent 4px),radial-gradient(circle at 13px 24px,#fb6b24 0 3px,transparent 4px),radial-gradient(circle at 25px 26px,#002964 0 3px,transparent 4px);
   }
   .mz-home-eurofins strong { font-size:28px; line-height:1; letter-spacing:0; text-transform:none; }
   .mz-home-eurofins small { margin-top:8px; color:#102240; font-size:12px; font-weight:900; line-height:1.25; }
@@ -272,8 +272,8 @@
   .mz-home-review__person strong { display:flex; flex-direction:column; color:#14203a; font-size:13px; line-height:1.3; }
   .mz-home-review__person small { margin-top:2px; color:#526175; font-size:11px; font-weight:700; }
   .mz-home-avatar { flex:0 0 auto; width:48px; height:48px; border-radius:50%; box-shadow:0 0 0 2px #fff,0 0 0 3px #d4dce4; }
-  .mz-home-avatar--sea { background:linear-gradient(180deg,#7ec1df 0 40%,#f5f1d8 40% 50%,#2e8a50 50%); }
-  .mz-home-avatar--lagoon { background:linear-gradient(180deg,#7ed5f1 0 45%,#fff 45% 50%,#0b91a4 50%); }
+  .mz-home-avatar--sea { background:linear-gradient(180deg,#002964 0 40%,#f5f1d8 40% 50%,#2e8a50 50%); }
+  .mz-home-avatar--lagoon { background:linear-gradient(180deg,#002964 0 45%,#fff 45% 50%,#002964 50%); }
   .mz-home-avatar--sun { background:radial-gradient(circle at 54% 40%,#f8b331 0 13px,transparent 14px),linear-gradient(180deg,#f36b31 0 52%,#24221a 52%); }
 
   .mz-home-help { padding-bottom:18px; }
