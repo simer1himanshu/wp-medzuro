@@ -127,6 +127,28 @@ function medzuro_seed_coming_soon_products() {
 add_action( 'init', 'medzuro_seed_coming_soon_products', 30 );
 
 /**
+ * Archive the exact duplicate created by concurrent first-run requests.
+ */
+function medzuro_archive_duplicate_trimora() {
+	if ( '1' === get_option( 'medzuro_trimora_duplicate_cleanup_v1' ) ) {
+		return;
+	}
+
+	$duplicate = get_page_by_path( 'holyoak-garcinia-trimora-2', OBJECT, 'product' );
+	if ( $duplicate && 'yes' === get_post_meta( $duplicate->ID, 'medzuro_coming_soon', true ) ) {
+		wp_update_post(
+			array(
+				'ID'          => $duplicate->ID,
+				'post_status' => 'draft',
+			)
+		);
+	}
+
+	update_option( 'medzuro_trimora_duplicate_cleanup_v1', '1', false );
+}
+add_action( 'init', 'medzuro_archive_duplicate_trimora', 40 );
+
+/**
  * Coming-soon products must never enter the cart.
  *
  * @param bool       $purchasable Existing purchasable state.

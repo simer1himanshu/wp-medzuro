@@ -121,7 +121,9 @@ $s = medzuro_home()['settings'];
 
 								<span class="mz-home-price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
 
-								<?php if ( $product->is_type( 'simple' ) && $product->is_purchasable() && $product->is_in_stock() ) : ?>
+								<?php if ( medzuro_is_coming_soon( $product ) ) : ?>
+									<button class="mz-home-add" type="button" disabled><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></button>
+								<?php elseif ( $product->is_type( 'simple' ) && $product->is_purchasable() && $product->is_in_stock() ) : ?>
 									<form method="post" class="mz-home-product__form"
 										action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $link ) ); ?>">
 										<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>">

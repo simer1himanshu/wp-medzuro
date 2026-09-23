@@ -38,6 +38,31 @@ function medzuro_catalog_orderby_options() {
 }
 
 /**
+ * Keep available products ahead of Coming Soon entries for every shop sort.
+ *
+ * @param array    $clauses SQL clauses for the product query.
+ * @param WP_Query $query   Current query.
+ * @return array
+ */
+function medzuro_available_products_first( $clauses, $query ) {
+	if ( is_admin() || ! $query->is_main_query() || ( ! is_shop() && ! is_product_taxonomy() ) ) {
+		return $clauses;
+	}
+
+	global $wpdb;
+
+	if ( false === strpos( $clauses['join'], 'medzuro_coming_soon_order' ) ) {
+		$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS medzuro_coming_soon_order ON ({$wpdb->posts}.ID = medzuro_coming_soon_order.post_id AND medzuro_coming_soon_order.meta_key = 'medzuro_coming_soon')";
+	}
+
+	$existing_order = $clauses['orderby'] ? ', ' . $clauses['orderby'] : '';
+	$clauses['orderby'] = "CASE WHEN medzuro_coming_soon_order.meta_value = 'yes' THEN 1 ELSE 0 END ASC{$existing_order}";
+
+	return $clauses;
+}
+add_filter( 'posts_clauses', 'medzuro_available_products_first', 20, 2 );
+
+/**
  * Archive pagination.
  *
  * Rebuilt with paginate_links() rather than woocommerce_pagination() so the

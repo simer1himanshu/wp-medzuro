@@ -80,6 +80,16 @@ function medzuro_home_products() {
 		'limit'   => $limit > 0 ? $limit : 5,
 		'orderby' => 'menu_order',
 		'order'   => 'ASC',
+		'exclude' => get_posts(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => 'medzuro_coming_soon',
+				'meta_value'     => 'yes',
+			)
+		),
 	);
 
 	if ( '' !== $handle && 'all' !== $handle ) {
