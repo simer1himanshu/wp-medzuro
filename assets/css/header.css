@@ -60,7 +60,7 @@
 
 .mz-hd__logo { flex: 0 0 auto; }
 .mz-hd__logo-link { display: block; line-height: 0; }
-.mz-hd__logo img { width: 180px; height: auto; }
+.mz-hd__logo img { width: 145px; height: auto; }
 
 /* Navigation */
 .mz-hd__nav { flex: 1 1 auto; }
@@ -182,7 +182,7 @@
   .mz-hd__mobile { display: block; }
   .mz-hd__nav { display: none; }
   .mz-hd__bar { gap: 12px; min-height: 58px; }
-  .mz-hd__logo img { width: 140px; }
+  .mz-hd__logo img { width: 120px; }
 }
 
 /* Main content */

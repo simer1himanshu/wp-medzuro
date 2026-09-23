@@ -66,7 +66,7 @@ defined( 'ABSPATH' ) || exit;
 					<?php the_custom_logo(); ?>
 				<?php else : ?>
 					<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-logo.png' ); ?>"
-					     width="180" height="58" fetchpriority="high"
+					     width="145" height="58" fetchpriority="high"
 					     alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 				<?php endif; ?>
 			</a>
