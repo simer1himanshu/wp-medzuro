@@ -119,6 +119,18 @@
   margin-left: auto;
 }
 
+@media (min-width: 990px) {
+  .mz-hd__bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .mz-hd__logo { justify-self: start; }
+  .mz-hd__nav { justify-self: center; }
+  .mz-nav { justify-content: center; }
+  .mz-hd__icons { justify-self: end; margin-left: 0; }
+}
+
 .mz-hd__icon {
   position: relative;
   display: inline-flex;
