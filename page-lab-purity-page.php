@@ -14,5 +14,7 @@ defined( 'ABSPATH' ) || exit;
 medzuro_style( 'lab-purity-page' );
 
 get_header();
+echo '<div class="mz-lab">';
 get_template_part( 'template-parts/lab-purity-page' );
+echo '</div>';
 get_footer();
