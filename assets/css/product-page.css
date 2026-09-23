@@ -1141,6 +1141,9 @@
   .mz-pdp-price del { color:#7b8797; font-size:17px; font-weight:700; }
   .mz-pdp-price ins { text-decoration:none; }
   .mz-pdp-purchase { margin-top:22px; }
+  .mz-pdp-coming-soon { display:grid; gap:5px; margin-top:22px; padding:18px 20px; border:1px solid #002964; border-radius:4px; background:#f5f7fa; }
+  .mz-pdp-coming-soon strong { color:#002964; font-size:18px; }
+  .mz-pdp-coming-soon span { color:#506079; font-size:14px; }
   .mz-pdp-purchase form.cart { display:flex; flex-wrap:wrap; gap:12px; margin:0; }
   .mz-pdp-purchase .quantity { flex:0 0 84px; }
   .mz-pdp-purchase .qty { width:84px; height:50px; border:1px solid #c8d2de; border-radius:4px; background:#fff; color:var(--mz-navy); text-align:center; font-weight:800; }

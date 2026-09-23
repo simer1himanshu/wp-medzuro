@@ -23,6 +23,7 @@ while ( have_posts() ) :
 	$short_desc   = $product->get_short_description();
 	$rating       = (float) $product->get_average_rating();
 	$review_count = (int) $product->get_review_count();
+	$coming_soon = medzuro_is_coming_soon( $product );
 	$image_ids    = array_values(
 		array_filter(
 			array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() )
@@ -104,11 +105,18 @@ while ( have_posts() ) :
 					<div class="mz-pdp-subtitle"><?php echo wp_kses_post( wpautop( $short_desc ) ); ?></div>
 				<?php endif; ?>
 
-				<div class="mz-pdp-price"><?php woocommerce_template_single_price(); ?></div>
+				<?php if ( $coming_soon ) : ?>
+					<div class="mz-pdp-coming-soon">
+						<strong><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></strong>
+						<span><?php esc_html_e( 'This product is not available to purchase yet.', 'medzuro' ); ?></span>
+					</div>
+				<?php else : ?>
+					<div class="mz-pdp-price"><?php woocommerce_template_single_price(); ?></div>
 
-				<div class="mz-pdp-purchase">
-					<?php woocommerce_template_single_add_to_cart(); ?>
-				</div>
+					<div class="mz-pdp-purchase">
+						<?php woocommerce_template_single_add_to_cart(); ?>
+					</div>
+				<?php endif; ?>
 
 				<ul class="mz-pdp-assurances" role="list">
 					<li><?php medzuro_icon( 'shield', 20 ); ?><span><strong><?php esc_html_e( 'Secure payment', 'medzuro' ); ?></strong><?php esc_html_e( 'Protected checkout with trusted payment methods.', 'medzuro' ); ?></span></li>

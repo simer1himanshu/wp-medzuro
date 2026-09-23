@@ -27,6 +27,7 @@ $on_sale   = $product->is_on_sale();
 $brand     = medzuro_product_brand( $product );
 $rating    = (float) $product->get_average_rating();
 $reviews   = (int) $product->get_review_count();
+$coming_soon = medzuro_is_coming_soon( $product );
 ?>
 <article class="mz-product-card">
 	<a class="mz-product-card__media" href="<?php echo esc_url( $permalink ); ?>"
@@ -73,7 +74,12 @@ $reviews   = (int) $product->get_review_count();
 			<?php echo wp_kses_post( $product->get_price_html() ); ?>
 		</div>
 
-		<?php if ( ! $product->is_in_stock() ) : ?>
+		<?php if ( $coming_soon ) : ?>
+			<a class="mz-product-card__button mz-product-card__button--coming-soon" href="<?php echo esc_url( $permalink ); ?>">
+				<?php esc_html_e( 'Coming Soon', 'medzuro' ); ?>
+			</a>
+
+		<?php elseif ( ! $product->is_in_stock() ) : ?>
 			<a class="mz-product-card__button mz-product-card__button--disabled" href="<?php echo esc_url( $permalink ); ?>">
 				<?php esc_html_e( 'Sold Out', 'medzuro' ); ?>
 			</a>

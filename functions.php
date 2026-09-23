@@ -16,6 +16,7 @@ define( 'MEDZURO_VERSION', '1.0.0' );
 require_once get_template_directory() . '/inc/content.php';
 require_once get_template_directory() . '/inc/icons.php';
 require_once get_template_directory() . '/inc/product.php';
+require_once get_template_directory() . '/inc/coming-soon-products.php';
 require_once get_template_directory() . '/inc/collection.php';
 require_once get_template_directory() . '/inc/home-content.php';
 require_once get_template_directory() . '/inc/ref-icons.php';

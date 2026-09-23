@@ -109,6 +109,14 @@
     color: #fff !important;
   }
 
+  .mz-product-card__button--coming-soon,
+  .mz-product-card__button--coming-soon:hover {
+    border-color: #002964;
+    background: #002964;
+    color: #fff !important;
+    cursor: default;
+  }
+
   .mz-collection-btn--primary:hover,
   .mz-collection-btn--primary:focus {
     background: var(--mz-blue);
