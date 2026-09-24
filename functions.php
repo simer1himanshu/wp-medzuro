@@ -13,6 +13,18 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'MEDZURO_VERSION', '1.0.0' );
 
+/**
+ * Return the bundled logo URL with a file-based cache version.
+ *
+ * @return string
+ */
+function medzuro_logo_url() {
+	$path = get_theme_file_path( '/assets/img/medzuro-logo.png' );
+	$url  = get_theme_file_uri( '/assets/img/medzuro-logo.png' );
+
+	return file_exists( $path ) ? add_query_arg( 'ver', filemtime( $path ), $url ) : $url;
+}
+
 require_once get_template_directory() . '/inc/content.php';
 require_once get_template_directory() . '/inc/icons.php';
 require_once get_template_directory() . '/inc/product.php';

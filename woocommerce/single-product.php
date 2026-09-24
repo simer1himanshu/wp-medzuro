@@ -76,7 +76,7 @@ while ( have_posts() ) :
 							);
 							?>
 						<?php else : ?>
-							<img class="mz-pdp-placeholder" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-logo.png' ); ?>"
+							<img class="mz-pdp-placeholder" src="<?php echo esc_url( medzuro_logo_url() ); ?>"
 								alt="<?php echo esc_attr( $product->get_name() ); ?>" width="420" height="136">
 							<p><?php esc_html_e( 'Product image coming soon', 'medzuro' ); ?></p>
 						<?php endif; ?>

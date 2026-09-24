@@ -154,7 +154,7 @@ defined( 'ABSPATH' ) || exit;
             <a class="mz-about__link" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">Explore our brands &rarr;</a>
           </div>
           <div class="mz-about__panel-logo">
-            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-logo.png' ); ?>" alt="Medzuro Retail logo" loading="lazy" width="520" height="220">
+            <img src="<?php echo esc_url( medzuro_logo_url() ); ?>" alt="Medzuro Retail logo" loading="lazy" width="520" height="220">
           </div>
         </article>
 

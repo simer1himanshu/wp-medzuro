@@ -46,7 +46,7 @@ $coming_soon = medzuro_is_coming_soon( $product );
 			?>
 		<?php else : ?>
 			<span class="mz-product-card__placeholder">
-				<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-logo.png' ); ?>"
+				<img src="<?php echo esc_url( medzuro_logo_url() ); ?>"
 					alt="" loading="lazy" width="220" height="110">
 			</span>
 		<?php endif; ?>

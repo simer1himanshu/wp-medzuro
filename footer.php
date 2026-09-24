@@ -24,7 +24,7 @@ $f = medzuro_content()['footer'];
 			<div class="mz-foot__brand">
 				<a class="mz-foot__logo" href="<?php echo esc_url( home_url( '/' ) ); ?>"
 				   aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
-					<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-logo.png' ); ?>"
+					<img src="<?php echo esc_url( medzuro_logo_url() ); ?>"
 					     width="180" height="58" loading="lazy"
 					     alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 				</a>
