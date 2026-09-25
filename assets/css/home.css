@@ -374,6 +374,11 @@
     .template-index .top-header .middle-hdr { text-align:center !important; }
     .mz-home-hero,
     .mz-home-hero__wrap { min-height:620px; }
+    .mz-home-hero__photo {
+      background-image:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(255,255,255,.97) 48%, rgba(255,255,255,.18) 64%, rgba(255,255,255,0) 100%), url(../img/medzuro-home-hero-mobile.png);
+      background-position:center, center bottom;
+      background-size:100% 100%, 100% auto;
+    }
     .mz-home-hero__title { font-size:34px; }
     .mz-home-hero__text { font-size:15px; }
     .mz-home-btn { width:100%; }
