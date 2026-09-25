@@ -59,7 +59,7 @@ function medzuro_home_url( $path ) {
 }
 
 /**
- * Products for the homepage carousel.
+ * Products for the homepage grid.
  *
  * Mirrors `collections[s.collection].products limit: s.product_limit`. The
  * `collection` setting holds a Shopify collection handle; 'all' means the whole
@@ -73,23 +73,11 @@ function medzuro_home_products() {
 	}
 
 	$handle = (string) medzuro_home_setting( 'collection', 'all' );
-	$limit  = (int) medzuro_home_setting( 'product_limit', 5 );
-
 	$args = array(
 		'status'  => 'publish',
-		'limit'   => $limit > 0 ? $limit : 5,
+		'limit'   => -1,
 		'orderby' => 'menu_order',
 		'order'   => 'ASC',
-		'exclude' => get_posts(
-			array(
-				'post_type'      => 'product',
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-				'meta_key'       => 'medzuro_coming_soon',
-				'meta_value'     => 'yes',
-			)
-		),
 	);
 
 	if ( '' !== $handle && 'all' !== $handle ) {
@@ -105,5 +93,22 @@ function medzuro_home_products() {
 		$products = wc_get_products( $args );
 	}
 
-	return is_array( $products ) ? $products : array();
+	if ( ! is_array( $products ) ) {
+		return array();
+	}
+
+	usort(
+		$products,
+		function ( $first, $second ) {
+			$coming_order = (int) medzuro_is_coming_soon( $first ) <=> (int) medzuro_is_coming_soon( $second );
+			if ( 0 !== $coming_order ) {
+				return $coming_order;
+			}
+
+			$menu_order = $first->get_menu_order() <=> $second->get_menu_order();
+			return 0 !== $menu_order ? $menu_order : $first->get_id() <=> $second->get_id();
+		}
+	);
+
+	return $products;
 }

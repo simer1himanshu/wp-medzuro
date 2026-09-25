@@ -112,15 +112,14 @@
 
   .mz-home-products,
   .mz-home-reviews { position:relative; padding-top:8px; padding-bottom:34px; }
-  .mz-home-products__viewport,
+  .mz-home-products__viewport { overflow:visible; padding:8px 1px 10px; }
   .mz-home-reviews__viewport { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; padding:8px 1px 10px; }
-  .mz-home-products__viewport::-webkit-scrollbar,
   .mz-home-reviews__viewport::-webkit-scrollbar { display:none; }
   .mz-home-products__track,
   .mz-home-reviews__track {
     margin:0; padding:0; list-style:none; display:grid; grid-auto-flow:column; gap:16px;
   }
-  .mz-home-products__track { grid-auto-columns:calc((100% - 64px) / 5); }
+  .mz-home-products__track { grid-auto-flow:row; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
   .mz-home-reviews__track { grid-auto-columns:calc((100% - 40px) / 3); gap:20px; max-width:100%; }
   .mz-home-arrow {
     position:absolute; z-index:3; top:50%; width:31px; height:31px; border-radius:50%; border:1px solid #b9c3cc;
@@ -151,6 +150,7 @@
   .mz-home-rating span { color:#101010; letter-spacing:0; font-size:12px; }
   .mz-home-rating small { color:#14213c; font-size:11px; font-weight:700; }
   .mz-home-price { display:flex; align-items:baseline; gap:9px; margin-top:2px; color:#182239; }
+  .mz-home-price--coming-soon { color:#002964; font-size:14px; font-weight:800; text-transform:uppercase; }
   .mz-home-price strong { font-size:15px; font-weight:900; }
   .mz-home-price s { color:#6f7783; font-size:12px; font-weight:600; }
   .mz-home-add {
@@ -358,7 +358,7 @@
     .mz-home-help__list { grid-template-columns:1fr 1fr; padding:22px; gap:20px; }
     .mz-home-trust__list li + li,
     .mz-home-help__list li + li { border-left:0; padding-left:0; }
-    .mz-home-products__track { grid-auto-columns:minmax(190px, 45%); }
+    .mz-home-products__track { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .mz-home-reviews__track { grid-auto-columns:minmax(270px, 74%); }
     .mz-home-world__panel { grid-template-columns:1fr; padding:30px 24px; }
     .mz-home-lab__panel { grid-template-columns:1fr; }
@@ -379,7 +379,7 @@
     .mz-home-btn { width:100%; }
     .mz-home-trust__list,
     .mz-home-help__list { grid-template-columns:1fr; }
-    .mz-home-products__track { grid-auto-columns:minmax(170px, 78%); }
+    .mz-home-products__track { grid-template-columns:1fr; }
     .mz-home-product__media { min-height:170px; }
     .mz-home-world__stats { grid-template-columns:1fr; gap:18px; text-align:left; }
     .mz-home-world__stats div { align-items:flex-start; text-align:left; padding:0; }

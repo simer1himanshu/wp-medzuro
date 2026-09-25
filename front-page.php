@@ -62,18 +62,14 @@ $s = medzuro_home()['settings'];
 			<h2 id="mz-home-products-title"><?php echo esc_html( $s['products_title'] ); ?></h2>
 		</div>
 
-		<button class="mz-home-arrow mz-home-arrow--prev" type="button"
-			aria-label="<?php esc_attr_e( 'Previous products', 'medzuro' ); ?>" data-mz-home-prev>
-			<span aria-hidden="true">&#8249;</span>
-		</button>
-
-		<div class="mz-home-products__viewport" data-mz-home-products>
+		<div class="mz-home-products__viewport">
 			<ul class="mz-home-products__track" role="list">
 				<?php
 				$products = medzuro_home_products();
 
 				if ( $products ) :
 					foreach ( $products as $i => $product ) :
+						$coming_soon = medzuro_is_coming_soon( $product );
 						$on_sale  = $product->is_on_sale();
 						$regular  = (float) $product->get_regular_price();
 						$price    = (float) $product->get_price();
@@ -113,15 +109,17 @@ $s = medzuro_home()['settings'];
 									<?php echo esc_html( medzuro_field( 'serving', $s['product_meta'], $product->get_id() ) ); ?>
 								</span>
 
-								<?php if ( $s['show_ratings'] ) : ?>
+								<?php if ( $s['show_ratings'] && ! $coming_soon ) : ?>
 									<span class="mz-home-rating" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'medzuro' ); ?>">
 										<span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small>(<?php echo esc_html( $reviews ); ?>)</small>
 									</span>
 								<?php endif; ?>
 
-								<span class="mz-home-price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
+								<span class="mz-home-price<?php echo $coming_soon ? ' mz-home-price--coming-soon' : ''; ?>">
+									<?php echo $coming_soon ? esc_html__( 'Coming Soon', 'medzuro' ) : wp_kses_post( $product->get_price_html() ); ?>
+								</span>
 
-								<?php if ( medzuro_is_coming_soon( $product ) ) : ?>
+								<?php if ( $coming_soon ) : ?>
 									<button class="mz-home-add" type="button" disabled><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></button>
 								<?php elseif ( $product->is_type( 'simple' ) && $product->is_purchasable() && $product->is_in_stock() ) : ?>
 									<form method="post" class="mz-home-product__form"
@@ -145,11 +143,6 @@ $s = medzuro_home()['settings'];
 				?>
 			</ul>
 		</div>
-
-		<button class="mz-home-arrow mz-home-arrow--next" type="button"
-			aria-label="<?php esc_attr_e( 'Next products', 'medzuro' ); ?>" data-mz-home-next>
-			<span aria-hidden="true">&#8250;</span>
-		</button>
 	</section>
 
 	<?php

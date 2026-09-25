@@ -35,7 +35,6 @@
       });
     }
 
-    bindScroller('[data-mz-home-products]', '[data-mz-home-prev]', '[data-mz-home-next]');
     bindScroller('[data-mz-reviews]', '[data-mz-reviews-prev]', '[data-mz-reviews-next]');
   });
 })();
