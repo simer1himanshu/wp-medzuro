@@ -346,10 +346,11 @@
     .template-index .header-logo svg { width:170px !important; max-width:170px !important; }
     .mz-home-ref .page-width { padding-left:18px; padding-right:18px; }
     .mz-home-hero,
-    .mz-home-hero__wrap { min-height:650px; }
+    .mz-home-hero__wrap { min-height:760px; }
     .mz-home-hero__photo {
-      background-image:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(255,255,255,.96) 42%, rgba(255,255,255,.12) 70%, rgba(255,255,255,0) 100%), url(../img/medzuro-home-hero-wide-v2.png);
-      background-position:right bottom; background-size:auto 58%;
+      background-image:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(255,255,255,.97) 38%, rgba(255,255,255,.12) 62%, rgba(255,255,255,0) 100%), url(../img/medzuro-home-hero-mobile.png);
+      background-position:center, center bottom;
+      background-size:100% 100%, min(82vw, 680px) auto;
     }
     .mz-home-hero__wrap { align-items:flex-start; }
     .mz-home-hero__copy { padding-top:48px; }
