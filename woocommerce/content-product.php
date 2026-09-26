@@ -40,7 +40,7 @@ if ( ! $descriptor ) {
 			<?php
 			echo wp_get_attachment_image(
 				get_post_thumbnail_id(),
-				'woocommerce_thumbnail',
+				'medium_large',
 				false,
 				array(
 					'loading' => 'lazy',

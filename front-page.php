@@ -82,7 +82,7 @@ $s = medzuro_home()['settings'];
 									<?php
 									echo wp_get_attachment_image(
 										$product->get_image_id(),
-										'woocommerce_thumbnail',
+										'medium_large',
 										false,
 										array(
 											'class'   => 'mz-home-product__img',
