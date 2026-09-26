@@ -71,6 +71,7 @@ $s = medzuro_home()['settings'];
 					foreach ( $products as $i => $product ) :
 						$coming_soon = medzuro_is_coming_soon( $product );
 						$pricing  = medzuro_card_pricing( $product );
+						$card_image = medzuro_card_image_url( $product );
 						// Shopify derived a plausible-looking count from the loop
 						// index; kept so the design matches until real reviews exist.
 						$reviews  = ( ( $i + 1 ) * 16 ) + 48;
@@ -78,7 +79,10 @@ $s = medzuro_home()['settings'];
 						?>
 						<li class="mz-home-product">
 							<a class="mz-home-product__media" href="<?php echo esc_url( $link ); ?>">
-								<?php if ( $product->get_image_id() ) : ?>
+								<?php if ( $card_image ) : ?>
+									<img class="mz-home-product__img" src="<?php echo esc_url( $card_image ); ?>"
+										alt="<?php echo esc_attr( $product->get_name() ); ?>" loading="lazy" width="1254" height="1254">
+								<?php elseif ( $product->get_image_id() ) : ?>
 									<?php
 									echo wp_get_attachment_image(
 										$product->get_image_id(),

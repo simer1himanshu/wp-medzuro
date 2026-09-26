@@ -27,6 +27,7 @@ $rating    = (float) $product->get_average_rating();
 $reviews   = (int) $product->get_review_count();
 $coming_soon = medzuro_is_coming_soon( $product );
 $pricing   = medzuro_card_pricing( $product );
+$card_image = medzuro_card_image_url( $product );
 $descriptor = medzuro_field( 'serving', '', $product->get_id() );
 
 if ( ! $descriptor ) {
@@ -36,7 +37,10 @@ if ( ! $descriptor ) {
 <article class="mz-product-card">
 	<a class="mz-product-card__media" href="<?php echo esc_url( $permalink ); ?>"
 		aria-label="<?php echo esc_attr( $product->get_name() ); ?>">
-		<?php if ( has_post_thumbnail() ) : ?>
+		<?php if ( $card_image ) : ?>
+			<img src="<?php echo esc_url( $card_image ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>"
+				loading="lazy" width="1254" height="1254">
+		<?php elseif ( has_post_thumbnail() ) : ?>
 			<?php
 			echo wp_get_attachment_image(
 				get_post_thumbnail_id(),

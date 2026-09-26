@@ -58,6 +58,29 @@ function medzuro_card_pricing( $product ) {
 }
 
 /**
+ * Return the coordinated square catalog image for a product when available.
+ *
+ * @param WC_Product $product Product being displayed.
+ * @return string Catalog image URL, or an empty string for the Woo fallback.
+ */
+function medzuro_card_image_url( $product ) {
+	$images = array(
+		'holyoak-capsules'                 => 'holyoak-capsules.png',
+		'holyoak-gummies'                  => 'holyoak-gummies.png',
+		'holyoak-resin'                    => 'holyoak-resin.png',
+		'holyoak-arjun-extract-capsules'   => 'holyoak-arjun-extract-capsules.png',
+		'holyoak-garcinia-trimora'         => 'holyoak-garcinia-trimora.png',
+		'holyoak-glyvionix'                => 'holyoak-glyvionix.png',
+		'holyoak-l-glutathione'            => 'holyoak-l-glutathione.png',
+		'holyoak-marine-collagen'          => 'holyoak-marine-collagen.png',
+		'holyoak-riseup-men'               => 'holyoak-riseup-men.png',
+	);
+	$filename = $images[ $product->get_slug() ] ?? '';
+
+	return $filename ? get_template_directory_uri() . '/assets/img/catalog/' . $filename : '';
+}
+
+/**
  * Build the "Select Your Pack" options.
  *
  * The Shopify section had two mutually exclusive branches: real variants when
