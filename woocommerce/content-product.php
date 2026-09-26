@@ -23,13 +23,10 @@ if ( ! $product || ! $product->is_visible() ) {
 }
 
 $permalink = $product->get_permalink();
-$on_sale   = $product->is_on_sale();
 $rating    = (float) $product->get_average_rating();
 $reviews   = (int) $product->get_review_count();
 $coming_soon = medzuro_is_coming_soon( $product );
-$regular   = (float) $product->get_regular_price();
-$sale      = (float) $product->get_sale_price();
-$discount  = ( $on_sale && $regular > 0 && $sale > 0 ) ? (int) round( ( ( $regular - $sale ) / $regular ) * 100 ) : 0;
+$pricing   = medzuro_card_pricing( $product );
 $descriptor = medzuro_field( 'serving', '', $product->get_id() );
 
 if ( ! $descriptor ) {
@@ -69,10 +66,9 @@ if ( ! $descriptor ) {
 
 		<?php if ( ! $coming_soon ) : ?>
 			<div class="mz-product-card__price">
-				<?php echo wp_kses_post( $product->get_price_html() ); ?>
-				<?php if ( $discount > 0 ) : ?>
-					<small class="mz-product-card__discount"><?php echo esc_html( $discount ); ?>% off</small>
-				<?php endif; ?>
+				<strong><?php echo wp_kses_post( $pricing['current'] ); ?></strong>
+				<del><?php echo wp_kses_post( $pricing['compare'] ); ?></del>
+				<small class="mz-product-card__discount"><?php echo esc_html( $pricing['discount'] ); ?>% off</small>
 			</div>
 
 			<?php if ( $rating > 0 ) : ?>

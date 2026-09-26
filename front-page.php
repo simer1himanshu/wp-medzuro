@@ -70,10 +70,7 @@ $s = medzuro_home()['settings'];
 				if ( $products ) :
 					foreach ( $products as $i => $product ) :
 						$coming_soon = medzuro_is_coming_soon( $product );
-						$on_sale  = $product->is_on_sale();
-						$regular  = (float) $product->get_regular_price();
-						$price    = (float) $product->get_price();
-						$discount = ( $on_sale && $regular > 0 ) ? (int) round( ( ( $regular - $price ) / $regular ) * 100 ) : 0;
+						$pricing  = medzuro_card_pricing( $product );
 						// Shopify derived a plausible-looking count from the loop
 						// index; kept so the design matches until real reviews exist.
 						$reviews  = ( ( $i + 1 ) * 16 ) + 48;
@@ -107,10 +104,9 @@ $s = medzuro_home()['settings'];
 
 								<?php if ( ! $coming_soon ) : ?>
 									<span class="mz-home-price">
-										<?php echo wp_kses_post( $product->get_price_html() ); ?>
-										<?php if ( $discount > 0 ) : ?>
-											<small class="mz-home-discount"><?php echo esc_html( $discount ); ?>% off</small>
-										<?php endif; ?>
+										<strong><?php echo wp_kses_post( $pricing['current'] ); ?></strong>
+										<del><?php echo wp_kses_post( $pricing['compare'] ); ?></del>
+										<small class="mz-home-discount"><?php echo esc_html( $pricing['discount'] ); ?>% off</small>
 									</span>
 
 									<?php if ( $s['show_ratings'] ) : ?>

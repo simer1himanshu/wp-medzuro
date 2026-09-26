@@ -151,7 +151,8 @@
   .mz-home-rating small { color:#526074; font-size:13px; font-weight:500; }
   .mz-home-price { display:flex; flex-wrap:wrap; align-items:baseline; gap:9px; min-height:26px; color:#182239; }
   .mz-home-price strong, .mz-home-price .amount { font-size:18px; font-weight:900; }
-  .mz-home-price s, .mz-home-price del .amount { color:#9aa3ad; font-size:14px; font-weight:600; }
+  .mz-home-price del { color:#9aa3ad; font-size:14px; font-weight:600; text-decoration-thickness:1px; }
+  .mz-home-price del .amount { color:inherit; font-size:inherit; font-weight:inherit; }
   .mz-home-discount { padding:5px 8px; border-radius:8px; background:#edf1f6; color:#002964; font-size:12px; font-weight:800; }
   .mz-home-add {
     margin-top:auto; width:100%; min-height:48px; display:flex; align-items:center; justify-content:center;

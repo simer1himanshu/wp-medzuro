@@ -30,6 +30,34 @@ function medzuro_field( $key, $default = '', $post_id = null ) {
 }
 
 /**
+ * Build the selling, compare-at, and discount values used by product cards.
+ *
+ * Real WooCommerce sale pricing always wins. Products without a sale use the
+ * store's card presentation of 20% off without changing their checkout price.
+ *
+ * @param WC_Product $product Product being displayed.
+ * @return array{current:string,compare:string,discount:int}
+ */
+function medzuro_card_pricing( $product ) {
+	$current = (float) $product->get_price();
+	$regular = (float) $product->get_regular_price();
+
+	if ( $product->is_on_sale() && $regular > $current ) {
+		$compare  = $regular;
+		$discount = (int) round( ( ( $compare - $current ) / $compare ) * 100 );
+	} else {
+		$discount = 20;
+		$compare  = $current / ( 1 - ( $discount / 100 ) );
+	}
+
+	return array(
+		'current'  => wc_price( $current ),
+		'compare'  => wc_price( $compare ),
+		'discount' => $discount,
+	);
+}
+
+/**
  * Build the "Select Your Pack" options.
  *
  * The Shopify section had two mutually exclusive branches: real variants when
