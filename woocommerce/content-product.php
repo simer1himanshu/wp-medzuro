@@ -24,10 +24,17 @@ if ( ! $product || ! $product->is_visible() ) {
 
 $permalink = $product->get_permalink();
 $on_sale   = $product->is_on_sale();
-$brand     = medzuro_product_brand( $product );
 $rating    = (float) $product->get_average_rating();
 $reviews   = (int) $product->get_review_count();
 $coming_soon = medzuro_is_coming_soon( $product );
+$regular   = (float) $product->get_regular_price();
+$sale      = (float) $product->get_sale_price();
+$discount  = ( $on_sale && $regular > 0 && $sale > 0 ) ? (int) round( ( ( $regular - $sale ) / $regular ) * 100 ) : 0;
+$descriptor = medzuro_field( 'serving', '', $product->get_id() );
+
+if ( ! $descriptor ) {
+	$descriptor = wp_trim_words( wp_strip_all_tags( $product->get_short_description() ), 7, '' );
+}
 ?>
 <article class="mz-product-card">
 	<a class="mz-product-card__media" href="<?php echo esc_url( $permalink ); ?>"
@@ -51,28 +58,30 @@ $coming_soon = medzuro_is_coming_soon( $product );
 			</span>
 		<?php endif; ?>
 
-		<?php if ( $on_sale ) : ?>
-			<span class="mz-product-card__sale"><?php esc_html_e( 'Sale', 'medzuro' ); ?></span>
-		<?php endif; ?>
 	</a>
 
 	<div class="mz-product-card__body">
-		<?php if ( $brand ) : ?>
-			<p class="mz-product-card__vendor"><?php echo esc_html( $brand ); ?></p>
-		<?php endif; ?>
-
 		<h3><a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
 
-		<?php if ( $rating > 0 ) : ?>
-			<div class="mz-product-card__rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %s out of 5', 'medzuro' ), $rating ) ); ?>">
-				<?php echo wp_kses_post( wc_get_rating_html( $rating, $reviews ) ); ?>
-				<small><?php echo esc_html( '(' . $reviews . ')' ); ?></small>
-			</div>
+		<?php if ( $descriptor ) : ?>
+			<p class="mz-product-card__meta"><?php echo esc_html( $descriptor ); ?></p>
 		<?php endif; ?>
 
-		<div class="mz-product-card__price">
-			<?php echo wp_kses_post( $product->get_price_html() ); ?>
-		</div>
+		<?php if ( ! $coming_soon ) : ?>
+			<div class="mz-product-card__price">
+				<?php echo wp_kses_post( $product->get_price_html() ); ?>
+				<?php if ( $discount > 0 ) : ?>
+					<small class="mz-product-card__discount"><?php echo esc_html( $discount ); ?>% off</small>
+				<?php endif; ?>
+			</div>
+
+			<?php if ( $rating > 0 ) : ?>
+				<div class="mz-product-card__rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %s out of 5', 'medzuro' ), $rating ) ); ?>">
+					<?php echo wp_kses_post( wc_get_rating_html( $rating, $reviews ) ); ?>
+					<small><?php echo esc_html( sprintf( _n( '%d review', '%d reviews', $reviews, 'medzuro' ), $reviews ) ); ?></small>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
 
 		<?php if ( $coming_soon ) : ?>
 			<a class="mz-product-card__button mz-product-card__button--coming-soon" href="<?php echo esc_url( $permalink ); ?>">

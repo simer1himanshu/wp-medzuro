@@ -81,10 +81,6 @@ $s = medzuro_home()['settings'];
 						?>
 						<li class="mz-home-product">
 							<a class="mz-home-product__media" href="<?php echo esc_url( $link ); ?>">
-								<?php if ( $discount > 0 ) : ?>
-									<span class="mz-home-sale"><?php echo esc_html( $discount ); ?>% off</span>
-								<?php endif; ?>
-
 								<?php if ( $product->get_image_id() ) : ?>
 									<?php
 									echo wp_get_attachment_image(
@@ -109,15 +105,20 @@ $s = medzuro_home()['settings'];
 									<?php echo esc_html( medzuro_field( 'serving', $s['product_meta'], $product->get_id() ) ); ?>
 								</span>
 
-								<?php if ( $s['show_ratings'] && ! $coming_soon ) : ?>
-									<span class="mz-home-rating" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'medzuro' ); ?>">
-										<span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small>(<?php echo esc_html( $reviews ); ?>)</small>
+								<?php if ( ! $coming_soon ) : ?>
+									<span class="mz-home-price">
+										<?php echo wp_kses_post( $product->get_price_html() ); ?>
+										<?php if ( $discount > 0 ) : ?>
+											<small class="mz-home-discount"><?php echo esc_html( $discount ); ?>% off</small>
+										<?php endif; ?>
 									</span>
-								<?php endif; ?>
 
-								<span class="mz-home-price<?php echo $coming_soon ? ' mz-home-price--coming-soon' : ''; ?>">
-									<?php echo $coming_soon ? esc_html__( 'Coming Soon', 'medzuro' ) : wp_kses_post( $product->get_price_html() ); ?>
-								</span>
+									<?php if ( $s['show_ratings'] ) : ?>
+										<span class="mz-home-rating" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'medzuro' ); ?>">
+											<span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small><?php echo esc_html( $reviews ); ?> <?php esc_html_e( 'reviews', 'medzuro' ); ?></small>
+										</span>
+									<?php endif; ?>
+								<?php endif; ?>
 
 								<?php if ( $coming_soon ) : ?>
 									<button class="mz-home-add" type="button" disabled><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></button>

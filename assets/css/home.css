@@ -133,29 +133,29 @@
 
   .mz-home-product {
     min-width:0; background:#fff; border:1px solid #dfe6ee; border-radius:8px; overflow:hidden;
-    display:flex; flex-direction:column; box-shadow:0 5px 18px rgba(11,27,51,.04);
+    display:flex; flex-direction:column; padding:16px; box-shadow:0 5px 18px rgba(11,27,51,.04);
   }
   .mz-home-product__media {
-    position:relative; display:grid; place-items:center; min-height:185px; padding:16px 16px 8px; background:#fff;
+    position:relative; display:grid; place-items:center; aspect-ratio:1 / 1; padding:0; overflow:hidden; border-radius:8px; background:#f5f7f4;
     text-decoration:none !important;
   }
-  .mz-home-product__img { width:100%; height:170px; object-fit:contain; display:block; }
-  .mz-home-product__body { padding:0 18px 18px; display:flex; flex-direction:column; gap:7px; flex:1; }
+  .mz-home-product__img { width:100%; height:100%; object-fit:contain; display:block; }
+  .mz-home-product__body { padding:18px 4px 0; display:flex; flex-direction:column; gap:9px; flex:1; }
   .mz-home-product__title {
-    min-height:36px; color:var(--mz-navy) !important; font-size:13px; line-height:1.35; font-weight:800;
+    min-height:48px; color:var(--mz-navy) !important; font-size:18px; line-height:1.3; font-weight:800;
     text-decoration:none !important;
   }
-  .mz-home-product__meta { color:#23324a; font-size:11px; font-weight:600; }
-  .mz-home-rating { display:inline-flex; align-items:center; gap:6px; color:#151515; line-height:1; font-size:12px; }
-  .mz-home-rating span { color:#101010; letter-spacing:0; font-size:12px; }
-  .mz-home-rating small { color:#14213c; font-size:11px; font-weight:700; }
-  .mz-home-price { display:flex; align-items:baseline; gap:9px; margin-top:2px; color:#182239; }
-  .mz-home-price--coming-soon { color:#002964; font-size:14px; font-weight:800; text-transform:uppercase; }
-  .mz-home-price strong { font-size:15px; font-weight:900; }
-  .mz-home-price s { color:#6f7783; font-size:12px; font-weight:600; }
+  .mz-home-product__meta { min-height:22px; color:#758174; font-size:15px; font-weight:500; }
+  .mz-home-rating { display:inline-flex; align-items:center; gap:8px; color:#002964; line-height:1; font-size:14px; }
+  .mz-home-rating span { color:#002964; letter-spacing:0; font-size:14px; }
+  .mz-home-rating small { color:#526074; font-size:13px; font-weight:500; }
+  .mz-home-price { display:flex; flex-wrap:wrap; align-items:baseline; gap:9px; min-height:26px; color:#182239; }
+  .mz-home-price strong, .mz-home-price .amount { font-size:18px; font-weight:900; }
+  .mz-home-price s, .mz-home-price del .amount { color:#9aa3ad; font-size:14px; font-weight:600; }
+  .mz-home-discount { padding:5px 8px; border-radius:8px; background:#edf1f6; color:#002964; font-size:12px; font-weight:800; }
   .mz-home-add {
-    margin-top:auto; width:100%; min-height:43px; display:flex; align-items:center; justify-content:center;
-    border:1px solid #7d875e; border-radius:4px; background:#fff; color:#111 !important; font-size:12px;
+    margin-top:auto; width:100%; min-height:48px; display:flex; align-items:center; justify-content:center;
+    border:1px solid #002964; border-radius:8px; background:#002964; color:#fff !important; font-size:14px;
     font-weight:900; text-transform:uppercase; letter-spacing:0; text-decoration:none !important;
   }
   button.mz-home-add { cursor:pointer; }
