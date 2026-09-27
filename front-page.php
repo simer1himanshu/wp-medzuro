@@ -228,7 +228,7 @@ $s = medzuro_home()['settings'];
 		</section>
 	<?php endif; ?>
 
-	<?php $reviews = medzuro_home_blocks( 'review' ); ?>
+	<?php $reviews = medzuro_managed_testimonials(); ?>
 	<?php if ( $reviews ) : ?>
 		<section class="page-width mz-home-reviews" aria-labelledby="mz-home-reviews-title">
 			<div class="mz-home-section-title">
@@ -254,7 +254,12 @@ $s = medzuro_home()['settings'];
 							</span>
 							<p><?php echo esc_html( $block['text'] ); ?></p>
 							<div class="mz-home-review__person">
-								<span class="mz-home-avatar mz-home-avatar--<?php echo esc_attr( $block['avatar'] ); ?>"></span>
+								<?php if ( ! empty( $block['photo'] ) ) : ?>
+									<img class="mz-home-avatar" src="<?php echo esc_url( $block['photo'] ); ?>"
+										alt="<?php echo esc_attr( $block['author'] ); ?>" loading="lazy" width="48" height="48">
+								<?php else : ?>
+									<span class="mz-home-avatar mz-home-avatar--<?php echo esc_attr( $block['avatar'] ); ?>"></span>
+								<?php endif; ?>
 								<strong><?php echo esc_html( $block['author'] ); ?><small><?php echo esc_html( $block['location'] ); ?></small></strong>
 							</div>
 						</li>
@@ -268,6 +273,47 @@ $s = medzuro_home()['settings'];
 			</button>
 		</section>
 	<?php endif; ?>
+
+	<?php
+	$blog_query = new WP_Query(
+		array(
+			'post_type'           => 'post',
+			'post_status'         => 'publish',
+			'posts_per_page'      => 3,
+			'ignore_sticky_posts' => true,
+		)
+	);
+	?>
+	<section class="page-width mz-home-blog" aria-labelledby="mz-home-blog-title">
+		<div class="mz-home-section-title">
+			<h2 id="mz-home-blog-title"><?php esc_html_e( 'Latest Wellness Articles', 'medzuro' ); ?></h2>
+		</div>
+		<?php if ( $blog_query->have_posts() ) : ?>
+			<div class="mz-home-blog__grid">
+				<?php while ( $blog_query->have_posts() ) : ?>
+					<?php $blog_query->the_post(); ?>
+					<article <?php post_class( 'mz-home-blog-card' ); ?>>
+						<a class="mz-home-blog-card__media" href="<?php the_permalink(); ?>" aria-label="<?php the_title_attribute(); ?>">
+							<?php if ( has_post_thumbnail() ) : ?>
+								<?php the_post_thumbnail( 'medium_large', array( 'loading' => 'lazy' ) ); ?>
+							<?php else : ?>
+								<span><?php medzuro_ref_icon( 'lab' ); ?></span>
+							<?php endif; ?>
+						</a>
+						<div class="mz-home-blog-card__body">
+							<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
+							<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+							<p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 20 ) ); ?></p>
+							<a class="mz-home-blog-card__link" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read article', 'medzuro' ); ?> <span aria-hidden="true">&rarr;</span></a>
+						</div>
+					</article>
+				<?php endwhile; ?>
+			</div>
+		<?php else : ?>
+			<p class="mz-home-blog__empty"><?php esc_html_e( 'Wellness articles are coming soon.', 'medzuro' ); ?></p>
+		<?php endif; ?>
+	</section>
+	<?php wp_reset_postdata(); ?>
 
 	<?php $help = medzuro_home_blocks( 'help' ); ?>
 	<?php if ( $help ) : ?>
@@ -287,7 +333,7 @@ $s = medzuro_home()['settings'];
 	<?php endif; ?>
 
 	<?php if ( $s['show_newsletter'] ) : ?>
-		<section class="page-width mz-home-newsletter" aria-label="<?php esc_attr_e( 'Subscribe to Medzuro updates', 'medzuro' ); ?>">
+		<section id="mz-newsletter" class="page-width mz-home-newsletter" aria-label="<?php esc_attr_e( 'Subscribe to Medzuro updates', 'medzuro' ); ?>">
 			<div class="mz-home-newsletter__panel">
 				<div class="mz-home-newsletter__copy">
 					<span class="mz-home-newsletter__icon" aria-hidden="true">
@@ -297,23 +343,32 @@ $s = medzuro_home()['settings'];
 				</div>
 
 				<?php
-				/**
-				 * Newsletter form.
-				 *
-				 * Shopify's {% form 'customer' %} posted to its customer
-				 * endpoint. Hook a mail plugin's shortcode here; the markup
-				 * below is inert until then.
-				 */
 				if ( has_action( 'medzuro_newsletter_form' ) ) {
 					do_action( 'medzuro_newsletter_form' );
 				} else {
+					$status = isset( $_GET['newsletter'] ) ? sanitize_key( wp_unslash( $_GET['newsletter'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$messages = array(
+						'success' => __( 'Thank you. You are now subscribed.', 'medzuro' ),
+						'exists'  => __( 'This email is already subscribed.', 'medzuro' ),
+						'invalid' => __( 'Please enter a valid email address.', 'medzuro' ),
+					);
 					?>
-					<form class="mz-home-newsletter__form" method="post" action="">
+					<div class="mz-home-newsletter__form-wrap">
+					<form class="mz-home-newsletter__form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<input type="hidden" name="action" value="medzuro_newsletter_subscribe">
+						<?php wp_nonce_field( 'medzuro_newsletter_subscribe', 'medzuro_newsletter_nonce' ); ?>
+						<label class="mz-home-newsletter__trap" aria-hidden="true">Company<input type="text" name="company" tabindex="-1" autocomplete="off"></label>
 						<label class="v-hidden" for="mz-newsletter-email"><?php esc_html_e( 'Email address', 'medzuro' ); ?></label>
 						<input id="mz-newsletter-email" type="email" name="email" autocomplete="email"
 							placeholder="<?php echo esc_attr( $s['newsletter_placeholder'] ); ?>" required>
 						<button type="submit"><?php echo esc_html( $s['newsletter_button'] ); ?></button>
 					</form>
+					<?php if ( isset( $messages[ $status ] ) ) : ?>
+						<p class="mz-home-newsletter__message mz-home-newsletter__message--<?php echo esc_attr( $status ); ?>" role="status">
+							<?php echo esc_html( $messages[ $status ] ); ?>
+						</p>
+					<?php endif; ?>
+					</div>
 					<?php
 				}
 				?>

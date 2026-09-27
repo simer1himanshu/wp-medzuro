@@ -56,7 +56,7 @@ function medzuro_content() {
 		'topbar' => array(
 			// settings.leftTxt / centerTxt / rightTxt — topbar was enabled.
 			'left'   => '',
-			'center' => 'Free delivery across Fiji on orders over $100',
+			'center' => 'Free shipping all over Fiji',
 			'right'  => '',
 		),
 

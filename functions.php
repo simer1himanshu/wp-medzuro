@@ -31,6 +31,7 @@ require_once get_template_directory() . '/inc/product.php';
 require_once get_template_directory() . '/inc/coming-soon-products.php';
 require_once get_template_directory() . '/inc/collection.php';
 require_once get_template_directory() . '/inc/home-content.php';
+require_once get_template_directory() . '/inc/home-admin.php';
 require_once get_template_directory() . '/inc/ref-icons.php';
 require_once get_template_directory() . '/inc/home.php';
 require_once get_template_directory() . '/inc/cart.php';
