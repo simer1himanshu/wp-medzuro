@@ -34,9 +34,12 @@ if ( ! $descriptor ) {
 	$descriptor = wp_trim_words( wp_strip_all_tags( $product->get_short_description() ), 7, '' );
 }
 ?>
-<article class="mz-product-card">
+<article class="mz-product-card<?php echo $coming_soon ? ' mz-product-card--coming-soon' : ''; ?>">
 	<a class="mz-product-card__media" href="<?php echo esc_url( $permalink ); ?>"
 		aria-label="<?php echo esc_attr( $product->get_name() ); ?>">
+		<?php if ( $coming_soon ) : ?>
+			<span class="mz-product-card__coming-badge"><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></span>
+		<?php endif; ?>
 		<?php if ( $card_image ) : ?>
 			<img src="<?php echo esc_url( $card_image ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>"
 				loading="lazy" width="1254" height="1254">

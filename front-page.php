@@ -77,8 +77,11 @@ $s = medzuro_home()['settings'];
 						$reviews  = ( ( $i + 1 ) * 16 ) + 48;
 						$link     = $product->get_permalink();
 						?>
-						<li class="mz-home-product">
+						<li class="mz-home-product<?php echo $coming_soon ? ' mz-home-product--coming-soon' : ''; ?>">
 							<a class="mz-home-product__media" href="<?php echo esc_url( $link ); ?>">
+								<?php if ( $coming_soon ) : ?>
+									<span class="mz-home-coming-badge"><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></span>
+								<?php endif; ?>
 								<?php if ( $card_image ) : ?>
 									<img class="mz-home-product__img" src="<?php echo esc_url( $card_image ); ?>"
 										alt="<?php echo esc_attr( $product->get_name() ); ?>" loading="lazy" width="1254" height="1254">
