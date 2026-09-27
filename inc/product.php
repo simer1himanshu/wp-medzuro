@@ -81,6 +81,24 @@ function medzuro_card_image_url( $product ) {
 }
 
 /**
+ * Keep the three live HolyOak product names concise across WooCommerce.
+ *
+ * @param string     $name    Existing product name.
+ * @param WC_Product $product Product being displayed.
+ * @return string
+ */
+function medzuro_live_product_name( $name, $product ) {
+	$names = array(
+		'holyoak-gummies' => 'Shilajit Gummies',
+		'holyoak-resin'   => 'Shilajit Resin',
+		'holyoak-capsules' => 'Shilajit Capsules',
+	);
+
+	return $names[ $product->get_slug() ] ?? $name;
+}
+add_filter( 'woocommerce_product_get_name', 'medzuro_live_product_name', 10, 2 );
+
+/**
  * Build the "Select Your Pack" options.
  *
  * The Shopify section had two mutually exclusive branches: real variants when
