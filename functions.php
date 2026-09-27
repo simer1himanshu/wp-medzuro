@@ -161,6 +161,10 @@ function medzuro_assets() {
 		medzuro_style( 'home' );
 		wp_enqueue_script( 'medzuro-home', get_template_directory_uri() . '/assets/js/home.js', array(), MEDZURO_VERSION, true );
 	}
+
+	if ( is_singular( 'post' ) || is_home() || is_category() || is_tag() ) {
+		medzuro_style( 'blog' );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'medzuro_assets' );
 

@@ -1,0 +1,47 @@
+.mz-article { padding: 54px 0 72px; }
+.mz-article__header,
+.mz-article__content { max-width: 860px; }
+.mz-article__back {
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 34px;
+  color: #002964; font-size: 13px; font-weight: 800; text-decoration: none;
+}
+.mz-article__eyebrow {
+  margin: 0 0 12px; color: #002964; font-size: 12px; font-weight: 800;
+  text-transform: uppercase;
+}
+.mz-article__header h1 {
+  max-width: 800px; margin: 0; color: #002964; font-size: 48px; line-height: 1.12;
+  font-weight: 800; letter-spacing: 0;
+}
+.mz-article__meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; color: #627086; font-size: 13px; }
+.mz-article__featured { max-width: 1120px; margin-top: 38px; }
+.mz-article__featured img { width: 100%; max-height: 620px; display: block; object-fit: cover; border-radius: 8px; }
+.mz-article__content { margin-top: 38px; color: #26364e; font-size: 17px; line-height: 1.8; }
+.mz-article__content > *:first-child { margin-top: 0; }
+.mz-article__content h2,
+.mz-article__content h3,
+.mz-article__content h4 { margin: 42px 0 14px; color: #002964; line-height: 1.25; letter-spacing: 0; }
+.mz-article__content h2 { font-size: 32px; }
+.mz-article__content h3 { font-size: 25px; }
+.mz-article__content p,
+.mz-article__content ul,
+.mz-article__content ol { margin: 0 0 22px; }
+.mz-article__content a { color: #002964; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.mz-article__content img { max-width: 100%; height: auto; border-radius: 8px; }
+.mz-article__content figure { margin: 32px 0; }
+.mz-article__content figcaption { margin-top: 8px; color: #6a7688; font-size: 13px; text-align: center; }
+.mz-article__content .wp-block-image.alignwide,
+.mz-article__content .wp-block-gallery.alignwide { width: min(1080px, calc(100vw - 48px)); max-width: none; margin-left: 50%; transform: translateX(-50%); }
+.mz-article__content .wp-block-image.alignfull,
+.mz-article__content .wp-block-gallery.alignfull { width: 100vw; max-width: none; margin-left: 50%; transform: translateX(-50%); }
+.mz-article__content blockquote { margin: 32px 0; padding: 4px 0 4px 24px; border-left: 4px solid #002964; color: #002964; font-size: 20px; font-weight: 600; }
+.mz-article__pages { margin-top: 34px; color: #002964; font-weight: 700; }
+
+@media (max-width: 768px) {
+  .mz-article { padding: 34px 0 50px; }
+  .mz-article__header h1 { font-size: 34px; }
+  .mz-article__featured { margin-top: 26px; }
+  .mz-article__content { margin-top: 28px; font-size: 16px; }
+  .mz-article__content h2 { font-size: 27px; }
+  .mz-article__content h3 { font-size: 22px; }
+}
