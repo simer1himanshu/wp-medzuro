@@ -73,7 +73,7 @@ while ( have_posts() ) :
 										data-mz-pdp-thumb data-image="<?php echo esc_url( $full ); ?>" data-alt="<?php echo esc_attr( $alt ); ?>"
 										aria-label="<?php echo esc_attr( sprintf( __( 'View image %d', 'medzuro' ), $index + 1 ) ); ?>"
 										<?php echo 0 === $index ? 'aria-current="true"' : ''; ?>>
-										<?php echo wp_get_attachment_image( $attachment_id, 'woocommerce_gallery_thumbnail', false, array( 'loading' => 'lazy' ) ); ?>
+										<?php echo wp_get_attachment_image( $attachment_id, 'medium', false, array( 'loading' => 'lazy' ) ); ?>
 									</button>
 								<?php endforeach; ?>
 							</div>
