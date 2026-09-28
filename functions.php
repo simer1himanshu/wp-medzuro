@@ -151,6 +151,12 @@ function medzuro_assets() {
 				'errorText'    => __( 'We could not add this item. Please try again.', 'medzuro' ),
 			)
 		);
+
+		// $product isn't populated yet at this point in the request — the
+		// single-product template sets the global later, in its own loop.
+		if ( comments_open( get_queried_object_id() ) && get_option( 'thread_comments' ) ) {
+			wp_enqueue_script( 'comment-reply' );
+		}
 	}
 
 	if ( function_exists( 'is_woocommerce' ) && ( is_shop() || is_product_taxonomy() ) ) {
