@@ -1,11 +1,8 @@
 /* Medzuro product page.
 
-   Ported from the inline <script> in sections/medzuro-product-page.liquid.
-   The gallery, quantity stepper and pack-selector behaviour are unchanged;
-   what differs is what a pack selection writes into the form. Shopify posted a
-   single `id` field, whereas WooCommerce needs variation_id plus one
-   attribute_* field per attribute, so the radio carries them as data and this
-   script copies them into the hidden inputs. */
+   Gallery, quantity stepper, share button and option cards. The option cards
+   do not submit anything themselves: they set WooCommerce's hidden attribute
+   <select>, and Woo's variation script resolves variation_id from it. */
 
 (function () {
   'use strict';
@@ -16,108 +13,136 @@
 
     /* Gallery */
     var mainImage = root.querySelector('.mz-pdp-main-image');
-    var thumbs = root.querySelectorAll('[data-mz-pdp-thumb]');
+    var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-mz-pdp-thumb]'));
+    var thumbList = root.querySelector('[data-mz-pdp-thumbs]');
+    var current = 0;
 
-    thumbs.forEach(function (thumb) {
-      thumb.addEventListener('click', function () {
-        thumbs.forEach(function (item) {
-          item.classList.remove('is-active');
+    function show(index) {
+      if (!thumbs.length) return;
+      current = (index + thumbs.length) % thumbs.length;
+      var thumb = thumbs[current];
+
+      thumbs.forEach(function (item) {
+        item.classList.remove('is-active');
+        item.removeAttribute('aria-current');
+      });
+      thumb.classList.add('is-active');
+      thumb.setAttribute('aria-current', 'true');
+
+      if (mainImage && thumb.dataset.image) {
+        mainImage.src = thumb.dataset.image;
+        mainImage.removeAttribute('srcset');
+        mainImage.removeAttribute('sizes');
+        mainImage.alt = thumb.dataset.alt || '';
+      }
+
+      if (thumbList) {
+        thumbList.scrollTo({
+          top: thumb.offsetTop - (thumbList.clientHeight - thumb.offsetHeight) / 2,
+          left: thumb.offsetLeft - (thumbList.clientWidth - thumb.offsetWidth) / 2,
+          behavior: 'smooth'
         });
-        thumb.classList.add('is-active');
+      }
+    }
 
-        if (mainImage && thumb.dataset.image) {
-          mainImage.src = thumb.dataset.image;
-          mainImage.removeAttribute('srcset');
-          mainImage.removeAttribute('sizes');
-          mainImage.alt = thumb.dataset.alt || '';
-        }
+    thumbs.forEach(function (thumb, index) {
+      thumb.addEventListener('click', function () {
+        show(index);
       });
     });
 
-    /* Quantity stepper */
-    var qty = root.querySelector('input[name="quantity"]');
-    var minus = root.querySelector('[data-mz-pdp-minus]');
-    var plus = root.querySelector('[data-mz-pdp-plus]');
+    function on(selector, handler) {
+      var el = root.querySelector(selector);
+      if (el) el.addEventListener('click', handler);
+    }
 
-    if (qty && minus && plus) {
-      minus.addEventListener('click', function () {
-        qty.value = Math.max(1, parseInt(qty.value || '1', 10) - 1);
-      });
-      plus.addEventListener('click', function () {
-        qty.value = parseInt(qty.value || '1', 10) + 1;
+    on('[data-mz-pdp-prev]', function () { show(current - 1); });
+    on('[data-mz-pdp-next]', function () { show(current + 1); });
+    on('[data-mz-pdp-thumbs-prev]', function () { show(current - 1); });
+    on('[data-mz-pdp-thumbs-next]', function () { show(current + 1); });
+
+    /* Quantity stepper */
+    var qty = root.querySelector('.mz-pdp-purchase input.qty');
+
+    function step(delta) {
+      if (!qty) return;
+      var min = parseFloat(qty.min) || 1;
+      var max = parseFloat(qty.max) || Infinity;
+      var next = (parseFloat(qty.value) || min) + delta;
+      qty.value = Math.min(max, Math.max(min, next));
+      qty.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    on('[data-mz-pdp-minus]', function () { step(-1); });
+    on('[data-mz-pdp-plus]', function () { step(1); });
+
+    /* Share */
+    var share = root.querySelector('[data-mz-pdp-share]');
+    if (share) {
+      share.addEventListener('click', function () {
+        var data = { title: share.dataset.title, url: share.dataset.url };
+
+        if (navigator.share) {
+          navigator.share(data).catch(function () {});
+          return;
+        }
+
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(data.url).then(function () {
+            var done = share.querySelector('[data-mz-pdp-share-done]');
+            if (!done) return;
+            done.hidden = false;
+            setTimeout(function () { done.hidden = true; }, 2000);
+          });
+        }
       });
     }
 
-    /* Pack selector */
+    /* Option cards */
     var price = root.querySelector('[data-mz-pdp-price]');
     var compare = root.querySelector('[data-mz-pdp-compare]');
+    var saveLine = root.querySelector('[data-mz-pdp-save-line]');
     var save = root.querySelector('[data-mz-pdp-save]');
-    var savingLine = root.querySelector('[data-mz-pdp-saving-line]');
-    var addButton = root.querySelector('.mz-pdp-add');
-    var variationInput = root.querySelector('[data-mz-pdp-variation]');
-    var packs = root.querySelectorAll('[data-mz-pdp-pack]');
+    var discount = root.querySelector('[data-mz-pdp-discount]');
+    var badge = root.querySelector('[data-mz-pdp-badge]');
+    var stock = root.querySelector('[data-mz-pdp-stock]');
 
-    function applyVariation(pack) {
-      if (variationInput) {
-        variationInput.value = pack.dataset.variation || '';
-      }
-
-      var attributes = {};
-      try {
-        attributes = JSON.parse(pack.dataset.attributes || '{}') || {};
-      } catch (e) {
-        attributes = {};
-      }
-
-      Object.keys(attributes).forEach(function (name) {
-        var field = root.querySelector('[data-mz-pdp-attribute="' + name + '"]');
-        if (field) field.value = attributes[name];
-      });
-    }
-
-    packs.forEach(function (pack) {
-      pack.addEventListener('change', function () {
-        root.querySelectorAll('.mz-pdp-pack').forEach(function (item) {
-          item.classList.remove('is-selected');
+    root.querySelectorAll('[data-mz-pdp-option]').forEach(function (option) {
+      option.addEventListener('change', function () {
+        root.querySelectorAll('.mz-pdp-option').forEach(function (card) {
+          card.classList.remove('is-selected');
         });
+        option.closest('.mz-pdp-option').classList.add('is-selected');
 
-        var label = pack.closest('.mz-pdp-pack');
-        if (label) label.classList.add('is-selected');
+        var hasDiscount = parseInt(option.dataset.discount, 10) > 0;
+        var available = option.dataset.available === 'true';
 
-        if (qty && pack.dataset.quantity) qty.value = pack.dataset.quantity;
-        if (price && pack.dataset.price) price.textContent = pack.dataset.price;
-
-        applyVariation(pack);
-
+        if (price) price.textContent = option.dataset.price;
         if (compare) {
-          compare.hidden = !pack.dataset.compare;
-          compare.textContent = pack.dataset.compare || '';
+          compare.textContent = option.dataset.compare;
+          compare.hidden = !hasDiscount;
+        }
+        if (save) save.textContent = option.dataset.save;
+        if (discount) discount.textContent = option.dataset.discount;
+        if (saveLine) saveLine.hidden = !hasDiscount;
+        if (badge) {
+          badge.textContent = '-' + option.dataset.discount + '%';
+          badge.hidden = !hasDiscount;
+        }
+        if (stock) {
+          stock.textContent = available ? stock.dataset.in : stock.dataset.out;
+          stock.className = available ? 'is-in-stock' : 'is-out-of-stock';
         }
 
-        if (save) {
-          if (pack.dataset.save) {
-            save.hidden = false;
-            save.textContent = 'SAVE ' + pack.dataset.save;
-            if (savingLine) {
-              savingLine.textContent = 'You are saving ' + pack.dataset.save + ' on this order.';
-            }
-          } else {
-            save.hidden = true;
-            save.textContent = '';
-            if (savingLine) {
-              savingLine.textContent = 'Ask us about current bundle savings.';
-            }
-          }
-        }
+        var select = root.querySelector('.mz-pdp-purchase select[name="' + option.dataset.attribute + '"]');
+        if (!select) return;
 
-        if (addButton) {
-          var available = pack.dataset.available === 'true';
-          addButton.disabled = !available;
-
-          var labelText = addButton.querySelector('span');
-          if (labelText) {
-            labelText.textContent = available ? 'Add To Cart' : 'Sold Out';
-          }
+        select.value = option.value;
+        // Woo's variation form listens through jQuery.
+        if (window.jQuery) {
+          window.jQuery(select).trigger('change');
+        } else {
+          select.dispatchEvent(new Event('change', { bubbles: true }));
         }
       });
     });

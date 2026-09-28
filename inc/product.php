@@ -39,6 +39,25 @@ function medzuro_field( $key, $default = '', $post_id = null ) {
  * @return array{current:string,compare:string,discount:int}
  */
 function medzuro_card_pricing( $product ) {
+	$numbers = medzuro_price_numbers( $product );
+
+	return array(
+		'current'  => wc_price( $numbers['current'] ),
+		'compare'  => wc_price( $numbers['compare'] ),
+		'discount' => $numbers['discount'],
+	);
+}
+
+/**
+ * Raw selling, compare-at and discount figures behind medzuro_card_pricing().
+ *
+ * Shared with the product page so the discount a shopper saw on the card is
+ * the one they see after clicking through.
+ *
+ * @param WC_Product $product Product or variation.
+ * @return array{current:float,compare:float,discount:int}
+ */
+function medzuro_price_numbers( $product ) {
 	$current = (float) $product->get_price();
 	$regular = (float) $product->get_regular_price();
 
@@ -51,11 +70,153 @@ function medzuro_card_pricing( $product ) {
 	}
 
 	return array(
-		'current'  => wc_price( $current ),
-		'compare'  => wc_price( $compare ),
+		'current'  => $current,
+		'compare'  => $compare,
 		'discount' => $discount,
 	);
 }
+
+/**
+ * Format an amount as plain text, for data attributes and textContent.
+ *
+ * @param float $amount Amount.
+ * @return string
+ */
+function medzuro_price_text( $amount ) {
+	return html_entity_decode( wp_strip_all_tags( wc_price( $amount ) ), ENT_QUOTES, 'UTF-8' );
+}
+
+/**
+ * Price block values for the product page: selling, compare-at, saving.
+ *
+ * @param WC_Product $product Product or variation.
+ * @return array{price:string,compare:string,save:string,discount:int}
+ */
+function medzuro_pdp_price( $product ) {
+	$numbers = medzuro_price_numbers( $product );
+
+	return array(
+		'price'    => medzuro_price_text( $numbers['current'] ),
+		'compare'  => medzuro_price_text( $numbers['compare'] ),
+		'save'     => medzuro_price_text( $numbers['compare'] - $numbers['current'] ),
+		'discount' => $numbers['discount'],
+	);
+}
+
+/**
+ * Option cards for a variable product with a single attribute (e.g. Weight).
+ *
+ * The cards drive WooCommerce's own variation form: picking one sets the
+ * hidden attribute <select> and Woo's variation script resolves the
+ * variation_id, so validation and stock checks stay Woo's. Products with more
+ * than one attribute return null and keep the stock dropdowns.
+ *
+ * @param WC_Product $product Product being displayed.
+ * @return array{attribute:string,label:string,selected:string,cards:array}|null
+ */
+function medzuro_pdp_variation_cards( $product ) {
+	if ( ! $product->is_type( 'variable' ) ) {
+		return null;
+	}
+
+	$attributes = $product->get_variation_attributes();
+
+	if ( 1 !== count( $attributes ) ) {
+		return null;
+	}
+
+	$taxonomy = (string) array_key_first( $attributes );
+	$field    = 'attribute_' . sanitize_title( $taxonomy );
+	$defaults = $product->get_default_attributes();
+	$selected = (string) ( $defaults[ sanitize_title( $taxonomy ) ] ?? '' );
+	$cards    = array();
+
+	foreach ( $product->get_children() as $variation_id ) {
+		$variation = wc_get_product( $variation_id );
+
+		if ( ! $variation || ! $variation->variation_is_visible() ) {
+			continue;
+		}
+
+		$value = (string) ( $variation->get_variation_attributes()[ $field ] ?? '' );
+
+		// An "Any weight" variation cannot be shown as one card.
+		if ( '' === $value ) {
+			return null;
+		}
+
+		$term  = taxonomy_exists( $taxonomy ) ? get_term_by( 'slug', $value, $taxonomy ) : false;
+		$title = $term ? $term->name : $value;
+
+		$cards[] = array_merge(
+			medzuro_pdp_price( $variation ),
+			array(
+				'value'     => $value,
+				'title'     => $title,
+				'available' => $variation->is_in_stock(),
+			)
+		);
+	}
+
+	if ( ! $cards ) {
+		return null;
+	}
+
+	$values = wp_list_pluck( $cards, 'value' );
+
+	if ( ! in_array( $selected, $values, true ) ) {
+		$in_stock = wp_list_filter( $cards, array( 'available' => true ) );
+		$selected = $in_stock ? reset( $in_stock )['value'] : $cards[0]['value'];
+	}
+
+	return array(
+		'attribute' => $field,
+		'label'     => wc_attribute_label( $taxonomy, $product ),
+		'selected'  => $selected,
+		'cards'     => $cards,
+	);
+}
+
+/**
+ * Preselect the carded option in Woo's hidden dropdown.
+ *
+ * Without this the form loads with no variation chosen and the add-to-cart
+ * button disabled, while the cards already show one as selected.
+ *
+ * @param array $args wc_dropdown_variation_attribute_options() arguments.
+ * @return array
+ */
+function medzuro_pdp_preselect_variation( $args ) {
+	if ( ! empty( $args['selected'] ) || ! is_product() || empty( $args['product'] ) ) {
+		return $args;
+	}
+
+	$cards = medzuro_pdp_variation_cards( $args['product'] );
+
+	if ( $cards ) {
+		$args['selected'] = $cards['selected'];
+	}
+
+	return $args;
+}
+add_filter( 'woocommerce_dropdown_variation_attribute_options_args', 'medzuro_pdp_preselect_variation' );
+
+/**
+ * Wrap the product page quantity field in − / + buttons.
+ */
+function medzuro_pdp_qty_minus() {
+	if ( is_product() ) {
+		echo '<button type="button" class="mz-pdp-qty-btn" data-mz-pdp-minus aria-label="' . esc_attr__( 'Decrease quantity', 'medzuro' ) . '">&minus;</button>';
+	}
+}
+add_action( 'woocommerce_before_quantity_input_field', 'medzuro_pdp_qty_minus' );
+
+function medzuro_pdp_qty_plus() {
+	if ( is_product() ) {
+		echo '<button type="button" class="mz-pdp-qty-btn" data-mz-pdp-plus aria-label="' . esc_attr__( 'Increase quantity', 'medzuro' ) . '">+</button>';
+	}
+}
+add_action( 'woocommerce_after_quantity_input_field', 'medzuro_pdp_qty_plus' );
 
 /**
  * Return the coordinated square catalog image for a product when available.

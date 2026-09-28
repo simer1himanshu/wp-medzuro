@@ -53,6 +53,7 @@ function medzuro_icon_paths() {
 		'lock'   => '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
 		'close'  => '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
 		'chev'   => '<path d="m6 9 6 6 6-6"/>',
+		'share'  => '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5"/><path d="m8.2 13.2 7.6 4.5"/>',
 	);
 }
 
