@@ -33,8 +33,15 @@ $description     = $product->get_description();
 $hero_banner_id  = absint( get_post_meta( $product->get_id(), 'medzuro_pdp_hero_banner', true ) );
 $hero_banner_url = $hero_banner_id ? wp_get_attachment_image_url( $hero_banner_id, 'large' ) : '';
 $brand           = medzuro_product_brand( $product );
-$is_holyoak      = false !== stripos( $brand, 'holyoak' )
-	|| false !== stripos( $product->get_name(), 'holyoak' )
+
+// get_name() runs the medzuro_live_product_name filter, which shortens the
+// three live HolyOak products to "Shilajit …" — so it no longer contains
+// "holyoak" and can't be used to detect them. get_the_title() is the raw,
+// unfiltered post title instead. The slug catches the rest (every HolyOak
+// product, live or coming soon, is slugged holyoak-*).
+$is_holyoak = false !== stripos( $brand, 'holyoak' )
+	|| false !== stripos( $product->get_slug(), 'holyoak' )
+	|| false !== stripos( get_the_title( $product->get_id() ), 'holyoak' )
 	|| has_term( 'holyoak', 'product_cat', $product->get_id() );
 ?>
 
