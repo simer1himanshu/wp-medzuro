@@ -254,6 +254,7 @@ function medzuro_pdp_banner_url( $product ) {
 	$images = array(
 		'holyoak-capsules' => 'holyoak-capsules-banner.jpg',
 		'holyoak-resin'    => 'holyoak-resin-banner.jpg',
+		'holyoak-gummies'  => 'holyoak-gummies-banner.jpg',
 	);
 	$filename = $images[ $product->get_slug() ] ?? '';
 
