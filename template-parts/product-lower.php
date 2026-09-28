@@ -9,6 +9,10 @@
  * exists in assets/css/product-page.css from that earlier build, so nothing
  * here is new styling — only the honest, generic copy is new.
  *
+ * The "HolyOak around the world" banner reads its copy and stats/flags from
+ * medzuro_home() — the same source the front page uses — so there is one
+ * place to update that content rather than two.
+ *
  * Deliberately no reviews or testimonial section here: WooCommerce's own
  * review system (shown in the buybox and via woocommerce_template_single_meta)
  * is the only reviews surface this theme uses, so nothing here is ever
@@ -108,6 +112,45 @@ $is_holyoak      = false !== stripos( $brand, 'holyoak' )
 		</div>
 	</div>
 </div>
+
+<?php
+$home  = medzuro_home()['settings'];
+$stats = medzuro_home_blocks( 'stat' );
+$flags = medzuro_home_blocks( 'flag' );
+?>
+<?php if ( ! empty( $home['show_world'] ) && ( $stats || $flags ) ) : ?>
+<div class="mz-pdp-section mz-pdp-world">
+	<div class="mz-pdp-shell">
+		<div class="mz-pdp-world__panel">
+			<div class="mz-pdp-world__copy">
+				<p class="mz-pdp-kicker"><?php echo esc_html( $home['world_kicker'] ); ?></p>
+				<h2><?php echo esc_html( $home['world_heading'] ); ?><br><?php echo esc_html( $home['world_heading_2'] ); ?> <span><?php echo esc_html( $home['world_accent'] ); ?></span></h2>
+			</div>
+
+			<?php if ( $stats ) : ?>
+				<div class="mz-pdp-world__stats" role="list">
+					<?php foreach ( $stats as $block ) : ?>
+						<div role="listitem">
+							<?php medzuro_ref_icon( $block['icon'] ); ?>
+							<strong><?php echo esc_html( $block['value'] ); ?></strong><small><?php echo esc_html( $block['label'] ); ?></small>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $flags ) : ?>
+				<ul class="mz-pdp-flags" role="list" aria-label="<?php esc_attr_e( 'International regions', 'medzuro' ); ?>">
+					<?php foreach ( $flags as $block ) : ?>
+						<li>
+							<span class="mz-flag mz-flag--<?php echo esc_attr( $block['flag'] ); ?>"></span><small><?php echo esc_html( $block['label'] ); ?></small>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+	</div>
+</div>
+<?php endif; ?>
 
 <div class="mz-pdp-section mz-pdp-purity">
 	<div class="mz-pdp-shell mz-pdp-purity__inner">
