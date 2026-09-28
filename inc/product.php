@@ -253,6 +253,7 @@ function medzuro_card_image_url( $product ) {
 function medzuro_pdp_banner_url( $product ) {
 	$images = array(
 		'holyoak-capsules' => 'holyoak-capsules-banner.jpg',
+		'holyoak-resin'    => 'holyoak-resin-banner.jpg',
 	);
 	$filename = $images[ $product->get_slug() ] ?? '';
 
