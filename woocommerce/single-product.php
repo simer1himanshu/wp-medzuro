@@ -51,7 +51,7 @@ while ( have_posts() ) :
 		<div class="mz-pdp-shell">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Home', 'medzuro' ); ?></a>
 			<span class="mz-pdp-breadcrumb__sep" aria-hidden="true"></span>
-			<span aria-current="page"><?php the_title(); ?></span>
+			<span aria-current="page"><?php echo esc_html( $product->get_name() ); ?></span>
 		</div>
 	</nav>
 
@@ -120,7 +120,7 @@ while ( have_posts() ) :
 
 			<section class="mz-pdp-buybox" aria-labelledby="mz-product-title">
 				<div class="mz-pdp-title-row">
-					<h1 id="mz-product-title"><?php the_title(); ?></h1>
+					<h1 id="mz-product-title"><?php echo esc_html( $product->get_name() ); ?></h1>
 					<button class="mz-pdp-share" type="button" data-mz-pdp-share
 						data-title="<?php echo esc_attr( $product->get_name() ); ?>" data-url="<?php echo esc_url( get_permalink() ); ?>"
 						aria-label="<?php esc_attr_e( 'Share this product', 'medzuro' ); ?>">

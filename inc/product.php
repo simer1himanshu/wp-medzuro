@@ -260,6 +260,28 @@ function medzuro_live_product_name( $name, $product ) {
 add_filter( 'woocommerce_product_get_name', 'medzuro_live_product_name', 10, 2 );
 
 /**
+ * Use the same display name in the browser tab on product pages.
+ *
+ * The filter above only reaches code that asks WooCommerce for the name; the
+ * document title reads the raw post title.
+ *
+ * @param array $parts Document title parts.
+ * @return array
+ */
+function medzuro_live_product_document_title( $parts ) {
+	if ( function_exists( 'is_product' ) && is_product() ) {
+		$product = wc_get_product( get_queried_object_id() );
+
+		if ( $product ) {
+			$parts['title'] = $product->get_name();
+		}
+	}
+
+	return $parts;
+}
+add_filter( 'document_title_parts', 'medzuro_live_product_document_title' );
+
+/**
  * Build the "Select Your Pack" options.
  *
  * The Shopify section had two mutually exclusive branches: real variants when
