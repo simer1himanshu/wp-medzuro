@@ -30,8 +30,7 @@ if ( ! $product ) {
 }
 
 $description     = $product->get_description();
-$hero_banner_id  = absint( get_post_meta( $product->get_id(), 'medzuro_pdp_hero_banner', true ) );
-$hero_banner_url = $hero_banner_id ? wp_get_attachment_image_url( $hero_banner_id, 'large' ) : '';
+$hero_banner_url = medzuro_pdp_banner_url( $product );
 $brand           = medzuro_product_brand( $product );
 
 // get_name() runs the medzuro_live_product_name filter, which shortens the
@@ -85,14 +84,6 @@ $is_holyoak = false !== stripos( $brand, 'holyoak' )
 	</div>
 </section>
 
-<?php if ( $hero_banner_url ) : ?>
-<div class="mz-pdp-section mz-pdp-hero-banner">
-	<div class="mz-pdp-shell">
-		<img src="<?php echo esc_url( $hero_banner_url ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>" loading="lazy">
-	</div>
-</div>
-<?php endif; ?>
-
 <?php if ( $is_holyoak ) : ?>
 <div class="mz-pdp-section mz-pdp-usage">
 	<div class="mz-pdp-shell">
@@ -119,6 +110,15 @@ $is_holyoak = false !== stripos( $brand, 'holyoak' )
 		</div>
 	</div>
 </div>
+
+<?php // Sits between the usage steps and the world banner — not a top-of-page hero — and, being inside this $is_holyoak block, only for HolyOak products. Every product with a banner today is HolyOak; a non-HolyOak product using the medzuro_pdp_hero_banner fallback would need its own slot if that comes up. ?>
+<?php if ( $hero_banner_url ) : ?>
+<div class="mz-pdp-section mz-pdp-hero-banner">
+	<div class="mz-pdp-shell">
+		<img src="<?php echo esc_url( $hero_banner_url ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>" loading="lazy">
+	</div>
+</div>
+<?php endif; ?>
 
 <?php
 $home  = medzuro_home()['settings'];

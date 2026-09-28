@@ -242,6 +242,30 @@ function medzuro_card_image_url( $product ) {
 }
 
 /**
+ * A wide marketing banner for the product page, for products supplied with
+ * one, keyed by slug like medzuro_card_image_url() above. Falls back to the
+ * medzuro_pdp_hero_banner post meta set through a custom field, so either
+ * path works.
+ *
+ * @param WC_Product $product Product being displayed.
+ * @return string Banner image URL, or an empty string.
+ */
+function medzuro_pdp_banner_url( $product ) {
+	$images = array(
+		'holyoak-capsules' => 'holyoak-capsules-banner.jpg',
+	);
+	$filename = $images[ $product->get_slug() ] ?? '';
+
+	if ( $filename ) {
+		return get_template_directory_uri() . '/assets/img/' . $filename;
+	}
+
+	$meta_id = absint( get_post_meta( $product->get_id(), 'medzuro_pdp_hero_banner', true ) );
+
+	return $meta_id ? (string) wp_get_attachment_image_url( $meta_id, 'large' ) : '';
+}
+
+/**
  * Keep the three live HolyOak product names concise across WooCommerce.
  *
  * @param string     $name    Existing product name.
