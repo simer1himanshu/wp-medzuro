@@ -114,8 +114,6 @@ while ( have_posts() ) :
 						<?php endif; ?>
 					</div>
 				</div>
-
-				<?php get_template_part( 'template-parts/product-trust-row' ); ?>
 			</section>
 
 			<section class="mz-pdp-buybox" aria-labelledby="mz-product-title">

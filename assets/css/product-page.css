@@ -115,25 +115,6 @@
     object-fit: contain;
   }
 
-  .mz-pdp-trust-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  .mz-pdp-trust-row div {
-    min-height: 84px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border: 1px solid var(--mz-line);
-    border-radius: 8px;
-    background: #fff;
-  }
-
-  .mz-pdp-trust-row svg,
   .mz-pdp-loved svg,
   .mz-pdp-freebie svg {
     width: 26px;
@@ -144,13 +125,6 @@
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
-
-  .mz-pdp-trust-row span {
-    color: var(--mz-navy);
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1.35;
   }
 
   .mz-pdp-buybox {
@@ -1082,7 +1056,6 @@
       padding: 20px;
     }
 
-    .mz-pdp-trust-row,
     .mz-pdp-benefits,
     .mz-pdp-pack-grid,
     .mz-pdp-qty-row,
