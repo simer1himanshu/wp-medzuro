@@ -21,7 +21,6 @@ while ( have_posts() ) :
 
 	$rating       = (float) $product->get_average_rating();
 	$review_count = (int) $product->get_review_count();
-	$reviews_open = comments_open( $product->get_id() );
 	$short_desc   = $product->get_short_description();
 	$coming_soon  = medzuro_is_coming_soon( $product );
 	$in_stock     = $product->is_in_stock();
@@ -130,24 +129,11 @@ while ( have_posts() ) :
 
 				<div class="mz-pdp-meta-row">
 					<?php if ( $review_count > 0 ) : ?>
-						<?php
-						$rating_label = sprintf(
-							/* translators: %s: average rating out of 5. */
-							__( 'Rated %s out of 5', 'medzuro' ),
-							number_format_i18n( $rating, 1 )
-						);
-						$rating_inner = sprintf(
-							'<span class="mz-pdp-stars" style="--mz-rating: %1$s%%" role="img" aria-label="%2$s"></span><span>%3$s</span>',
-							esc_attr( round( $rating / 5 * 100 ) ),
-							esc_attr( $rating_label ),
-							esc_html( sprintf( _n( '%d review', '%d reviews', $review_count, 'medzuro' ), $review_count ) )
-						);
-						?>
-						<?php if ( $reviews_open ) : ?>
-							<a class="mz-pdp-rating" href="#reviews"><?php echo $rating_inner; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped pieces above. ?></a>
-						<?php else : ?>
-							<div class="mz-pdp-rating"><?php echo $rating_inner; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped pieces above. ?></div>
-						<?php endif; ?>
+						<div class="mz-pdp-rating">
+							<span class="mz-pdp-stars" style="--mz-rating: <?php echo esc_attr( round( $rating / 5 * 100 ) ); ?>%"
+								role="img" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %s out of 5', 'medzuro' ), number_format_i18n( $rating, 1 ) ) ); ?>"></span>
+							<span><?php echo esc_html( sprintf( _n( '%d review', '%d reviews', $review_count, 'medzuro' ), $review_count ) ); ?></span>
+						</div>
 					<?php endif; ?>
 
 					<?php if ( ! $coming_soon ) : ?>
@@ -222,7 +208,6 @@ while ( have_posts() ) :
 	</div>
 
 	<?php get_template_part( 'template-parts/product-lower' ); ?>
-	<?php get_template_part( 'template-parts/product-reviews' ); ?>
 </section>
 
 	<?php
