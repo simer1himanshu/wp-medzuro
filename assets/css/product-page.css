@@ -1214,6 +1214,21 @@
   .mz-pdp-purchase .mz-pdp-buy-now:hover { background:#111; color:#fff; }
   .mz-pdp-purchase .mz-pdp-buy-now.is-loading { opacity:.7; cursor:wait; }
 
+  /* WooCommerce's own stylesheet styles these with selectors like
+     `.woocommerce button.button.alt` (its purple) and
+     `.woocommerce div.product form.cart div.quantity`, which outrank the
+     rules above. Match them with enough specificity to win. */
+  .mz-pdp .mz-pdp-purchase form.cart::before,
+  .mz-pdp .mz-pdp-purchase form.cart::after { display:none; }
+  .mz-pdp .mz-pdp-purchase form.cart div.quantity { float:none; margin:0; }
+  .mz-pdp .mz-pdp-purchase form.cart div.quantity .qty { width:100%; height:100%; padding:0; }
+  .mz-pdp .mz-pdp-purchase form.cart button.single_add_to_cart_button,
+  .mz-pdp .mz-pdp-purchase form.cart button.mz-pdp-buy-now { float:none; border:1px solid var(--mz-navy); border-radius:0; background:var(--mz-navy); color:#fff; }
+  .mz-pdp .mz-pdp-purchase form.cart button.single_add_to_cart_button:hover,
+  .mz-pdp .mz-pdp-purchase form.cart button.mz-pdp-buy-now:hover { border-color:#001a40; background:#001a40; color:#fff; }
+  .mz-pdp .mz-pdp-purchase form.cart button.single_add_to_cart_button.disabled,
+  .mz-pdp .mz-pdp-purchase form.cart button.single_add_to_cart_button:disabled { border-color:var(--mz-navy); background:var(--mz-navy); color:#fff; opacity:.55; }
+
   /* Variable products without option cards keep Woo's dropdowns. */
   .mz-pdp-purchase .variations { width:100%; margin:0; border-collapse:collapse; }
   .mz-pdp-purchase .variations th,
