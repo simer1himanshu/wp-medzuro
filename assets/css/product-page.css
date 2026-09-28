@@ -1225,11 +1225,7 @@
   .mz-pdp-coming-soon strong { color:#002964; font-size:18px; }
   .mz-pdp-coming-soon span { color:#506079; font-size:14px; }
 
-  .mz-pdp-assurances { display:grid; gap:0; margin:32px 0 0; padding:0; border-top:1px solid var(--mz-line); list-style:none; }
-  .mz-pdp-assurances li { display:grid; grid-template-columns:24px 1fr; gap:12px; padding:14px 0; border-bottom:1px solid var(--mz-line); color:#506079; font-size:12px; line-height:1.45; }
-  .mz-pdp-assurances svg { margin-top:2px; color:#002964; }
-  .mz-pdp-assurances strong { display:block; margin-bottom:2px; color:var(--mz-navy); font-size:13px; }
-  .mz-pdp-meta { margin-top:16px; color:#687792; font-size:12px; }
+  .mz-pdp-meta { margin-top:32px; padding-top:24px; border-top:1px solid var(--mz-line); color:#687792; font-size:12px; }
   .mz-pdp-meta .product_meta { display:grid; gap:5px; }
   .mz-pdp-meta a { color:var(--mz-blue); }
 

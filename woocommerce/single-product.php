@@ -202,12 +202,6 @@ while ( have_posts() ) :
 					</div>
 				<?php endif; ?>
 
-				<ul class="mz-pdp-assurances" role="list">
-					<li><?php medzuro_icon( 'shield', 20 ); ?><span><strong><?php esc_html_e( 'Secure payment', 'medzuro' ); ?></strong><?php esc_html_e( 'Protected checkout with trusted payment methods.', 'medzuro' ); ?></span></li>
-					<li><?php medzuro_icon( 'truck', 20 ); ?><span><strong><?php esc_html_e( 'Delivery across Fiji', 'medzuro' ); ?></strong><?php esc_html_e( 'Delivery timing is confirmed during fulfilment.', 'medzuro' ); ?></span></li>
-					<li><?php medzuro_icon( 'pin', 20 ); ?><span><strong><?php esc_html_e( 'Local pickup', 'medzuro' ); ?></strong><?php esc_html_e( 'Pickup can be arranged from our Suva location.', 'medzuro' ); ?></span></li>
-				</ul>
-
 				<div class="mz-pdp-meta"><?php woocommerce_template_single_meta(); ?></div>
 			</section>
 		</div>
