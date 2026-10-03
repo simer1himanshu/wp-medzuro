@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 $savings  = medzuro_cart_savings();
 $delivery = apply_filters(
 	'medzuro_cart_delivery_note',
-	'Same-day delivery across most of Suva. 2-3 business days Fiji-wide.'
+	'Free DHL Express delivery Fiji-wide in 3-7 working days, or collect from Nakasi, Suva.'
 );
 $secure   = apply_filters(
 	'medzuro_cart_secure_note',

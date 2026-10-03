@@ -186,7 +186,10 @@ function medzuro_mpaisa_init_gateway_class() {
 		 * @return string Order total formatted as the API expects, e.g. "10.50".
 		 */
 		private static function format_amount( WC_Order $order ) {
-			return number_format( (float) $order->get_total(), 2, '.', '' );
+			// Pickup orders with the "10% to reserve" option charge only the
+			// deposit (see inc/checkout-flow.php); everything else, the total.
+			$amount = (float) apply_filters( 'medzuro_mpaisa_charge_amount', (float) $order->get_total(), $order );
+			return number_format( $amount, 2, '.', '' );
 		}
 
 		/**
@@ -446,7 +449,12 @@ function medzuro_mpaisa_init_gateway_class() {
 
 			$order->add_order_note( 'M-PAiSA status check: ' . $status . ' — ' . wp_remote_retrieve_body( $response ) );
 
-			if ( 'SUCCESS' === $status && ! $order->is_paid() ) {
+			if ( 'SUCCESS' === $status && ! $order->is_paid() && ! $order->has_status( 'deposit-paid' ) ) {
+				if ( function_exists( 'medzuro_order_is_deposit' ) && medzuro_order_is_deposit( $order ) ) {
+					$order->update_status( 'deposit-paid', 'Deposit confirmed from a manual M-PAiSA status check (requestID ' . $rid . ').' );
+					wc_maybe_reduce_stock_levels( $order->get_id() );
+					return;
+				}
 				$order->payment_complete();
 				$order->add_order_note( 'Marked paid from a manual M-PAiSA status check (requestID ' . $rid . ').' );
 			}
@@ -661,7 +669,7 @@ function medzuro_mpaisa_handle_callback( WP_REST_Request $request ) {
 	}
 
 	// Already handled (e.g. the customer's browser hit this URL twice).
-	if ( $order->is_paid() ) {
+	if ( $order->is_paid() || $order->has_status( 'deposit-paid' ) ) {
 		wp_safe_redirect( $order->get_checkout_order_received_url() );
 		exit;
 	}
@@ -702,8 +710,16 @@ function medzuro_mpaisa_handle_callback( WP_REST_Request $request ) {
 	// 101/112 both read as "success" in the API guide's response-code table
 	// (§5.0): 101 SUCCESS, 112 Transaction completed successfully.
 	if ( in_array( $rcode, array( '101', '112' ), true ) ) {
-		$order->payment_complete();
-		$order->add_order_note( 'M-PAiSA payment confirmed, signature verified (requestID ' . $rid . ', rCode ' . $rcode . ').' );
+		if ( function_exists( 'medzuro_order_is_deposit' ) && medzuro_order_is_deposit( $order ) ) {
+			// 10% pickup deposit: not fully paid, so not payment_complete().
+			$order->set_transaction_id( $rid );
+			$order->add_order_note( 'M-PAiSA deposit of $' . $stored_amt . ' confirmed, signature verified (requestID ' . $rid . ', rCode ' . $rcode . '). Balance due at pickup.' );
+			$order->update_status( 'deposit-paid' );
+			wc_maybe_reduce_stock_levels( $order->get_id() );
+		} else {
+			$order->payment_complete( $rid );
+			$order->add_order_note( 'M-PAiSA payment confirmed, signature verified (requestID ' . $rid . ', rCode ' . $rcode . ').' );
+		}
 		$order->save();
 
 		wp_safe_redirect( $order->get_checkout_order_received_url() );

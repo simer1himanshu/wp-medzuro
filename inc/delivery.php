@@ -1,18 +1,75 @@
 <?php
 /**
- * Delivery or pickup: shipping method, checkout fields and payment rules.
+ * Delivery or pickup: the shipping method and its helpers.
  *
- * Implements the client's "Initial Flow" (choose DHL Express home delivery or
- * Nakasi store pickup) and the rules that follow from that choice. Home
- * delivery is online payment only; pickup keeps every enabled gateway.
+ * Implements the client's "Initial Flow": the customer chooses DHL Express
+ * home delivery or store pickup in Nakasi, Suva. Every other shipping rate is
+ * removed so the cart and checkout always show exactly those two choices.
  *
- * After deploying, add the "Medzuro Delivery / Pickup" method to the Fiji
- * shipping zone in WooCommerce > Settings > Shipping.
+ * The method can optionally be added to the Fiji shipping zone
+ * (WooCommerce > Settings > Shipping) to change its cost, delivery time or
+ * pickup address. If it isn't added, the same two rates are created with the
+ * defaults below, so the flow works without any admin setup.
  *
  * @package Medzuro
  */
 
 defined( 'ABSPATH' ) || exit;
+
+/**
+ * Default settings for the two rates.
+ *
+ * @return array
+ */
+function medzuro_delivery_defaults() {
+	return array(
+		'dhl_enabled'    => 'yes',
+		'dhl_cost'       => '0',
+		'dhl_eta'        => __( '3-7 working days', 'medzuro' ),
+		'pickup_enabled' => 'yes',
+		'pickup_address' => __( 'Nakasi, Suva', 'medzuro' ),
+		'pickup_note'    => __( 'Collect from our location', 'medzuro' ),
+	);
+}
+
+/**
+ * Build the DHL + pickup rate arguments from a settings array.
+ *
+ * @param array  $s       Settings (see medzuro_delivery_defaults()).
+ * @param string $id_base Rate id prefix, e.g. "medzuro_delivery:3".
+ * @return array[] Rate args keyed by "dhl" / "pickup".
+ */
+function medzuro_delivery_rate_args( $s, $id_base ) {
+	$s     = wp_parse_args( $s, medzuro_delivery_defaults() );
+	$rates = array();
+
+	if ( 'yes' === $s['dhl_enabled'] ) {
+		$rates['dhl'] = array(
+			'id'        => $id_base . ':dhl',
+			'label'     => __( 'Home Delivery (DHL Express)', 'medzuro' ),
+			'cost'      => (float) $s['dhl_cost'],
+			'meta_data' => array(
+				'type' => 'delivery',
+				'note' => $s['dhl_eta'],
+			),
+		);
+	}
+
+	if ( 'yes' === $s['pickup_enabled'] ) {
+		$rates['pickup'] = array(
+			'id'        => $id_base . ':pickup',
+			'label'     => __( 'Store Pickup', 'medzuro' ),
+			'cost'      => 0,
+			'meta_data' => array(
+				'type'    => 'pickup',
+				'note'    => $s['pickup_address'],
+				'subnote' => $s['pickup_note'],
+			),
+		);
+	}
+
+	return $rates;
+}
 
 /**
  * Shipping method that offers DHL home delivery and store pickup rates.
@@ -40,6 +97,8 @@ function medzuro_register_delivery_method() {
 		}
 
 		public function init_instance_form_fields() {
+			$d = medzuro_delivery_defaults();
+
 			$this->instance_form_fields = array(
 				'title'          => array(
 					'title'   => __( 'Method title', 'medzuro' ),
@@ -50,61 +109,47 @@ function medzuro_register_delivery_method() {
 					'title'   => __( 'Home delivery', 'medzuro' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Offer DHL Express home delivery', 'medzuro' ),
-					'default' => 'yes',
+					'default' => $d['dhl_enabled'],
 				),
 				'dhl_cost'       => array(
 					'title'       => __( 'DHL cost', 'medzuro' ),
 					'type'        => 'price',
 					'description' => __( 'Leave at 0 for free shipping.', 'medzuro' ),
-					'default'     => '0',
+					'default'     => $d['dhl_cost'],
 					'desc_tip'    => true,
 				),
 				'dhl_eta'        => array(
 					'title'   => __( 'DHL delivery time', 'medzuro' ),
 					'type'    => 'text',
-					'default' => __( '3-7 working days', 'medzuro' ),
+					'default' => $d['dhl_eta'],
 				),
 				'pickup_enabled' => array(
 					'title'   => __( 'Pickup', 'medzuro' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Offer store pickup', 'medzuro' ),
-					'default' => 'yes',
+					'default' => $d['pickup_enabled'],
 				),
 				'pickup_address' => array(
 					'title'   => __( 'Pickup location', 'medzuro' ),
 					'type'    => 'text',
-					'default' => __( 'Nakasi, Suva', 'medzuro' ),
+					'default' => $d['pickup_address'],
+				),
+				'pickup_note'    => array(
+					'title'   => __( 'Pickup note', 'medzuro' ),
+					'type'    => 'text',
+					'default' => $d['pickup_note'],
 				),
 			);
 		}
 
 		public function calculate_shipping( $package = array() ) {
-			if ( 'yes' === $this->get_option( 'dhl_enabled', 'yes' ) ) {
-				$this->add_rate(
-					array(
-						'id'        => $this->get_rate_id( 'dhl' ),
-						'label'     => __( 'Home Delivery (DHL Express)', 'medzuro' ),
-						'cost'      => (float) $this->get_option( 'dhl_cost', 0 ),
-						'meta_data' => array(
-							'type' => 'delivery',
-							'note' => $this->get_option( 'dhl_eta' ),
-						),
-					)
-				);
+			$settings = array();
+			foreach ( array_keys( medzuro_delivery_defaults() ) as $key ) {
+				$settings[ $key ] = $this->get_option( $key );
 			}
 
-			if ( 'yes' === $this->get_option( 'pickup_enabled', 'yes' ) ) {
-				$this->add_rate(
-					array(
-						'id'        => $this->get_rate_id( 'pickup' ),
-						'label'     => __( 'Store Pickup', 'medzuro' ),
-						'cost'      => 0,
-						'meta_data' => array(
-							'type' => 'pickup',
-							'note' => $this->get_option( 'pickup_address' ),
-						),
-					)
-				);
+			foreach ( medzuro_delivery_rate_args( $settings, $this->get_rate_id() ) as $args ) {
+				$this->add_rate( $args );
 			}
 		}
 	}
@@ -122,11 +167,69 @@ function medzuro_add_delivery_method( $methods ) {
 add_filter( 'woocommerce_shipping_methods', 'medzuro_add_delivery_method' );
 
 /**
+ * Show exactly the two Medzuro rates, whatever else the zone is set up with.
+ *
+ * The live store had "Free shipping" and "Flat rate $10" in its zone. The
+ * client's flow has only DHL delivery and pickup, so other rates are dropped,
+ * and the two rates are created with defaults when the zone doesn't have the
+ * Medzuro method yet.
+ *
+ * @param WC_Shipping_Rate[] $rates   Rates for the package.
+ * @param array              $package Package.
+ * @return WC_Shipping_Rate[]
+ */
+function medzuro_only_delivery_rates( $rates, $package ) {
+	$country = isset( $package['destination']['country'] ) ? $package['destination']['country'] : '';
+	if ( $country && 'FJ' !== $country ) {
+		return $rates;
+	}
+
+	$ours = array_filter( $rates, fn( $rate ) => 'medzuro_delivery' === $rate->get_method_id() );
+	if ( $ours ) {
+		return $ours;
+	}
+
+	$out = array();
+	foreach ( medzuro_delivery_rate_args( array(), 'medzuro_delivery' ) as $args ) {
+		$rate = new WC_Shipping_Rate( $args['id'], $args['label'], $args['cost'], array(), 'medzuro_delivery' );
+		foreach ( $args['meta_data'] as $k => $v ) {
+			$rate->add_meta_data( $k, $v );
+		}
+		$out[ $args['id'] ] = $rate;
+	}
+
+	return $out;
+}
+add_filter( 'woocommerce_package_rates', 'medzuro_only_delivery_rates', 100, 2 );
+
+/**
+ * Whether a rate id is the pickup rate.
+ *
+ * @param string $rate_id Rate id.
+ * @return bool
+ */
+function medzuro_rate_is_pickup( $rate_id ) {
+	return is_string( $rate_id ) && 0 === strpos( $rate_id, 'medzuro_delivery' ) && ':pickup' === substr( $rate_id, -7 );
+}
+
+/**
  * Whether the customer has chosen pickup. Null when nothing is chosen yet.
+ *
+ * Prefers the rate posted with the current request (checkout submit or
+ * order review refresh) over the session, which can lag by one request.
  *
  * @return bool|null
  */
 function medzuro_chosen_is_pickup() {
+	// phpcs:disable WordPress.Security.NonceVerification.Missing
+	if ( isset( $_POST['shipping_method'] ) && is_array( $_POST['shipping_method'] ) ) {
+		$posted = wc_clean( wp_unslash( reset( $_POST['shipping_method'] ) ) );
+		if ( is_string( $posted ) && 0 === strpos( $posted, 'medzuro_delivery' ) ) {
+			return medzuro_rate_is_pickup( $posted );
+		}
+	}
+	// phpcs:enable
+
 	if ( ! function_exists( 'WC' ) || ! WC()->session ) {
 		return null;
 	}
@@ -138,42 +241,24 @@ function medzuro_chosen_is_pickup() {
 		return null;
 	}
 
-	return false !== strpos( $rate, 'pickup' );
+	return medzuro_rate_is_pickup( $rate );
 }
 
 /**
- * Show each rate as a two-line choice: title plus time/location and price.
+ * Whether an order is a pickup order.
  *
- * @param string          $label  Default label.
- * @param WC_Shipping_Rate $method Rate.
- * @return string
+ * @param WC_Order $order Order.
+ * @return bool
  */
-function medzuro_shipping_rate_label( $label, $method ) {
-	if ( 0 !== strpos( $method->get_id(), 'medzuro_delivery' ) ) {
-		return $label;
+function medzuro_order_is_pickup( $order ) {
+	// Rate meta ("type") is copied onto the order's shipping line item.
+	foreach ( $order->get_shipping_methods() as $item ) {
+		if ( 'pickup' === $item->get_meta( 'type' ) || 'local_pickup' === $item->get_method_id() || 'pickup_location' === $item->get_method_id() ) {
+			return true;
+		}
 	}
-
-	$meta = $method->get_meta_data();
-	$note = isset( $meta['note'] ) ? $meta['note'] : '';
-	$cost = (float) $method->get_cost();
-	$out  = '<span class="mz-rate"><strong class="mz-rate__title">' . esc_html( $method->get_label() ) . '</strong>';
-
-	if ( $note ) {
-		$out .= '<small class="mz-rate__note">' . esc_html( $note ) . '</small>';
-	}
-
-	$out .= '<span class="mz-rate__price">'
-		. ( $cost > 0 ? wp_kses_post( wc_price( $cost ) ) : esc_html__( 'FREE', 'medzuro' ) )
-		. '</span></span>';
-
-	return $out;
+	return false;
 }
-add_filter( 'woocommerce_cart_shipping_method_full_label', 'medzuro_shipping_rate_label', 10, 2 );
-
-/**
- * Always show a customer a shipping choice, never an auto-picked one hidden in totals.
- */
-add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_true' );
 
 /**
  * Fiji divisions for the Province field.
@@ -193,126 +278,20 @@ function medzuro_fiji_states( $states ) {
 add_filter( 'woocommerce_states', 'medzuro_fiji_states' );
 
 /**
- * Checkout fields: Fiji address labels, +679 mobile and contact preference.
+ * Fiji has no postcodes; never ask for one.
  *
- * @param array $fields Checkout fields.
+ * @param array $locale Country locales.
  * @return array
  */
-function medzuro_checkout_fields( $fields ) {
-	$b = &$fields['billing'];
-
-	$b['billing_phone']['label']       = __( 'Mobile number', 'medzuro' );
-	$b['billing_phone']['placeholder'] = '+679 1234567';
-	$b['billing_phone']['required']    = true;
-
-	$b['billing_address_1']['label']       = __( 'House/Unit No. and Street', 'medzuro' );
-	$b['billing_address_1']['placeholder'] = __( '12 Main Street', 'medzuro' );
-	$b['billing_address_2']['label']       = __( 'Area/Suburb', 'medzuro' );
-	$b['billing_address_2']['placeholder'] = __( 'Nakasi', 'medzuro' );
-	$b['billing_address_2']['required']    = true;
-	$b['billing_state']['label']           = __( 'Province', 'medzuro' );
-
-	$b['billing_contact_method'] = array(
-		'type'     => 'radio',
-		'label'    => __( 'Preferred contact method', 'medzuro' ),
-		'required' => true,
-		'default'  => 'viber',
-		'class'    => array( 'form-row-wide', 'mz-contact-method' ),
-		'options'  => array(
-			'viber' => __( 'Viber', 'medzuro' ),
-			'phone' => __( 'Phone', 'medzuro' ),
-			'email' => __( 'Email', 'medzuro' ),
-		),
-		'priority' => 125,
+function medzuro_fiji_locale( $locale ) {
+	$locale['FJ']['postcode'] = array(
+		'required' => false,
+		'hidden'   => true,
 	);
-
-	$fields['order']['order_comments']['label']       = __( 'Delivery instructions (optional)', 'medzuro' );
-	$fields['order']['order_comments']['placeholder'] = __( 'e.g. Leave with reception, call before delivery', 'medzuro' );
-
-	return $fields;
+	$locale['FJ']['state']    = array(
+		'label'    => __( 'Province', 'medzuro' ),
+		'required' => true,
+	);
+	return $locale;
 }
-add_filter( 'woocommerce_checkout_fields', 'medzuro_checkout_fields' );
-
-/**
- * Pickup orders need no street address; delivery orders do.
- *
- * @param array $fields Checkout fields.
- * @return array
- */
-function medzuro_relax_address_for_pickup( $fields ) {
-	if ( true === medzuro_chosen_is_pickup() ) {
-		foreach ( array( 'billing_address_1', 'billing_address_2', 'billing_city', 'billing_state', 'billing_postcode' ) as $key ) {
-			if ( isset( $fields['billing'][ $key ] ) ) {
-				$fields['billing'][ $key ]['required'] = false;
-			}
-		}
-	}
-	return $fields;
-}
-add_filter( 'woocommerce_checkout_fields', 'medzuro_relax_address_for_pickup', 20 );
-
-/**
- * Validate the Fiji mobile number (7 digits, optional +679).
- */
-function medzuro_validate_checkout() {
-	$phone  = isset( $_POST['billing_phone'] ) ? wc_clean( wp_unslash( $_POST['billing_phone'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-	$digits = preg_replace( '/\D+/', '', $phone );
-
-	if ( '' !== $digits && 0 === strpos( $digits, '679' ) ) {
-		$digits = substr( $digits, 3 );
-	}
-
-	if ( '' !== $phone && 7 !== strlen( $digits ) ) {
-		wc_add_notice( __( 'Please enter a valid Fiji mobile number, e.g. +679 1234567.', 'medzuro' ), 'error' );
-	}
-}
-add_action( 'woocommerce_checkout_process', 'medzuro_validate_checkout' );
-
-/**
- * Save the contact preference on the order.
- *
- * @param WC_Order $order Order.
- */
-function medzuro_save_contact_method( $order ) {
-	$method = isset( $_POST['billing_contact_method'] ) ? sanitize_key( wp_unslash( $_POST['billing_contact_method'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-
-	if ( in_array( $method, array( 'viber', 'phone', 'email' ), true ) ) {
-		$order->update_meta_data( '_billing_contact_method', $method );
-	}
-}
-add_action( 'woocommerce_checkout_create_order', 'medzuro_save_contact_method' );
-
-/**
- * Show the contact preference in the admin order screen.
- *
- * @param WC_Order $order Order.
- */
-function medzuro_show_contact_method( $order ) {
-	$method = $order->get_meta( '_billing_contact_method' );
-	if ( $method ) {
-		echo '<p><strong>' . esc_html__( 'Preferred contact:', 'medzuro' ) . '</strong> ' . esc_html( ucfirst( $method ) ) . '</p>';
-	}
-}
-add_action( 'woocommerce_admin_order_data_after_billing_address', 'medzuro_show_contact_method' );
-
-/**
- * Payment rules: home delivery is online payment only.
- *
- * Pickup keeps every enabled gateway so pay-in-store or reserve options can
- * be added later. Offline gateways are removed for delivery orders.
- *
- * @param array $gateways Available gateways.
- * @return array
- */
-function medzuro_gateways_by_delivery( $gateways ) {
-	if ( is_admin() || false !== medzuro_chosen_is_pickup() ) {
-		return $gateways;
-	}
-
-	foreach ( array( 'cod', 'cheque', 'bacs' ) as $offline ) {
-		unset( $gateways[ $offline ] );
-	}
-
-	return $gateways;
-}
-add_filter( 'woocommerce_available_payment_gateways', 'medzuro_gateways_by_delivery' );
+add_filter( 'woocommerce_get_country_locale', 'medzuro_fiji_locale' );

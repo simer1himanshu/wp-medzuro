@@ -96,3 +96,17 @@ function medzuro_checkout_badge() {
 	medzuro_seller_badge( 'compact' );
 }
 add_action( 'woocommerce_checkout_before_order_review', 'medzuro_checkout_badge', 5 );
+
+/**
+ * "Your Cart (N items)" heading above the cart table.
+ */
+function medzuro_cart_heading() {
+	$count = WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
+	printf(
+		'<h1 class="mz-cart-ttl">%1$s <span>(%2$s)</span></h1>',
+		esc_html__( 'Your Cart', 'medzuro' ),
+		/* translators: %d: item count */
+		esc_html( sprintf( _n( '%d item', '%d items', $count, 'medzuro' ), $count ) )
+	);
+}
+add_action( 'woocommerce_before_cart', 'medzuro_cart_heading', 5 );
