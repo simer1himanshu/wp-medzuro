@@ -1,0 +1,17 @@
+/* Delivery / pickup choice cards (cart + checkout) */
+.woocommerce-shipping-methods { list-style: none; margin: 0; padding: 0; }
+.woocommerce-shipping-methods li { margin: 0 0 10px; }
+.woocommerce-shipping-methods li label {
+	display: block; cursor: pointer; padding: 14px 14px 14px 40px; position: relative;
+	border: 1.5px solid #d9e2ef; border-radius: 10px; background: #fff;
+}
+.woocommerce-shipping-methods li input[type="radio"] { position: absolute; left: 14px; top: 18px; margin: 0; }
+.woocommerce-shipping-methods li input[type="radio"]:checked + label { border-color: #1d6fd8; background: #f2f7ff; }
+.mz-rate { display: grid; gap: 2px; }
+.mz-rate__title { font-weight: 600; }
+.mz-rate__note { color: #5b6b82; }
+.mz-rate__price { font-weight: 600; color: #1a7f3c; }
+
+/* Preferred contact method */
+.mz-contact-method .woocommerce-input-wrapper { display: flex; gap: 20px; flex-wrap: wrap; }
+.mz-contact-method .woocommerce-input-wrapper label { display: inline-flex; align-items: center; gap: 6px; margin: 0; }

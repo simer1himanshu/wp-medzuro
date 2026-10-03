@@ -35,6 +35,7 @@ require_once get_template_directory() . '/inc/home-admin.php';
 require_once get_template_directory() . '/inc/ref-icons.php';
 require_once get_template_directory() . '/inc/home.php';
 require_once get_template_directory() . '/inc/cart.php';
+require_once get_template_directory() . '/inc/delivery.php';
 require_once get_template_directory() . '/inc/mpaisa-gateway.php';
 
 /**
@@ -151,6 +152,10 @@ function medzuro_assets() {
 				'errorText'    => __( 'We could not add this item. Please try again.', 'medzuro' ),
 			)
 		);
+	}
+
+	if ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() ) ) {
+		medzuro_style( 'cart-checkout' );
 	}
 
 	if ( function_exists( 'is_woocommerce' ) && ( is_shop() || is_product_taxonomy() ) ) {
