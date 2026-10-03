@@ -53,10 +53,23 @@ function medzuro_cart_checkout_shortcode() {
 }
 
 /**
- * Checkout step script.
+ * Checkout scripts: WooCommerce's classic checkout.js plus the step script.
+ *
+ * The checkout page still contains the Checkout block in the editor, and
+ * WooCommerce dequeues the classic "wc-checkout" script whenever that block
+ * is processed. Both scripts are therefore (re-)enqueued late, and again in
+ * the footer, so the classic form always has its JavaScript.
  */
 function medzuro_checkout_assets() {
 	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() || is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) {
+		return;
+	}
+
+	if ( wp_script_is( 'wc-checkout', 'registered' ) ) {
+		wp_enqueue_script( 'wc-checkout' );
+	}
+
+	if ( wp_script_is( 'medzuro-checkout-steps', 'enqueued' ) ) {
 		return;
 	}
 
@@ -65,7 +78,7 @@ function medzuro_checkout_assets() {
 	wp_enqueue_script(
 		'medzuro-checkout-steps',
 		get_template_directory_uri() . '/assets/js/checkout-steps.js',
-		array( 'jquery', 'wc-checkout' ),
+		array( 'jquery' ),
 		file_exists( $path ) ? filemtime( $path ) : MEDZURO_VERSION,
 		true
 	);
@@ -80,7 +93,34 @@ function medzuro_checkout_assets() {
 		)
 	);
 }
-add_action( 'wp_enqueue_scripts', 'medzuro_checkout_assets', 30 );
+add_action( 'wp_enqueue_scripts', 'medzuro_checkout_assets', 999 );
+add_action( 'wp_footer', 'medzuro_checkout_assets', 1 );
+
+/**
+ * Stop the Checkout/Cart blocks' scripts from dequeuing the classic ones.
+ *
+ * Runs after WooCommerce's block classes have hooked their dequeue callback
+ * (priority 20) and removes it, since those blocks are never rendered here.
+ */
+function medzuro_keep_classic_scripts() {
+	if ( ! function_exists( 'is_checkout' ) || ! ( is_checkout() || is_cart() ) ) {
+		return;
+	}
+
+	global $wp_filter;
+	if ( empty( $wp_filter['wp_enqueue_scripts'] ) ) {
+		return;
+	}
+
+	foreach ( (array) $wp_filter['wp_enqueue_scripts']->callbacks as $priority => $callbacks ) {
+		foreach ( $callbacks as $cb ) {
+			if ( is_array( $cb['function'] ) && is_object( $cb['function'][0] ) && 'dequeue_woocommerce_core_scripts' === $cb['function'][1] ) {
+				remove_action( 'wp_enqueue_scripts', $cb['function'], $priority );
+			}
+		}
+	}
+}
+add_action( 'wp_enqueue_scripts', 'medzuro_keep_classic_scripts', 15 );
 
 /**
  * Shipping goes to the billing (delivery) address; there is no second form.
@@ -97,6 +137,21 @@ add_filter( 'default_checkout_billing_country', fn() => 'FJ' );
  */
 add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_true' );
 add_filter( 'woocommerce_shipping_show_shipping_calculator', '__return_false' );
+
+/**
+ * Tag cart packages so rates cached in customers' sessions before this flow
+ * went live are recalculated (and pass through medzuro_only_delivery_rates).
+ *
+ * @param array $packages Packages.
+ * @return array
+ */
+function medzuro_shipping_package_version( $packages ) {
+	foreach ( $packages as $i => $package ) {
+		$packages[ $i ]['medzuro_rates'] = 2;
+	}
+	return $packages;
+}
+add_filter( 'woocommerce_cart_shipping_packages', 'medzuro_shipping_package_version' );
 
 /* -------------------------------------------------------------------------
  * Fields

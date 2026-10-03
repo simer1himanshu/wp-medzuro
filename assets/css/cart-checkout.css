@@ -317,3 +317,12 @@
   .mz-track__dhl .button { margin-left: 0; width: 100%; }
   .mz-cart-page table.cart thead { display: none; }
 }
+
+/* Override WooCommerce's default float/48% widths on the cart totals. */
+.mz-cart-page .cart-collaterals,
+.mz-cart-page .cart-collaterals .cart_totals,
+.mz-cart-page .cart-collaterals .cross-sells { float: none; width: 100%; }
+.mz-cart-page .cart_totals table.shop_table { width: 100%; table-layout: auto; }
+.mz-cart-page .cart_totals .mz-ship-choose td { width: 100%; }
+.mz-cart-page .woocommerce-cart-form { min-width: 0; }
+.mz-checkout-page .woocommerce-form-coupon-toggle + .checkout_coupon { display: none; }
