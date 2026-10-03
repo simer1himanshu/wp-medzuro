@@ -905,3 +905,101 @@ function medzuro_current_rates() {
 
 	return array( $rates, isset( $chosen[0] ) ? $chosen[0] : '' );
 }
+
+/* -------------------------------------------------------------------------
+ * Payment method cards (design 7A/7B: logo, name, "Pay with ... wallet")
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Card copy for gateways shown on the payment step.
+ *
+ * Drop the official logo the client received from Vodafone at
+ * assets/img/mpaisa-logo.svg (or .png) and it is used automatically;
+ * until then a plain red tile with a phone icon is shown.
+ *
+ * @return array
+ */
+function medzuro_gateway_cards() {
+	return array(
+		'mpaisa'          => array(
+			'name' => __( 'M-PAiSA', 'medzuro' ),
+			'sub'  => __( 'Pay with M-PAiSA wallet', 'medzuro' ),
+			'logo' => 'mpaisa-logo',
+			'icon' => 'phone',
+			'tone' => 'red',
+		),
+		'medzuro_reserve' => array(
+			'name' => __( 'Reserve without payment', 'medzuro' ),
+			'sub'  => __( 'Pay when you collect', 'medzuro' ),
+			'logo' => '',
+			'icon' => 'calendar',
+			'tone' => 'navy',
+		),
+	);
+}
+
+/**
+ * True only while WooCommerce prints the payment method list, so the card
+ * markup never ends up in the order's saved payment method title.
+ *
+ * @param bool|null $set New state.
+ * @return bool
+ */
+function medzuro_rendering_payment_list( $set = null ) {
+	static $on = false;
+	if ( null !== $set ) {
+		$on = (bool) $set;
+	}
+	return $on;
+}
+add_action( 'woocommerce_review_order_before_payment', fn() => medzuro_rendering_payment_list( true ) );
+add_action( 'woocommerce_review_order_after_payment', fn() => medzuro_rendering_payment_list( false ) );
+
+/**
+ * Gateway title as a card: logo tile, name and one-line subtitle.
+ *
+ * @param string $title Title.
+ * @param string $id    Gateway id.
+ * @return string
+ */
+function medzuro_gateway_card_title( $title, $id = '' ) {
+	$cards = medzuro_gateway_cards();
+	if ( ! medzuro_rendering_payment_list() || ! isset( $cards[ $id ] ) ) {
+		return $title;
+	}
+
+	$c    = $cards[ $id ];
+	$logo = '';
+	if ( $c['logo'] ) {
+		foreach ( array( 'svg', 'png', 'jpg' ) as $ext ) {
+			$rel = '/assets/img/' . $c['logo'] . '.' . $ext;
+			if ( file_exists( get_theme_file_path( $rel ) ) ) {
+				$logo = '<img src="' . esc_url( get_theme_file_uri( $rel ) ) . '" alt="" />';
+				break;
+			}
+		}
+	}
+	if ( ! $logo ) {
+		ob_start();
+		medzuro_icon( $c['icon'], 22 );
+		$logo = ob_get_clean();
+	}
+
+	return '<span class="mz-gw mz-gw--' . esc_attr( $c['tone'] ) . '">'
+		. '<span class="mz-gw__logo' . ( false !== strpos( $logo, '<img' ) ? ' mz-gw__logo--img' : '' ) . '">' . $logo . '</span>'
+		. '<span class="mz-gw__text"><strong>' . esc_html( $c['name'] ) . '</strong><small>' . esc_html( $c['sub'] ) . '</small></span>'
+		. '</span>';
+}
+add_filter( 'woocommerce_gateway_title', 'medzuro_gateway_card_title', 20, 2 );
+
+/**
+ * The card already says it all; drop the separate description box.
+ *
+ * @param string $description Description.
+ * @param string $id          Gateway id.
+ * @return string
+ */
+function medzuro_gateway_card_description( $description, $id = '' ) {
+	return medzuro_rendering_payment_list() && isset( medzuro_gateway_cards()[ $id ] ) ? '' : $description;
+}
+add_filter( 'woocommerce_gateway_description', 'medzuro_gateway_card_description', 20, 2 );

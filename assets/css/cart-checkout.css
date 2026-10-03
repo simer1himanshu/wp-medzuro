@@ -408,3 +408,17 @@
 .mz-receipt__steps li { counter-increment: mzstep; display: flex; gap: 10px; color: var(--co-muted); font-size: 14px; }
 .mz-receipt__steps li::before { content: counter(mzstep); flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--co-navy); color: #fff; font-size: 12px; font-weight: 700; }
 .mz-receipt__next { background: var(--co-wash); border-radius: 10px; padding: 14px; }
+
+/* Payment method cards: radio, logo tile, name + subtitle (design 7A/7B) */
+.mz-co #payment li.wc_payment_method { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #fff; }
+.mz-co #payment li.wc_payment_method > input { margin: 0; flex: none; width: 18px; height: 18px; }
+.mz-co #payment li.wc_payment_method > label { flex: 1; margin: 0; }
+.mz-co #payment li.wc_payment_method:has(input:checked) { border-color: var(--co-red); background: #fff5f6; }
+.mz-gw { display: flex; align-items: center; gap: 12px; }
+.mz-gw__logo { flex: none; width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center; color: #fff; background: var(--co-red); }
+.mz-gw--navy .mz-gw__logo { background: var(--co-navy); }
+.mz-gw__logo--img { background: #fff; border: 1px solid var(--co-line); overflow: hidden; }
+.mz-gw__logo img { width: 100%; height: 100%; object-fit: contain; }
+.mz-gw__text { display: grid; gap: 1px; }
+.mz-gw__text strong { font-size: 15px; color: var(--mz-heading, #111); }
+.mz-gw__text small { font-size: 13px; font-weight: 400; color: var(--co-muted); }
