@@ -105,6 +105,8 @@
     var save = root.querySelector('[data-mz-pdp-save]');
     var discount = root.querySelector('[data-mz-pdp-discount]');
     var badge = root.querySelector('[data-mz-pdp-badge]');
+    var compareWrap = root.querySelector('[data-mz-pdp-compare-wrap]');
+    var savePill = root.querySelector('[data-mz-pdp-save-pill]');
     var stock = root.querySelector('[data-mz-pdp-stock]');
 
     root.querySelectorAll('[data-mz-pdp-option]').forEach(function (option) {
@@ -125,6 +127,8 @@
         if (save) save.textContent = option.dataset.save;
         if (discount) discount.textContent = option.dataset.discount;
         if (saveLine) saveLine.hidden = !hasDiscount;
+        if (compareWrap) compareWrap.hidden = !hasDiscount;
+        if (savePill) savePill.hidden = !hasDiscount;
         if (badge) {
           badge.textContent = '-' + option.dataset.discount + '%';
           badge.hidden = !hasDiscount;

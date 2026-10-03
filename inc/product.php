@@ -418,3 +418,131 @@ function medzuro_product_brand( $product ) {
 
 	return (string) medzuro_field( 'brand', '', $product->get_id() );
 }
+
+/* -------------------------------------------------------------------------
+ * Product page design (brand eyebrow, tagline/description, feature strip)
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Brand shown above the title ("HOLYOAK").
+ *
+ * Uses WooCommerce Brands when a brand is assigned, otherwise HolyOak, which
+ * every product in the store currently is.
+ *
+ * @param WC_Product $product Product.
+ * @return string
+ */
+function medzuro_pdp_brand( $product ) {
+	$brand = 'HolyOak';
+	if ( taxonomy_exists( 'product_brand' ) ) {
+		$terms = get_the_terms( $product->get_id(), 'product_brand' );
+		if ( $terms && ! is_wp_error( $terms ) ) {
+			$brand = $terms[0]->name;
+		}
+	}
+	return apply_filters( 'medzuro_pdp_brand', $brand, $product );
+}
+
+/**
+ * Split the short description into the one-line tagline shown beside the
+ * rating and the paragraph under it, as in the design.
+ *
+ * The first sentence becomes the tagline; the rest is the paragraph.
+ *
+ * @param string $short Short description (HTML).
+ * @return array{tagline:string, body:string}
+ */
+function medzuro_pdp_split_description( $short ) {
+	$text = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( (string) $short ) ) );
+	if ( '' === $text ) {
+		return array( 'tagline' => '', 'body' => '' );
+	}
+
+	if ( preg_match( '/^(.+?[.!?])\s+(.+)$/u', $text, $m ) ) {
+		return array( 'tagline' => $m[1], 'body' => $m[2] );
+	}
+
+	return array( 'tagline' => $text, 'body' => '' );
+}
+
+/**
+ * Feature strip under the gallery: icon, title, subtitle.
+ *
+ * Shilajit products get the client's design copy; other products get no
+ * strip until their own copy is written (filter medzuro_pdp_features).
+ *
+ * @param WC_Product $product Product.
+ * @return array<int, array{0:string,1:string,2:string}>
+ */
+function medzuro_pdp_features( $product ) {
+	$features = array();
+
+	if ( false !== stripos( $product->get_name(), 'shilajit' ) ) {
+		$features = array(
+			array( 'leaf', __( 'Pure & Authentic', 'medzuro' ), __( 'High-quality Shilajit extract', 'medzuro' ) ),
+			array( 'lotus', __( 'Daily Wellness', 'medzuro' ), __( 'Supports natural energy', 'medzuro' ) ),
+			array( 'arm', __( 'Strength & Vitality', 'medzuro' ), __( 'Helps you stay active', 'medzuro' ) ),
+			array( 'heart', __( 'Trusted Supplement', 'medzuro' ), __( 'From the Medzuro range', 'medzuro' ) ),
+		);
+	}
+
+	return apply_filters( 'medzuro_pdp_features', $features, $product );
+}
+
+/**
+ * The design's add-to-cart row has no Buy Now button.
+ */
+function medzuro_pdp_hide_buy_now() {
+	remove_action( 'woocommerce_after_add_to_cart_button', 'medzuro_buy_now_button' );
+}
+add_action( 'wp', 'medzuro_pdp_hide_buy_now' );
+
+/* -------------------------------------------------------------------------
+ * "Buy any 2 & get 10% additional discount"
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Whether the offer is running. Turn it off with
+ * add_filter( 'medzuro_bundle_offer_enabled', '__return_false' );
+ *
+ * @return bool
+ */
+function medzuro_bundle_offer_enabled() {
+	return (bool) apply_filters( 'medzuro_bundle_offer_enabled', true );
+}
+
+/**
+ * @return float Discount rate, 0.10 = 10%.
+ */
+function medzuro_bundle_offer_rate() {
+	return (float) apply_filters( 'medzuro_bundle_offer_rate', 0.10 );
+}
+
+/**
+ * Apply the offer: with 2 or more items in the cart, take 10% off the
+ * items (after any coupons) as a negative fee, shown as its own line in the
+ * cart, checkout and order.
+ *
+ * @param WC_Cart $cart Cart.
+ */
+function medzuro_apply_bundle_offer( $cart ) {
+	if ( ! medzuro_bundle_offer_enabled() || ( is_admin() && ! wp_doing_ajax() ) ) {
+		return;
+	}
+
+	if ( $cart->get_cart_contents_count() < 2 ) {
+		return;
+	}
+
+	$base = (float) $cart->get_subtotal() - (float) $cart->get_discount_total();
+	if ( $base <= 0 ) {
+		return;
+	}
+
+	$rate     = medzuro_bundle_offer_rate();
+	$discount = round( $base * $rate, wc_get_price_decimals() );
+
+	/* translators: %d: percent */
+	$cart->add_fee( sprintf( __( 'Buy 2+ offer (%d%% off)', 'medzuro' ), (int) round( $rate * 100 ) ), -$discount, false );
+}
+add_action( 'woocommerce_cart_calculate_fees', 'medzuro_apply_bundle_offer' );

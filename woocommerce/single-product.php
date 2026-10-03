@@ -22,6 +22,8 @@ while ( have_posts() ) :
 	$rating       = (float) $product->get_average_rating();
 	$review_count = (int) $product->get_review_count();
 	$short_desc   = $product->get_short_description();
+	$mz_desc      = medzuro_pdp_split_description( $short_desc );
+	$mz_cur       = apply_filters( 'medzuro_pdp_currency_prefix', 'FJD ' );
 	$coming_soon  = medzuro_is_coming_soon( $product );
 	$in_stock     = $product->is_in_stock();
 	$cards        = $coming_soon ? null : medzuro_pdp_variation_cards( $product );
@@ -83,9 +85,7 @@ while ( have_posts() ) :
 					<?php endif; ?>
 
 					<div class="mz-pdp-main-media<?php echo $image_ids ? '' : ' mz-pdp-main-media--empty'; ?>">
-						<?php if ( ! $coming_soon && $price['discount'] > 0 ) : ?>
-							<span class="mz-pdp-badge" data-mz-pdp-badge>-<?php echo esc_html( $price['discount'] ); ?>%</span>
-						<?php endif; ?>
+						<?php /* The design shows the discount beside the price, not on the image. */ ?>
 
 						<?php if ( $image_ids ) : ?>
 							<?php
@@ -117,40 +117,31 @@ while ( have_posts() ) :
 			</section>
 
 			<section class="mz-pdp-buybox" aria-labelledby="mz-product-title">
-				<div class="mz-pdp-title-row">
-					<h1 id="mz-product-title"><?php echo esc_html( $product->get_name() ); ?></h1>
-					<button class="mz-pdp-share" type="button" data-mz-pdp-share
-						data-title="<?php echo esc_attr( $product->get_name() ); ?>" data-url="<?php echo esc_url( get_permalink() ); ?>"
-						aria-label="<?php esc_attr_e( 'Share this product', 'medzuro' ); ?>">
-						<?php medzuro_icon( 'share', 20 ); ?>
-						<span class="mz-pdp-share__done" data-mz-pdp-share-done hidden><?php esc_html_e( 'Link copied', 'medzuro' ); ?></span>
-					</button>
-				</div>
+				<p class="mz-pdp-brand"><?php echo esc_html( medzuro_pdp_brand( $product ) ); ?></p>
+				<h1 id="mz-product-title"><?php echo esc_html( $product->get_name() ); ?></h1>
 
 				<div class="mz-pdp-meta-row">
 					<?php if ( $review_count > 0 ) : ?>
 						<div class="mz-pdp-rating">
 							<span class="mz-pdp-stars" style="--mz-rating: <?php echo esc_attr( round( $rating / 5 * 100 ) ); ?>%"
-								role="img" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %s out of 5', 'medzuro' ), number_format_i18n( $rating, 1 ) ) ); ?>"></span>
-							<span><?php echo esc_html( sprintf( _n( '%d review', '%d reviews', $review_count, 'medzuro' ), $review_count ) ); ?></span>
+								role="img" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %1$s out of 5 from %2$d reviews', 'medzuro' ), number_format_i18n( $rating, 1 ), $review_count ) ); ?>"></span>
+							<strong><?php echo esc_html( number_format_i18n( $rating, 1 ) ); ?></strong>
 						</div>
 					<?php endif; ?>
-
-					<?php if ( ! $coming_soon ) : ?>
-						<p class="mz-pdp-availability">
-							<?php esc_html_e( 'Availability:', 'medzuro' ); ?>
-							<span class="<?php echo $in_stock ? 'is-in-stock' : 'is-out-of-stock'; ?>" data-mz-pdp-stock
-								data-in="<?php esc_attr_e( 'In Stock', 'medzuro' ); ?>" data-out="<?php esc_attr_e( 'Out of Stock', 'medzuro' ); ?>">
-								<?php $in_stock ? esc_html_e( 'In Stock', 'medzuro' ) : esc_html_e( 'Out of Stock', 'medzuro' ); ?>
-							</span>
-						</p>
+					<?php if ( $mz_desc['tagline'] ) : ?>
+						<p class="mz-pdp-tagline"><?php echo esc_html( $mz_desc['tagline'] ); ?></p>
 					<?php endif; ?>
 				</div>
 
+				<?php if ( $mz_desc['body'] ) : ?>
+					<div class="mz-pdp-desc"><?php echo wp_kses_post( wpautop( $mz_desc['body'] ) ); ?></div>
+				<?php endif; ?>
+
+				<?php if ( ! $coming_soon && ! $in_stock ) : ?>
+					<p class="mz-pdp-availability"><span class="is-out-of-stock" data-mz-pdp-stock data-in="<?php esc_attr_e( 'In Stock', 'medzuro' ); ?>" data-out="<?php esc_attr_e( 'Out of Stock', 'medzuro' ); ?>"><?php esc_html_e( 'Out of Stock', 'medzuro' ); ?></span></p>
+				<?php endif; ?>
+
 				<?php if ( $coming_soon ) : ?>
-					<?php if ( $short_desc ) : ?>
-						<div class="mz-pdp-subtitle"><?php echo wp_kses_post( wpautop( $short_desc ) ); ?></div>
-					<?php endif; ?>
 
 					<div class="mz-pdp-coming-soon">
 						<strong><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></strong>
@@ -158,18 +149,19 @@ while ( have_posts() ) :
 					</div>
 				<?php else : ?>
 					<div class="mz-pdp-price">
-						<strong data-mz-pdp-price><?php echo esc_html( $price['price'] ); ?></strong>
-						<s data-mz-pdp-compare <?php echo $price['discount'] > 0 ? '' : 'hidden'; ?>><?php echo esc_html( $price['compare'] ); ?></s>
+						<strong><span class="mz-pdp-cur"><?php echo esc_html( $mz_cur ); ?></span><span data-mz-pdp-price><?php echo esc_html( $price['price'] ); ?></span></strong>
+						<s <?php echo $price['discount'] > 0 ? '' : 'hidden'; ?> data-mz-pdp-compare-wrap><span class="mz-pdp-cur"><?php echo esc_html( $mz_cur ); ?></span><span data-mz-pdp-compare><?php echo esc_html( $price['compare'] ); ?></span></s>
+						<span class="mz-pdp-off" data-mz-pdp-save-line <?php echo $price['discount'] > 0 ? '' : 'hidden'; ?>><span data-mz-pdp-discount><?php echo esc_html( $price['discount'] ); ?></span>% <?php esc_html_e( 'OFF', 'medzuro' ); ?></span>
 					</div>
-					<p class="mz-pdp-save" data-mz-pdp-save-line <?php echo $price['discount'] > 0 ? '' : 'hidden'; ?>>
-						<?php esc_html_e( 'Save', 'medzuro' ); ?> <span data-mz-pdp-save><?php echo esc_html( $price['save'] ); ?></span>
-						<em>(<span data-mz-pdp-discount><?php echo esc_html( $price['discount'] ); ?></span>% <?php esc_html_e( 'off', 'medzuro' ); ?>)</em>
+					<p class="mz-pdp-save" data-mz-pdp-save-pill <?php echo $price['discount'] > 0 ? '' : 'hidden'; ?>>
+						<?php esc_html_e( 'You save', 'medzuro' ); ?> <?php echo esc_html( $mz_cur ); ?><span data-mz-pdp-save><?php echo esc_html( $price['save'] ); ?></span>
 					</p>
-					<p class="mz-pdp-shipping"><?php esc_html_e( 'Shipping calculated at checkout.', 'medzuro' ); ?></p>
 
-					<?php if ( $short_desc ) : ?>
-						<div class="mz-pdp-subtitle"><?php echo wp_kses_post( wpautop( $short_desc ) ); ?></div>
-					<?php endif; ?>
+					<ul class="mz-pdp-trust">
+						<li><span class="mz-pdp-trust__icon"><?php medzuro_icon( 'flask', 22 ); ?></span><span><strong><?php esc_html_e( 'Lab-tested', 'medzuro' ); ?></strong><small><?php esc_html_e( 'Purity you can trust', 'medzuro' ); ?></small></span></li>
+						<li><span class="mz-pdp-trust__icon"><?php medzuro_icon( 'shield', 22 ); ?></span><span><strong><?php esc_html_e( 'Quality checked', 'medzuro' ); ?></strong><small><?php esc_html_e( 'Premium standards', 'medzuro' ); ?></small></span></li>
+						<li><span class="mz-pdp-trust__icon"><?php medzuro_icon( 'lock', 22 ); ?></span><span><strong><?php esc_html_e( 'Secure checkout', 'medzuro' ); ?></strong><small><?php esc_html_e( 'Your information is safe', 'medzuro' ); ?></small></span></li>
+					</ul>
 
 					<?php if ( $cards ) : ?>
 						<fieldset class="mz-pdp-options">
@@ -200,11 +192,43 @@ while ( have_posts() ) :
 					<div class="mz-pdp-purchase<?php echo $cards ? ' mz-pdp-purchase--cards' : ''; ?>">
 						<?php woocommerce_template_single_add_to_cart(); ?>
 					</div>
-				<?php endif; ?>
 
-				<div class="mz-pdp-meta"><?php woocommerce_template_single_meta(); ?></div>
+					<?php if ( medzuro_bundle_offer_enabled() ) : ?>
+						<div class="mz-pdp-promo">
+							<span class="mz-pdp-promo__icon"><?php medzuro_icon( 'gift', 56 ); ?></span>
+							<span class="mz-pdp-promo__text">
+								<strong><?php esc_html_e( 'Buy any 2', 'medzuro' ); ?></strong>
+								<em>
+									<?php
+									/* translators: %d: percent */
+									printf( esc_html__( '& GET %d%%', 'medzuro' ), (int) round( medzuro_bundle_offer_rate() * 100 ) );
+									?>
+								</em>
+								<span><?php esc_html_e( 'Additional discount', 'medzuro' ); ?></span>
+							</span>
+						</div>
+					<?php endif; ?>
+
+					<div class="mz-pdp-delivery">
+						<span class="mz-pdp-delivery__icon"><?php medzuro_icon( 'truck', 34 ); ?></span>
+						<span><strong><?php esc_html_e( 'Fast delivery across Fiji', 'medzuro' ); ?></strong><small><?php esc_html_e( 'Reliable shipping with DHL', 'medzuro' ); ?></small></span>
+						<?php medzuro_dhl_badge( 'lg' ); ?>
+					</div>
+				<?php endif; ?>
 			</section>
 		</div>
+
+		<?php $mz_features = medzuro_pdp_features( $product ); ?>
+		<?php if ( $mz_features ) : ?>
+			<ul class="mz-pdp-features">
+				<?php foreach ( $mz_features as $mz_f ) : ?>
+					<li>
+						<span class="mz-pdp-features__icon"><?php medzuro_icon( $mz_f[0], 30 ); ?></span>
+						<span><strong><?php echo esc_html( $mz_f[1] ); ?></strong><small><?php echo esc_html( $mz_f[2] ); ?></small></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
 	</div>
 
 	<?php get_template_part( 'template-parts/product-lower' ); ?>
