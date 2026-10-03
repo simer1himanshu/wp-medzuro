@@ -28,7 +28,8 @@ defined( 'ABSPATH' ) || exit;
 			$_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 
 			if ( $_product instanceof WC_Product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
-				$cart_item_name = WC()->cart->get_item_product_name( $cart_item, $_product );
+				// get_item_product_name() only exists from WooCommerce 11.2; the live store runs 11.1.
+				$cart_item_name = method_exists( WC()->cart, 'get_item_product_name' ) ? WC()->cart->get_item_product_name( $cart_item, $_product ) : $_product->get_name();
 				?>
 				<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
 					<td class="product-name">
