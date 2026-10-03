@@ -17,9 +17,15 @@
 	}
 
 	var i18n = window.medzuroCheckout || {};
-	var PANELS = [ 'delivery', 'details', 'address', 'review', 'payment' ];
 	var STAGES = [ 'delivery', 'details', 'payment' ];
 	var current = 0;
+
+	// Pickup adds "How would you like to pay?" before the payment step.
+	function panels() {
+		return isPickup()
+			? [ 'delivery', 'details', 'address', 'review', 'payopt', 'payment' ]
+			: [ 'delivery', 'details', 'address', 'review', 'payment' ];
+	}
 
 	/* ------------------------------------------------------------------ */
 	/* Delivery / pickup mode                                              */
@@ -40,7 +46,23 @@
 	function applyMode() {
 		var pickup = isPickup();
 		$form.toggleClass( 'is-pickup', pickup ).toggleClass( 'is-delivery', ! pickup );
+		applyOption();
 	}
+
+	// "Reserve without payment" hides the payment method list (design 7C).
+	function applyOption() {
+		var option = $form.find( '.mz-pay-summary' ).data( 'option' ) || ( isPickup() ? val( 'mz_pickup_payment' ) : 'delivery' );
+		$form.toggleClass( 'is-reserve', isPickup() && 'reserve' === option );
+	}
+
+	// "Go back & pay 10%" on the reserve screen.
+	$form.on( 'click', '.mz-switch-option', function ( e ) {
+		e.preventDefault();
+		var want = $( this ).data( 'option' );
+		$form.find( 'input[name="mz_pickup_payment"]' ).filter( function () {
+			return this.value === want;
+		} ).prop( 'checked', true ).trigger( 'change' );
+	} );
 
 	// Proxy cards on step 1 drive the real radios inside the order review.
 	$form.on( 'change', 'input[name="mz_delivery_choice"]', function () {
@@ -83,34 +105,12 @@
 	}
 
 	function updateSummaries() {
-		var pickup = isPickup();
 		var state = $form.find( '#billing_state option:selected' ).text();
-		var address = pickup
-			? text( $form.find( '.mz-pickup-loc span span' ) )
-			: [ ( val( 'billing_house_no' ) + ' ' + val( 'billing_address_1' ) ).trim(), val( 'billing_address_2' ), val( 'billing_city' ), state, 'Fiji' ].filter( Boolean ).join( ', ' );
+		var address = [ ( val( 'billing_house_no' ) + ' ' + val( 'billing_address_1' ) ).trim(), val( 'billing_address_2' ), val( 'billing_city' ), state, 'Fiji' ].filter( Boolean ).join( ', ' );
 		var contact = [ val( 'billing_first_name' ), val( 'billing_phone' ) ? '+679 ' + val( 'billing_phone' ) : '', val( 'billing_email' ) ].filter( Boolean ).join( ' · ' );
 
 		$form.find( '[data-mz-summary="address"]' ).text( address );
 		$form.find( '[data-mz-summary="contact"]' ).text( contact );
-
-		var $table = $form.find( '.woocommerce-checkout-review-order-table' );
-		$form.find( '[data-mz-summary="total"]' ).text( text( $table.find( '.order-total td' ) ) );
-
-		var $now = $table.find( '.mz-pay-now' );
-		var $nowRow = $form.find( '.mz-amount__row--now' );
-		if ( pickup && $now.length ) {
-			$nowRow.prop( 'hidden', false ).find( 'span' ).text( text( $now.find( 'th' ) ) );
-			$nowRow.find( 'strong' ).text( text( $now.find( 'td' ) ) );
-		} else {
-			$nowRow.prop( 'hidden', true );
-		}
-
-		var option = val( 'mz_pickup_payment' );
-		var note = '';
-		if ( pickup ) {
-			note = $.trim( $form.find( 'input[name="mz_pickup_payment"]:checked' ).closest( '.mz-pay-option' ).find( 'small' ).text() );
-		}
-		$form.find( '[data-mz-summary="pickupnote"]' ).text( note ).toggle( !! option );
 	}
 
 	/* ------------------------------------------------------------------ */
@@ -186,8 +186,9 @@
 
 	function show( index, opts ) {
 		opts = opts || {};
-		current = Math.max( 0, Math.min( PANELS.length - 1, index ) );
+		current = Math.max( 0, Math.min( panels().length - 1, index ) );
 
+		var PANELS = panels();
 		var name = PANELS[ current ];
 		var $panel = $form.find( '[data-panel="' + name + '"]' );
 		var stage = STAGES.indexOf( $panel.data( 'stage' ) );
@@ -202,7 +203,7 @@
 				.attr( 'aria-current', i === stage ? 'step' : null );
 		} );
 
-		if ( current >= 3 ) {
+		if ( name === 'review' ) {
 			updateSummaries();
 		}
 
@@ -219,12 +220,13 @@
 	}
 
 	function next() {
-		if ( validatePanel( PANELS[ current ] ) ) {
+		if ( validatePanel( panels()[ current ] ) ) {
 			show( current + 1 );
 		}
 	}
 
 	function goTo( name ) {
+		var PANELS = panels();
 		var target = PANELS.indexOf( name );
 		if ( target < 0 ) {
 			return;
@@ -256,6 +258,7 @@
 
 	$form.on( 'click', '.mz-stepper__step.is-done', function () {
 		var stage = $( this ).data( 'stage' );
+		var PANELS = panels();
 		var first = PANELS.filter( function ( p ) {
 			return $form.find( '[data-panel="' + p + '"]' ).data( 'stage' ) === stage;
 		} )[ 0 ];
@@ -264,7 +267,7 @@
 
 	// Enter in a field moves on instead of submitting early.
 	$form.on( 'keydown', 'input:not([type="submit"])', function ( e ) {
-		if ( 13 === e.which && 'payment' !== PANELS[ current ] ) {
+		if ( 13 === e.which && 'payment' !== panels()[ current ] ) {
 			e.preventDefault();
 			next();
 		}
@@ -275,6 +278,7 @@
 		var id = $form.find( '.woocommerce-error li[data-id]' ).first().data( 'id' );
 		var $target = id ? $form.find( '#' + id ) : $form.find( '.woocommerce-invalid' ).first();
 		var panel = $target.closest( '.mz-panel' ).data( 'panel' );
+		var PANELS = panels();
 
 		if ( panel && panel !== PANELS[ current ] ) {
 			show( PANELS.indexOf( panel ), { noScroll: true } );
@@ -286,6 +290,8 @@
 		updateSummaries();
 	} );
 
+	$form.on( 'change', 'input[name="mz_pickup_payment"]', applyOption );
+
 	/* ------------------------------------------------------------------ */
 	/* Start                                                               */
 	/* ------------------------------------------------------------------ */
@@ -293,7 +299,7 @@
 	$form.addClass( 'is-stepped' );
 	syncProxy();
 
-	var start = PANELS.indexOf( ( window.location.hash || '' ).replace( '#', '' ) );
+	var start = panels().indexOf( ( window.location.hash || '' ).replace( '#', '' ) );
 	// Arriving from the cart (#details) the delivery choice is already made.
 	// Never start past Details: earlier fields must be filled in first.
 	show( start > 0 ? Math.min( start, 1 ) : 0, { noScroll: true } );

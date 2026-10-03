@@ -32,7 +32,24 @@ Built to the client's "Initial Flow" and "Home Delivery" screens.
   - **Reserve without payment:** the order becomes *Reserved*. This is not
     guaranteed and nothing is charged.
 
+## Pickup store details
+
+The "Select pickup location" step shows the store name, address, opening
+hours and a Google Maps link. The defaults are in `medzuro_delivery_defaults()`
+in `inc/delivery.php` and are placeholders until the client confirms the real
+address and hours. They can also be edited in the "Medzuro Delivery / Pickup"
+method in the Fiji shipping zone. Add a photo of the shop as
+`assets/img/pickup-store.jpg` to show it on that step.
+
 ## Running orders (staff)
+
+Every order has an **Order follow-up** box beside it in the admin, with:
+
+- the payment status (Payment pending / 10% paid / Paid)
+- customer details
+- order type and payment option
+- buttons: Contact customer (Viber), Call, Send email, Mark as confirmed
+  (reserve orders only) and Cancel order
 
 | Order | What to do |
 |---|---|

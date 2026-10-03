@@ -337,3 +337,74 @@
 .mz-commerce .woocommerce-message,
 .mz-commerce .woocommerce-error { position: relative; padding: 12px 14px; border-top-width: 1px; }
 .mz-commerce .woocommerce-form-coupon-toggle .woocommerce-info a { color: var(--co-navy); font-weight: 600; }
+
+/* ------------------------------------------------------------------ */
+/* Pickup flow (designs 4-7C)                                          */
+/* ------------------------------------------------------------------ */
+
+/* WooCommerce's own button colours (purple) win on specificity; reset. */
+.mz-commerce.mz-commerce .button,
+.mz-commerce.mz-commerce button.button { background: #fff; color: var(--co-navy); border: 1.5px solid var(--co-navy); }
+.mz-commerce.mz-commerce .button.alt,
+.mz-commerce.mz-commerce button.button.alt,
+.mz-commerce.mz-commerce #place_order,
+.mz-commerce.mz-commerce .checkout-button { background: var(--co-navy); color: #fff; border-color: var(--co-navy); }
+
+/* Select pickup location */
+.mz-store { position: relative; display: grid; grid-template-columns: 22px 1fr; gap: 12px; padding: 14px; border: 1.5px solid var(--co-blue); border-radius: 10px; background: var(--co-wash); cursor: pointer; }
+.mz-store input { position: absolute; opacity: 0; }
+.mz-store__radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--co-blue); background: var(--co-blue); box-shadow: inset 0 0 0 4px #fff; align-self: center; }
+.mz-store__body { display: grid; gap: 6px; }
+.mz-store__name { color: var(--co-navy); font-size: 16px; }
+.mz-store__img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; }
+.mz-store__img--ph { display: grid; place-items: center; height: 96px; background: #e3ebf8; color: var(--co-navy); }
+.mz-store__addr, .mz-store__hours { font-size: 14px; color: var(--mz-ink, #0b1b33); }
+.mz-store__hours { color: var(--co-muted); }
+.mz-store__map { margin: 10px 0 16px; text-align: center; }
+.mz-store__map a { display: inline-flex; align-items: center; gap: 6px; color: var(--co-blue); font-weight: 600; }
+
+/* Order summary: pickup location row */
+.mz-review-to__store { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; font-weight: 600; }
+.mz-review-to__store .mz-icon { color: var(--co-navy); }
+.mz-co .mz-review .mz-pay-now, .mz-co .mz-review .mz-balance { display: none; }
+
+/* How would you like to pay? */
+.mz-pay-option { grid-template-columns: 22px 40px 1fr; align-items: start; padding: 16px 14px; }
+.mz-pay-option__icon { color: var(--co-navy); }
+.mz-pay-option__body ul { margin: 6px 0 0; padding-left: 18px; color: var(--co-muted); font-size: 13px; }
+.mz-pay-option__badge { position: absolute; top: -1px; right: -1px; padding: 4px 10px; border-radius: 0 10px 0 8px; background: var(--co-green); color: #fff; font: 600 12px var(--mz-font); }
+.mz-pay-option--full:has(input:checked) { border-color: var(--co-green); background: var(--co-green-wash); }
+.mz-pay-option--full input:checked + .mz-pay-option__radio { border-color: var(--co-green); background: var(--co-green); }
+
+/* Payment step boxes */
+.mz-pay-summary { display: grid; gap: 14px; margin: 4px 0 16px; text-align: left; }
+.mz-pay-summary .mz-amount { margin: 0; }
+.mz-pay-summary .mz-trust { margin: 0; }
+.mz-amount__row--hl { margin: 2px -14px; padding: 6px 14px !important; background: #fff1f2; color: var(--co-red); }
+.mz-amount__row--hl strong { color: var(--co-red); }
+
+.mz-notice { border-radius: 10px; padding: 16px; font-size: 14px; }
+.mz-notice--warn { text-align: center; background: #fff7e8; border: 1px solid #f5d9a3; }
+.mz-notice--warn h3 { margin: 6px 0 2px; font-size: 20px; color: #b4560a; }
+.mz-notice__icon { color: #e08a00; }
+.mz-notice__lead { margin: 0 0 8px; color: var(--co-red); font-weight: 600; }
+.mz-notice--warn p { margin: 0; }
+.mz-notice--note { background: #fff3e6; border: 1px solid #f7d2ad; color: #7a3a00; }
+.mz-notice--note ul { margin: 6px 0 0; padding-left: 18px; }
+
+.mz-co.is-reserve #payment ul.payment_methods,
+.mz-co.is-reserve .mz-hide-reserve { display: none; }
+.mz-co #payment .mz-switch-option { width: 100%; order: 4; }
+
+/* Order received: pickup + order request (designs 8, 9) */
+.mz-receipt__facts dd small { display: block; font-weight: 400; color: var(--co-muted); font-size: 12px; }
+.mz-receipt__facts > .mz-receipt__stack { display: grid; gap: 2px; }
+.mz-receipt__facts > .mz-receipt__stack dd { text-align: left; }
+.mz-receipt__card--reserved .mz-receipt__ttl { color: var(--co-green); }
+.mz-receipt__card--reserved .mz-receipt__status { color: var(--co-red); }
+.mz-receipt__alert { display: flex; gap: 10px; align-items: flex-start; max-width: 420px; margin: 0 auto 18px; padding: 12px 14px; border-radius: 10px; background: #fff1f2; border: 1px solid #f3b4b9; color: #a10d19; text-align: left; font-size: 14px; }
+.mz-receipt__alert .mz-icon { flex: none; }
+.mz-receipt__steps { margin: 0; padding: 0; list-style: none; counter-reset: mzstep; display: grid; gap: 8px; }
+.mz-receipt__steps li { counter-increment: mzstep; display: flex; gap: 10px; color: var(--co-muted); font-size: 14px; }
+.mz-receipt__steps li::before { content: counter(mzstep); flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--co-navy); color: #fff; font-size: 12px; font-weight: 700; }
+.mz-receipt__next { background: var(--co-wash); border-radius: 10px; padding: 14px; }

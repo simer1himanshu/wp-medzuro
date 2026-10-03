@@ -412,6 +412,12 @@ function medzuro_save_checkout_meta( $order, $data ) {
 		if ( 'deposit' === $option ) {
 			$order->update_meta_data( '_mz_deposit_amount', medzuro_deposit_amount( (float) $order->get_total() ) );
 		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verified the checkout nonce.
+		$note = isset( $_POST['mz_pickup_note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['mz_pickup_note'] ) ) : '';
+		if ( $note ) {
+			$order->set_customer_note( __( 'Pickup instructions:', 'medzuro' ) . ' ' . $note );
+		}
 	}
 }
 add_action( 'woocommerce_checkout_create_order', 'medzuro_save_checkout_meta', 10, 2 );
@@ -477,19 +483,28 @@ add_filter( 'woocommerce_order_item_get_formatted_meta_data', 'medzuro_hide_rate
 function medzuro_pickup_payment_options() {
 	return array(
 		'full'    => array(
-			'title' => __( 'Full payment', 'medzuro' ),
-			'badge' => __( 'Recommended', 'medzuro' ),
-			'desc'  => __( 'Pay the full amount now with M-PAiSA. Your order is guaranteed.', 'medzuro' ),
+			'title'   => __( 'Full Payment (Recommended)', 'medzuro' ),
+			'short'   => __( 'Full payment', 'medzuro' ),
+			'badge'   => __( 'Recommended', 'medzuro' ),
+			'icon'    => 'card',
+			'desc'    => __( 'Pay the full amount now and confirm your order.', 'medzuro' ),
+			'bullets' => array( __( 'Order reserved immediately', 'medzuro' ), __( 'Fast pickup', 'medzuro' ), __( 'No pending balance', 'medzuro' ) ),
 		),
 		'deposit' => array(
-			'title' => __( '10% payment to reserve', 'medzuro' ),
-			'badge' => '',
-			'desc'  => __( 'Pay 10% now with M-PAiSA and the balance when you collect.', 'medzuro' ),
+			'title'   => __( 'Pay 10% and Reserve', 'medzuro' ),
+			'short'   => __( '10% payment', 'medzuro' ),
+			'badge'   => '',
+			'icon'    => 'coin',
+			'desc'    => __( 'Pay just 10% now to reserve your order.', 'medzuro' ),
+			'bullets' => array( __( 'Reserve your order', 'medzuro' ), __( 'Pay remaining later', 'medzuro' ), __( 'Stock will be kept for you', 'medzuro' ) ),
 		),
 		'reserve' => array(
-			'title' => __( 'Reserve without payment', 'medzuro' ),
-			'badge' => '',
-			'desc'  => __( 'Pay when you collect. Not guaranteed - we hold stock for a limited time.', 'medzuro' ),
+			'title'   => __( 'Reserve Without Payment', 'medzuro' ),
+			'short'   => __( 'Reserve without payment', 'medzuro' ),
+			'badge'   => '',
+			'icon'    => 'calendar',
+			'desc'    => __( 'Place order request without payment.', 'medzuro' ),
+			'bullets' => array( __( 'We cannot guarantee reservation', 'medzuro' ), __( 'Subject to stock availability', 'medzuro' ), __( 'Our team will contact you', 'medzuro' ) ),
 		),
 	);
 }
@@ -621,14 +636,140 @@ function medzuro_review_deposit_rows() {
 add_action( 'woocommerce_review_order_after_order_total', 'medzuro_review_deposit_rows' );
 
 /**
- * Keep the "Continue to payment" button wording from the design.
+ * Plain-text price for button labels ("Pay $49.99 now").
+ *
+ * @param float $amount Amount.
+ * @return string
+ */
+function medzuro_plain_price( $amount ) {
+	return html_entity_decode( wp_strip_all_tags( wc_price( $amount ) ), ENT_QUOTES, 'UTF-8' );
+}
+
+/**
+ * What the customer pays now, given delivery/pickup and the pickup option.
+ *
+ * @return array{option:string, total:float, now:float, later:float}
+ */
+function medzuro_checkout_amounts() {
+	$total  = WC()->cart ? (float) WC()->cart->get_total( 'edit' ) : 0.0;
+	$option = true === medzuro_chosen_is_pickup() ? medzuro_pickup_payment_choice() : 'delivery';
+	$now    = $total;
+
+	if ( 'deposit' === $option ) {
+		$now = medzuro_deposit_amount( $total );
+	} elseif ( 'reserve' === $option ) {
+		$now = 0.0;
+	}
+
+	return array(
+		'option' => $option,
+		'total'  => $total,
+		'now'    => $now,
+		'later'  => max( 0, $total - $now ),
+	);
+}
+
+/**
+ * Place-order button: "Pay $X now", or "Confirm order request" when
+ * reserving without payment (designs 7A, 7B, 7C).
  *
  * @return string
  */
 function medzuro_order_button_text() {
-	return __( 'Continue to payment', 'medzuro' );
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return __( 'Continue to payment', 'medzuro' );
+	}
+
+	$a = medzuro_checkout_amounts();
+	if ( 'reserve' === $a['option'] ) {
+		return __( 'Confirm order request', 'medzuro' );
+	}
+
+	/* translators: %s: amount */
+	return sprintf( __( 'Pay %s now', 'medzuro' ), medzuro_plain_price( $a['now'] ) );
 }
 add_filter( 'woocommerce_order_button_text', 'medzuro_order_button_text' );
+
+/**
+ * Amount / notice boxes and trust icons above the button. Rendered inside
+ * WooCommerce's payment fragment so they refresh with every order update.
+ */
+function medzuro_payment_summary() {
+	if ( ! is_checkout() && ! wp_doing_ajax() ) {
+		return;
+	}
+
+	$a     = medzuro_checkout_amounts();
+	$trust = array(
+		array( 'shield', __( 'Secure payment', 'medzuro' ) ),
+		array( 'bolt', __( 'Instant confirmation', 'medzuro' ) ),
+		array( 'check', __( 'Order reserved immediately', 'medzuro' ) ),
+	);
+
+	echo '<div class="mz-pay-summary mz-pay-summary--' . esc_attr( $a['option'] ) . '" data-option="' . esc_attr( $a['option'] ) . '">';
+
+	if ( 'reserve' === $a['option'] ) {
+		echo '<div class="mz-notice mz-notice--warn">';
+		echo '<span class="mz-notice__icon">';
+		medzuro_icon( 'alert', 30 );
+		echo '</span><h3>' . esc_html__( 'Important notice', 'medzuro' ) . '</h3>';
+		echo '<p class="mz-notice__lead">' . esc_html__( 'Your order has not been reserved.', 'medzuro' ) . '</p>';
+		echo '<p>' . esc_html__( 'We have received your order request, but we cannot guarantee stock availability without payment. Our team will contact you to confirm availability and payment.', 'medzuro' ) . '</p>';
+		echo '</div>';
+		echo '<div class="mz-notice mz-notice--note"><strong>' . esc_html__( 'Please note:', 'medzuro' ) . '</strong><ul>';
+		echo '<li>' . esc_html__( 'Stock is subject to availability.', 'medzuro' ) . '</li>';
+		echo '<li>' . esc_html__( 'Your order will be confirmed after payment.', 'medzuro' ) . '</li>';
+		echo '<li>' . esc_html__( 'Our team will contact you on your mobile or Viber.', 'medzuro' ) . '</li>';
+		echo '</ul></div>';
+		echo '</div>';
+		return;
+	}
+
+	if ( 'deposit' === $a['option'] ) {
+		echo '<div class="mz-amount"><h3>' . esc_html__( 'Payment details', 'medzuro' ) . '</h3>';
+		echo '<div class="mz-amount__row"><span>' . esc_html__( 'Total amount', 'medzuro' ) . '</span><strong>' . wp_kses_post( wc_price( $a['total'] ) ) . '</strong></div>';
+		echo '<div class="mz-amount__row mz-amount__row--hl"><span>' . esc_html__( '10% to reserve', 'medzuro' ) . '</span><strong>' . wp_kses_post( wc_price( $a['now'] ) ) . '</strong></div>';
+		echo '<div class="mz-amount__row"><span>' . esc_html__( 'Remaining balance', 'medzuro' ) . '</span><strong>' . wp_kses_post( wc_price( $a['later'] ) ) . '</strong></div>';
+		echo '<p>' . esc_html__( 'You can pay the remaining amount later, before or at pickup.', 'medzuro' ) . '</p></div>';
+		$trust = array(
+			array( 'calendar', __( 'Reserve your order', 'medzuro' ) ),
+			array( 'box', __( 'Keep stock for you', 'medzuro' ) ),
+			array( 'coin', __( 'Flexible payment', 'medzuro' ) ),
+		);
+	} else {
+		echo '<div class="mz-amount"><h3>' . esc_html__( 'Order amount', 'medzuro' ) . '</h3>';
+		echo '<div class="mz-amount__row"><span>' . esc_html__( 'Order total', 'medzuro' ) . '</span><strong>' . wp_kses_post( wc_price( $a['total'] ) ) . '</strong></div>';
+		if ( 'delivery' === $a['option'] ) {
+			echo '<p>' . esc_html__( 'Full payment is required for online delivery.', 'medzuro' ) . '</p>';
+			$trust = array(
+				array( 'shield', __( 'Secure payment', 'medzuro' ) ),
+				array( 'lock', __( 'Encrypted transaction', 'medzuro' ) ),
+				array( 'user', __( 'Protects your data', 'medzuro' ) ),
+			);
+		}
+		echo '</div>';
+	}
+
+	echo '<ul class="mz-trust">';
+	foreach ( $trust as $t ) {
+		echo '<li>';
+		medzuro_icon( $t[0], 20 );
+		echo '<span>' . esc_html( $t[1] ) . '</span></li>';
+	}
+	echo '</ul></div>';
+}
+add_action( 'woocommerce_review_order_before_submit', 'medzuro_payment_summary', 5 );
+
+/**
+ * "Go back & pay 10%" under the reserve button (design 7C).
+ */
+function medzuro_payment_after_submit() {
+	if ( 'reserve' !== medzuro_checkout_amounts()['option'] ) {
+		return;
+	}
+	echo '<button type="button" class="button mz-switch-option" data-option="deposit">' . esc_html__( 'Go back & pay 10% (recommended)', 'medzuro' ) . '</button>';
+}
+add_action( 'woocommerce_review_order_after_submit', 'medzuro_payment_after_submit' );
 
 /* -------------------------------------------------------------------------
  * Shared markup

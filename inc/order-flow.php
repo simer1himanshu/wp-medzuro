@@ -5,7 +5,8 @@
  *
  * Statuses added:
  *   Deposit paid      - pickup order, 10% paid with M-PAiSA, balance at pickup
- *   Reserved          - pickup order reserved without payment (not guaranteed)
+ *   Reserved          - pickup order requested without payment (not guaranteed)
+ *   Reservation confirmed - staff confirmed stock for a "Reserved" order
  *   Ready for pickup  - staff have packed a pickup order (customer is emailed)
  *   Shipped           - DHL tracking number added (customer is emailed)
  * "Completed" means delivered (home delivery) or collected (pickup).
@@ -28,6 +29,7 @@ function medzuro_custom_statuses() {
 	return array(
 		'deposit-paid' => __( 'Deposit paid', 'medzuro' ),
 		'reserved'     => __( 'Reserved', 'medzuro' ),
+		'confirmed'    => __( 'Reservation confirmed', 'medzuro' ),
 		'ready-pickup' => __( 'Ready for pickup', 'medzuro' ),
 		'shipped'      => __( 'Shipped', 'medzuro' ),
 	);
@@ -158,7 +160,6 @@ if ( class_exists( 'WC_Payment_Gateway' ) && ! class_exists( 'WC_Gateway_Medzuro
 			$this->method_title       = __( 'Reserve without payment (pickup)', 'medzuro' );
 			$this->method_description = __( 'Lets pickup customers reserve an order and pay when they collect it. Only offered for store pickup.', 'medzuro' );
 			$this->has_fields         = false;
-			$this->order_button_text  = __( 'Reserve order', 'medzuro' );
 
 			$this->init_form_fields();
 			$this->init_settings();
@@ -450,7 +451,7 @@ function medzuro_order_progress( $order ) {
 	}
 
 	$reached = 0;
-	if ( $order->has_status( array( 'processing', 'on-hold', 'deposit-paid', 'reserved' ) ) ) {
+	if ( $order->has_status( array( 'processing', 'on-hold', 'deposit-paid', 'reserved', 'confirmed' ) ) ) {
 		$reached = 1;
 	} elseif ( $order->has_status( array( 'shipped', 'ready-pickup' ) ) ) {
 		$reached = 2;
@@ -552,3 +553,163 @@ function medzuro_order_totals_rows( $rows, $order ) {
 	return $rows;
 }
 add_filter( 'woocommerce_get_order_item_totals', 'medzuro_order_totals_rows', 10, 2 );
+
+
+/* -------------------------------------------------------------------------
+ * Admin follow-up box (design 10)
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Payment status label and tone for an order.
+ *
+ * @param WC_Order $order Order.
+ * @return array{0:string,1:string} Label, tone (pending|partial|paid).
+ */
+function medzuro_payment_badge( $order ) {
+	if ( $order->is_paid() || $order->has_status( 'completed' ) ) {
+		return array( __( 'Paid', 'medzuro' ), 'paid' );
+	}
+	if ( $order->has_status( 'deposit-paid' ) || ( medzuro_order_is_deposit( $order ) && medzuro_order_amount_paid( $order ) > 0 ) ) {
+		return array( __( '10% paid', 'medzuro' ), 'partial' );
+	}
+	return array( __( 'Payment pending', 'medzuro' ), 'pending' );
+}
+
+/**
+ * Register the follow-up box on the order screen.
+ */
+function medzuro_followup_meta_box() {
+	$screens = array( 'shop_order' );
+	if ( function_exists( 'wc_get_page_screen_id' ) ) {
+		$screens[] = wc_get_page_screen_id( 'shop-order' );
+	}
+	foreach ( array_unique( $screens ) as $screen ) {
+		add_meta_box( 'medzuro-followup', __( 'Order follow-up', 'medzuro' ), 'medzuro_followup_meta_box_html', $screen, 'side', 'high' );
+	}
+}
+add_action( 'add_meta_boxes', 'medzuro_followup_meta_box', 5 );
+
+/**
+ * @param WP_Post|WC_Order $post_or_order Order.
+ */
+function medzuro_followup_meta_box_html( $post_or_order ) {
+	$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order->ID );
+	if ( ! $order ) {
+		return;
+	}
+
+	list( $label, $tone ) = medzuro_payment_badge( $order );
+
+	$pickup  = medzuro_order_is_pickup( $order );
+	$option  = $order->get_meta( '_mz_pickup_payment' );
+	$labels  = medzuro_pickup_payment_options();
+	$phone   = preg_replace( '/\D+/', '', $order->get_billing_phone() );
+	$contact = $order->get_meta( '_billing_contact_method' );
+	$paid    = medzuro_order_amount_paid( $order );
+	$store   = medzuro_pickup_store();
+	$action  = function ( $do ) use ( $order ) {
+		return wp_nonce_url( admin_url( 'admin-post.php?action=medzuro_order_action&do=' . $do . '&order_id=' . $order->get_id() ), 'medzuro_order_action_' . $order->get_id() );
+	};
+	?>
+	<div class="mz-fu">
+		<p><span class="mz-fu__badge mz-fu__badge--<?php echo esc_attr( $tone ); ?>"><?php echo esc_html( $label ); ?></span></p>
+		<table class="mz-fu__table">
+			<tr><th><?php esc_html_e( 'Customer', 'medzuro' ); ?></th><td><?php echo esc_html( $order->get_formatted_billing_full_name() ); ?><br /><?php echo esc_html( $order->get_billing_phone() ); ?><br /><?php echo esc_html( $order->get_billing_email() ); ?><?php echo $contact ? '<br /><em>' . esc_html( sprintf( __( 'Prefers %s', 'medzuro' ), ucfirst( $contact ) ) ) . '</em>' : ''; ?></td></tr>
+			<tr><th><?php esc_html_e( 'Order type', 'medzuro' ); ?></th><td><?php echo esc_html( $pickup ? __( 'Pickup', 'medzuro' ) : __( 'Home delivery (DHL)', 'medzuro' ) ); ?></td></tr>
+			<?php if ( $pickup ) : ?>
+				<tr><th><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></th><td><?php echo esc_html( $store['name'] ); ?></td></tr>
+				<tr><th><?php esc_html_e( 'Payment option', 'medzuro' ); ?></th><td><?php echo esc_html( isset( $labels[ $option ] ) ? $labels[ $option ]['short'] : __( 'Full payment', 'medzuro' ) ); ?></td></tr>
+			<?php endif; ?>
+			<tr><th><?php esc_html_e( 'Total', 'medzuro' ); ?></th><td><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></td></tr>
+			<tr><th><?php esc_html_e( 'Paid so far', 'medzuro' ); ?></th><td><?php echo wp_kses_post( wc_price( $paid, array( 'currency' => $order->get_currency() ) ) ); ?></td></tr>
+			<tr><th><?php esc_html_e( 'Created', 'medzuro' ); ?></th><td><?php echo esc_html( wc_format_datetime( $order->get_date_created(), get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ); ?></td></tr>
+		</table>
+
+		<div class="mz-fu__actions">
+			<?php if ( $phone ) : ?>
+				<a class="button" href="<?php echo esc_url( 'viber://chat?number=%2B' . $phone, array( 'viber' ) ); ?>"><?php esc_html_e( 'Contact customer (Viber)', 'medzuro' ); ?></a>
+				<a class="button" href="<?php echo esc_url( 'tel:+' . $phone ); ?>"><?php esc_html_e( 'Call customer', 'medzuro' ); ?></a>
+			<?php endif; ?>
+			<?php if ( $order->get_billing_email() ) : ?>
+				<a class="button" href="<?php echo esc_url( 'mailto:' . $order->get_billing_email() . '?subject=' . rawurlencode( sprintf( __( 'Your Medzuro order #%s', 'medzuro' ), $order->get_order_number() ) ) ); ?>"><?php esc_html_e( 'Send email', 'medzuro' ); ?></a>
+			<?php endif; ?>
+			<?php if ( $order->has_status( 'reserved' ) ) : ?>
+				<a class="button button-primary" href="<?php echo esc_url( $action( 'confirm' ) ); ?>"><?php esc_html_e( 'Mark as confirmed', 'medzuro' ); ?></a>
+			<?php endif; ?>
+			<?php if ( ! $order->has_status( array( 'completed', 'cancelled', 'refunded' ) ) ) : ?>
+				<a class="button mz-fu__cancel" href="<?php echo esc_url( $action( 'cancel' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Cancel this order? Stock will be returned.', 'medzuro' ) ); ?>');"><?php esc_html_e( 'Cancel order', 'medzuro' ); ?></a>
+			<?php endif; ?>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Handle "Mark as confirmed" / "Cancel order" from the follow-up box.
+ */
+function medzuro_handle_order_action() {
+	$order_id = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;
+	$do       = isset( $_GET['do'] ) ? sanitize_key( wp_unslash( $_GET['do'] ) ) : '';
+
+	check_admin_referer( 'medzuro_order_action_' . $order_id );
+
+	if ( ! current_user_can( 'edit_shop_orders' ) ) {
+		wp_die( esc_html__( 'You are not allowed to change orders.', 'medzuro' ) );
+	}
+
+	$order = wc_get_order( $order_id );
+	if ( $order ) {
+		if ( 'confirm' === $do && $order->has_status( 'reserved' ) ) {
+			$order->update_status( 'confirmed', __( 'Reservation confirmed by staff.', 'medzuro' ) );
+		} elseif ( 'cancel' === $do && ! $order->has_status( array( 'completed', 'cancelled', 'refunded' ) ) ) {
+			$order->update_status( 'cancelled', __( 'Cancelled from the follow-up box.', 'medzuro' ) );
+		}
+	}
+
+	wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=wc-orders' ) );
+	exit;
+}
+add_action( 'admin_post_medzuro_order_action', 'medzuro_handle_order_action' );
+
+/**
+ * Email the customer when a reservation is confirmed.
+ *
+ * @param int      $order_id Order id.
+ * @param WC_Order $order    Order.
+ */
+function medzuro_email_confirmed( $order_id, $order ) {
+	$store = medzuro_pickup_store();
+	$body  = '<p>' . sprintf( esc_html__( 'Hi %s,', 'medzuro' ), esc_html( $order->get_billing_first_name() ) ) . '</p>';
+	$body .= '<p>' . sprintf( esc_html__( 'Good news - we have confirmed stock for order #%s and reserved it for you.', 'medzuro' ), esc_html( $order->get_order_number() ) ) . '</p>';
+	$body .= '<p><strong>' . esc_html__( 'Pay at pickup:', 'medzuro' ) . '</strong> ' . wp_kses_post( wc_price( (float) $order->get_total() ) ) . '<br />';
+	$body .= '<strong>' . esc_html__( 'Pickup:', 'medzuro' ) . '</strong> ' . esc_html( $store['name'] ) . ', ' . esc_html( $store['hours'] ) . '</p>';
+
+	/* translators: %s: order number */
+	medzuro_send_customer_email( $order, sprintf( __( 'Your Medzuro order #%s is confirmed', 'medzuro' ), $order->get_order_number() ), __( 'Reservation confirmed', 'medzuro' ), $body );
+}
+add_action( 'woocommerce_order_status_confirmed', 'medzuro_email_confirmed', 10, 2 );
+
+/**
+ * Status colours in the orders list and the follow-up box styles.
+ */
+function medzuro_admin_order_styles() {
+	?>
+	<style>
+		.order-status.status-reserved { background: #fde7e9; color: #b0101c; }
+		.order-status.status-deposit-paid { background: #fff1d6; color: #8a5300; }
+		.order-status.status-confirmed, .order-status.status-ready-pickup { background: #dbeafe; color: #1e3a8a; }
+		.order-status.status-shipped { background: #c6e1c6; color: #2c4700; }
+		.mz-fu__badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-weight: 600; }
+		.mz-fu__badge--pending { background: #fde7e9; color: #b0101c; }
+		.mz-fu__badge--partial { background: #fff1d6; color: #8a5300; }
+		.mz-fu__badge--paid { background: #dcf2e1; color: #1a7f3c; }
+		.mz-fu__table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+		.mz-fu__table th { text-align: left; vertical-align: top; width: 38%; padding: 4px 6px 4px 0; color: #50575e; font-weight: 600; }
+		.mz-fu__table td { padding: 4px 0; word-break: break-word; }
+		.mz-fu__actions { display: grid; gap: 6px; }
+		.mz-fu__actions .button { text-align: center; }
+		.mz-fu__cancel { color: #b32d2e !important; border-color: #b32d2e !important; }
+	</style>
+	<?php
+}
+add_action( 'admin_head', 'medzuro_admin_order_styles' );

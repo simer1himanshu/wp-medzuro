@@ -28,8 +28,66 @@ function medzuro_delivery_defaults() {
 		'dhl_eta'        => __( '3-7 working days', 'medzuro' ),
 		'pickup_enabled' => 'yes',
 		'pickup_address' => __( 'Nakasi, Suva', 'medzuro' ),
-		'pickup_note'    => __( 'Collect from our location', 'medzuro' ),
+		'pickup_note'    => __( 'Collect your order from our pickup location', 'medzuro' ),
+		'pickup_name'    => __( 'Medzuro Retail - Nakasi, Suva', 'medzuro' ),
+		'pickup_street'  => __( 'Lot 1, Nakasi Shopping Centre, Nakasi, Suva, Fiji Islands', 'medzuro' ),
+		'pickup_hours'   => __( 'Mon - Sat, 9:00 AM - 5:00 PM', 'medzuro' ),
+		'pickup_map'     => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Nakasi Shopping Centre, Nakasi, Fiji' ),
 	);
+}
+
+/**
+ * The pickup store's details, from the shipping method settings when the
+ * method is set up in the Fiji zone, otherwise the defaults above.
+ *
+ * Also used on the thank-you page, emails and the admin follow-up box.
+ * Drop a photo of the store at assets/img/pickup-store.jpg to show it on
+ * the "Select pickup location" step.
+ *
+ * @return array{name:string, street:string, hours:string, map:string, area:string, image:string}
+ */
+function medzuro_pickup_store() {
+	static $store = null;
+	if ( null !== $store ) {
+		return $store;
+	}
+
+	$settings = array();
+	if ( class_exists( 'WC_Shipping_Zones' ) ) {
+		foreach ( WC_Shipping_Zones::get_zones() as $zone ) {
+			foreach ( $zone['shipping_methods'] as $method ) {
+				if ( 'medzuro_delivery' === $method->id ) {
+					foreach ( array_keys( medzuro_delivery_defaults() ) as $key ) {
+						$value = $method->get_option( $key );
+						if ( '' !== $value && null !== $value ) {
+							$settings[ $key ] = $value;
+						}
+					}
+					break 2;
+				}
+			}
+		}
+	}
+
+	$s     = wp_parse_args( $settings, medzuro_delivery_defaults() );
+	$image = '';
+	foreach ( array( 'jpg', 'jpeg', 'png', 'webp' ) as $ext ) {
+		if ( file_exists( get_theme_file_path( '/assets/img/pickup-store.' . $ext ) ) ) {
+			$image = get_theme_file_uri( '/assets/img/pickup-store.' . $ext );
+			break;
+		}
+	}
+
+	$store = array(
+		'name'   => $s['pickup_name'],
+		'street' => $s['pickup_street'],
+		'hours'  => $s['pickup_hours'],
+		'map'    => $s['pickup_map'],
+		'area'   => $s['pickup_address'],
+		'image'  => $image,
+	);
+
+	return $store;
 }
 
 /**
@@ -138,6 +196,26 @@ function medzuro_register_delivery_method() {
 					'title'   => __( 'Pickup note', 'medzuro' ),
 					'type'    => 'text',
 					'default' => $d['pickup_note'],
+				),
+				'pickup_name'    => array(
+					'title'   => __( 'Store name', 'medzuro' ),
+					'type'    => 'text',
+					'default' => $d['pickup_name'],
+				),
+				'pickup_street'  => array(
+					'title'   => __( 'Store address', 'medzuro' ),
+					'type'    => 'text',
+					'default' => $d['pickup_street'],
+				),
+				'pickup_hours'   => array(
+					'title'   => __( 'Opening hours', 'medzuro' ),
+					'type'    => 'text',
+					'default' => $d['pickup_hours'],
+				),
+				'pickup_map'     => array(
+					'title'   => __( 'Google Maps link', 'medzuro' ),
+					'type'    => 'text',
+					'default' => $d['pickup_map'],
 				),
 			);
 		}

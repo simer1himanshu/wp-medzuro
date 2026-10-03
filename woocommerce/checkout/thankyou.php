@@ -41,12 +41,19 @@ defined( 'ABSPATH' ) || exit;
 
 		$mz_copy = array(
 			'paid'     => array( __( 'Payment successful!', 'medzuro' ), __( 'Your order has been placed.', 'medzuro' ), __( 'Completed', 'medzuro' ) ),
-			'deposit'  => array( __( 'Deposit received!', 'medzuro' ), __( 'Your order is reserved for pickup.', 'medzuro' ), __( 'Deposit paid', 'medzuro' ) ),
-			'reserved' => array( __( 'Order reserved!', 'medzuro' ), __( 'Pay when you collect. Reservations are not guaranteed.', 'medzuro' ), __( 'Pay at pickup', 'medzuro' ) ),
+			'deposit'  => array( __( 'Payment successful!', 'medzuro' ), __( 'Your order has been successfully reserved.', 'medzuro' ), __( '10% paid', 'medzuro' ) ),
+			'reserved' => array( __( 'Order request received!', 'medzuro' ), __( 'We have received your order request. Stock is subject to availability until payment is received.', 'medzuro' ), __( 'Payment pending', 'medzuro' ) ),
 			'waiting'  => array( __( 'Waiting for payment confirmation', 'medzuro' ), __( 'If you completed the payment on your phone, this can take a minute. Refresh this page to check.', 'medzuro' ), __( 'Awaiting payment', 'medzuro' ) ),
 			'failed'   => array( __( 'Payment not completed', 'medzuro' ), __( 'Your payment was declined or cancelled. You can try again below.', 'medzuro' ), __( 'Failed', 'medzuro' ) ),
 		);
 		list( $mz_title, $mz_sub, $mz_status ) = $mz_copy[ $mz_state ];
+
+		if ( $mz_pickup && 'paid' === $mz_state ) {
+			$mz_sub = __( 'Your order has been successfully reserved.', 'medzuro' );
+		}
+
+		$mz_store     = medzuro_pickup_store();
+		$mz_paid_note = 'deposit' === $mz_option ? __( '(10% payment)', 'medzuro' ) : __( '(Full payment)', 'medzuro' );
 		?>
 
 		<section class="mz-receipt__card mz-receipt__card--<?php echo esc_attr( $mz_state ); ?>">
@@ -62,12 +69,23 @@ defined( 'ABSPATH' ) || exit;
 				<?php if ( $order->get_payment_method_title() ) : ?>
 					<div><dt><?php esc_html_e( 'Payment method', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></dd></div>
 				<?php endif; ?>
-				<div><dt><?php esc_html_e( 'Amount paid', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( wc_price( $mz_paid, array( 'currency' => $order->get_currency() ) ) ); ?></dd></div>
+				<div><dt><?php esc_html_e( 'Payment made', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( wc_price( $mz_paid, array( 'currency' => $order->get_currency() ) ) ); ?><?php if ( $mz_pickup && $mz_paid > 0 ) : ?> <small><?php echo esc_html( $mz_paid_note ); ?></small><?php endif; ?></dd></div>
 				<?php if ( $mz_balance > 0 && in_array( $mz_state, array( 'deposit', 'reserved' ), true ) ) : ?>
 					<div><dt><?php esc_html_e( 'Balance at pickup', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( wc_price( $mz_balance, array( 'currency' => $order->get_currency() ) ) ); ?></dd></div>
 				<?php endif; ?>
 				<div><dt><?php esc_html_e( 'Payment status', 'medzuro' ); ?></dt><dd class="mz-receipt__status"><?php echo esc_html( $mz_status ); ?></dd></div>
+				<?php if ( $mz_pickup ) : ?>
+					<div class="mz-receipt__stack"><dt><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></dt><dd><?php echo esc_html( $mz_store['name'] ); ?></dd></div>
+					<div class="mz-receipt__stack"><dt><?php esc_html_e( 'Pickup hours', 'medzuro' ); ?></dt><dd><?php echo esc_html( $mz_store['hours'] ); ?></dd></div>
+				<?php endif; ?>
 			</dl>
+
+			<?php if ( 'reserved' === $mz_state ) : ?>
+				<div class="mz-receipt__alert" role="note">
+					<?php medzuro_icon( 'alert', 20 ); ?>
+					<span><?php esc_html_e( 'This is not a confirmed reservation. Our team will contact you shortly to confirm availability and payment.', 'medzuro' ); ?></span>
+				</div>
+			<?php endif; ?>
 
 			<?php if ( 'failed' === $mz_state || ( 'waiting' === $mz_state && $order->needs_payment() ) ) : ?>
 				<p class="mz-receipt__actions">
@@ -75,20 +93,42 @@ defined( 'ABSPATH' ) || exit;
 				</p>
 			<?php endif; ?>
 
-			<?php if ( 'failed' !== $mz_state ) : ?>
+			<?php if ( 'reserved' === $mz_state ) : ?>
+				<div class="mz-receipt__next">
+					<h2><?php esc_html_e( 'What happens next?', 'medzuro' ); ?></h2>
+					<ol class="mz-receipt__steps">
+						<li><?php esc_html_e( 'Our team will review your order.', 'medzuro' ); ?></li>
+						<li>
+							<?php
+							/* translators: %s: Viber / Phone / Email */
+							printf( esc_html__( 'We may contact you by %s to confirm availability.', 'medzuro' ), esc_html( $mz_contact ) );
+							?>
+						</li>
+						<li><?php esc_html_e( 'Once payment is received, your order will be reserved.', 'medzuro' ); ?></li>
+					</ol>
+				</div>
+			<?php elseif ( 'failed' !== $mz_state ) : ?>
 				<div class="mz-receipt__next">
 					<h2><?php esc_html_e( 'Next steps', 'medzuro' ); ?></h2>
 					<ul>
-						<li><?php medzuro_icon( 'mail', 18 ); ?> <span><?php esc_html_e( 'You will receive an order confirmation by email.', 'medzuro' ); ?></span></li>
 						<?php if ( $mz_pickup ) : ?>
-							<li><?php medzuro_icon( 'box', 18 ); ?> <span><?php esc_html_e( 'We will prepare your order for pickup.', 'medzuro' ); ?></span></li>
+							<li><?php medzuro_icon( 'mail', 18 ); ?> <span><?php esc_html_e( 'You will also receive a confirmation by SMS/Email.', 'medzuro' ); ?></span></li>
 							<li><?php medzuro_icon( 'store', 18 ); ?> <span>
 								<?php
 								/* translators: %s: Viber / Phone / Email */
-								printf( esc_html__( 'We will contact you by %s when it is ready to collect from Nakasi, Suva.', 'medzuro' ), esc_html( $mz_contact ) );
+								printf( esc_html__( 'Our team will notify you by %s when your order is ready for pickup.', 'medzuro' ), esc_html( $mz_contact ) );
 								?>
 							</span></li>
+							<?php if ( $mz_balance > 0 ) : ?>
+								<li><?php medzuro_icon( 'coin', 18 ); ?> <span>
+									<?php
+									/* translators: %s: amount */
+									printf( esc_html__( 'Please pay the remaining %s before or at pickup.', 'medzuro' ), wp_kses_post( wc_price( $mz_balance ) ) );
+									?>
+								</span></li>
+							<?php endif; ?>
 						<?php else : ?>
+							<li><?php medzuro_icon( 'mail', 18 ); ?> <span><?php esc_html_e( 'You will receive an order confirmation by email.', 'medzuro' ); ?></span></li>
 							<li><?php medzuro_icon( 'box', 18 ); ?> <span><?php esc_html_e( 'We will prepare your order for shipment.', 'medzuro' ); ?></span></li>
 							<li><?php medzuro_icon( 'truck', 18 ); ?> <span><?php esc_html_e( 'You will receive a DHL tracking number once your order is shipped.', 'medzuro' ); ?></span></li>
 						<?php endif; ?>

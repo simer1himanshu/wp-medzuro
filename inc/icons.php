@@ -61,6 +61,12 @@ function medzuro_icon_paths() {
 		'mail'   => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/>',
 		'edit'   => '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
 		'external' => '<path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
+		'card'     => '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6 15h4"/>',
+		'coin'     => '<circle cx="15" cy="8" r="5"/><path d="M15 6v4"/><path d="M2 15h4l3 2h5a1.5 1.5 0 0 1 0 3H8"/><path d="M14 20l5-3a1.5 1.5 0 0 1 2 2l-5 3.5a3 3 0 0 1-1.7.5H2"/>',
+		'calendar' => '<rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18"/><path d="M8 2.5v4"/><path d="M16 2.5v4"/><path d="M7.5 13.5h2"/><path d="M11 13.5h2"/><path d="M14.5 13.5h2"/><path d="M7.5 17h2"/><path d="M11 17h2"/>',
+		'alert'    => '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/>',
+		'map'      => '<path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/>',
+		'bolt'     => '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
 		'share'  => '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5"/><path d="m8.2 13.2 7.6 4.5"/>',
 	);
 }
