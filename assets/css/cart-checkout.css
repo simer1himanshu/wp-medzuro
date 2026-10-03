@@ -422,3 +422,8 @@
 .mz-gw__text { display: grid; gap: 1px; }
 .mz-gw__text strong { font-size: 15px; color: var(--mz-heading, #111); }
 .mz-gw__text small { font-size: 13px; font-weight: 400; color: var(--co-muted); }
+
+/* "Have a gift card?" form from the WooCommerce Gift Cards plugin isn't in
+   the client's design; hidden on cart and checkout. Delete this rule to bring
+   it back. */
+.mz-commerce .add_gift_card_form { display: none !important; }
