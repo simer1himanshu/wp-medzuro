@@ -326,3 +326,14 @@
 .mz-cart-page .cart_totals .mz-ship-choose td { width: 100%; }
 .mz-cart-page .woocommerce-cart-form { min-width: 0; }
 .mz-checkout-page .woocommerce-form-coupon-toggle + .checkout_coupon { display: none; }
+
+/* WooCommerce draws an icon-font glyph (absolutely positioned, needs ~3.5em
+   left padding) before every notice. Our notices use their own compact
+   padding, so the glyph landed on top of the text ("Have a coupon?"). */
+.mz-commerce .woocommerce-info::before,
+.mz-commerce .woocommerce-message::before,
+.mz-commerce .woocommerce-error::before { content: none; display: none; }
+.mz-commerce .woocommerce-info,
+.mz-commerce .woocommerce-message,
+.mz-commerce .woocommerce-error { position: relative; padding: 12px 14px; border-top-width: 1px; }
+.mz-commerce .woocommerce-form-coupon-toggle .woocommerce-info a { color: var(--co-navy); font-weight: 600; }
