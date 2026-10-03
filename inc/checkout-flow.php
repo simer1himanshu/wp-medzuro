@@ -939,7 +939,7 @@ function medzuro_gateway_cards() {
 }
 
 /**
- * True only while WooCommerce prints the payment method list, so the card
+ * True only while WooCommerce prints a payment method row, so the card
  * markup never ends up in the order's saved payment method title.
  *
  * @param bool|null $set New state.
@@ -952,8 +952,24 @@ function medzuro_rendering_payment_list( $set = null ) {
 	}
 	return $on;
 }
-add_action( 'woocommerce_review_order_before_payment', fn() => medzuro_rendering_payment_list( true ) );
-add_action( 'woocommerce_review_order_after_payment', fn() => medzuro_rendering_payment_list( false ) );
+// Switched on around each payment-method.php render. (The before/after
+// payment actions don't fire during AJAX refreshes, so they can't be used.)
+add_action(
+	'woocommerce_before_template_part',
+	function ( $template_name ) {
+		if ( 'checkout/payment-method.php' === $template_name && ! is_admin() ) {
+			medzuro_rendering_payment_list( true );
+		}
+	}
+);
+add_action(
+	'woocommerce_after_template_part',
+	function ( $template_name ) {
+		if ( 'checkout/payment-method.php' === $template_name ) {
+			medzuro_rendering_payment_list( false );
+		}
+	}
+);
 
 /**
  * Gateway title as a card: logo tile, name and one-line subtitle.
