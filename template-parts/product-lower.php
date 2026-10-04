@@ -209,28 +209,7 @@ $flags = medzuro_home_blocks( 'flag' );
 
 <div class="mz-pdp-section mz-pdp-faq">
 	<div class="mz-pdp-shell">
-		<div class="mz-pdp-section-head">
-			<p><?php esc_html_e( 'FAQ', 'medzuro' ); ?></p>
-			<h2><?php esc_html_e( 'Common Questions', 'medzuro' ); ?></h2>
-		</div>
-		<div class="mz-pdp-faq-list">
-			<details open>
-				<summary><?php esc_html_e( 'Are these genuine HolyOak products?', 'medzuro' ); ?></summary>
-				<p><?php esc_html_e( 'Yes. Medzuro Retail sells genuine HolyOak products locally in Fiji, backed by customer support you can reach directly.', 'medzuro' ); ?></p>
-			</details>
-			<details>
-				<summary><?php esc_html_e( 'How soon can I get delivery?', 'medzuro' ); ?></summary>
-				<p><?php esc_html_e( 'Delivery timing depends on your location. Same-day delivery is available in most of Suva when stock and cut-off timing allow.', 'medzuro' ); ?></p>
-			</details>
-			<details>
-				<summary><?php esc_html_e( 'Can I pick up locally?', 'medzuro' ); ?></summary>
-				<p><?php esc_html_e( 'Yes. Local pickup can be arranged from the Suva location. Contact the team before visiting so stock can be confirmed.', 'medzuro' ); ?></p>
-			</details>
-			<details>
-				<summary><?php esc_html_e( 'How do I know the product is tested?', 'medzuro' ); ?></summary>
-				<p><?php esc_html_e( 'This product is independently tested by Eurofins for quality and purity. You can view more on the Lab Test and Purity page, and a Certificate of Analysis is available on request.', 'medzuro' ); ?></p>
-			</details>
-		</div>
+		<?php get_template_part( 'template-parts/faq' ); ?>
 	</div>
 </div>
 <?php endif; ?>

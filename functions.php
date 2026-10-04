@@ -36,6 +36,7 @@ require_once get_template_directory() . '/inc/ref-icons.php';
 require_once get_template_directory() . '/inc/home.php';
 require_once get_template_directory() . '/inc/cart.php';
 require_once get_template_directory() . '/inc/footer.php';
+require_once get_template_directory() . '/inc/faq.php';
 require_once get_template_directory() . '/inc/delivery.php';
 require_once get_template_directory() . '/inc/checkout-flow.php';
 require_once get_template_directory() . '/inc/mpaisa-gateway.php';
@@ -138,6 +139,7 @@ function medzuro_assets() {
 	if ( function_exists( 'is_product' ) && is_product() ) {
 		$product_script = get_theme_file_path( '/assets/js/product.js' );
 		medzuro_style( 'product-page' );
+		medzuro_style( 'faq' );
 		wp_enqueue_script(
 			'medzuro-product',
 			get_template_directory_uri() . '/assets/js/product.js',
