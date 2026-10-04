@@ -1,0 +1,24 @@
+/* Legal pages (Terms & Conditions) — scoped to .mz-legal */
+.mz-legal-page { padding-top:56px; padding-bottom:80px; }
+.mz-legal { max-width:860px; margin:0 auto; color:#304463; }
+  .mz-legal__head { margin-bottom:36px; padding-bottom:28px; border-bottom:1px solid #e1e7ee; }
+  .mz-legal__eyebrow { margin:0 0 10px; color:#1b64d1; font-size:14px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+  .mz-legal__head h1 { margin:0 0 14px; color:#0b2b6b; font-size:clamp(32px,4.4vw,48px); line-height:1.1; font-weight:800; letter-spacing:-.01em; }
+  .mz-legal__dates { margin:0; color:#5b6b82; font-size:15px; line-height:1.7; }
+
+  .mz-legal__section { margin-bottom:34px; }
+  .mz-legal__section h2 { display:flex; align-items:baseline; gap:12px; margin:0 0 14px; color:#0b2b6b; font-size:18px; line-height:1.35; font-weight:800; letter-spacing:.03em; }
+  .mz-legal__section h2 span { flex:0 0 auto; min-width:34px; padding:3px 0; border-radius:6px; background:#eaf2fd; color:#1b64d1; font-size:15px; text-align:center; }
+  .mz-legal p { margin:0 0 14px; font-size:16px; line-height:1.75; }
+  .mz-legal a { color:#1b64d1; }
+  .mz-legal__shout { padding:16px 20px; border-left:4px solid #1b64d1; border-radius:4px; background:#f3f7fd; color:#0b2b6b; font-weight:800; font-size:15px !important; letter-spacing:.01em; }
+
+  .mz-legal__disclaimer { margin-top:44px; padding:26px 28px; border:2px solid #0b2b6b; border-radius:12px; background:#f7f9fc; }
+  .mz-legal__disclaimer h2 { margin:0 0 12px; color:#0b2b6b; font-size:20px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  .mz-legal__disclaimer p { margin:0; color:#0b2b6b; font-size:14px; line-height:1.7; font-weight:700; letter-spacing:.01em; }
+
+  @media (max-width:760px) {
+    .mz-legal-page { padding-top:36px; padding-bottom:52px; }
+    .mz-legal__section h2 { font-size:16px; }
+    .mz-legal__disclaimer { padding:20px 18px; }
+  }
