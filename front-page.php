@@ -235,6 +235,18 @@ $s = medzuro_home()['settings'];
 				<h2 id="mz-home-reviews-title"><?php echo esc_html( $s['reviews_title'] ); ?></h2>
 			</div>
 
+			<?php
+			$mz_avg = array_sum( array_map( fn( $r ) => (int) ( $r['rating'] ?? 5 ), $reviews ) ) / count( $reviews );
+			?>
+			<div class="mz-home-reviews__summary">
+				<span class="mz-home-reviews__avg-stars" style="--mz-pct: <?php echo esc_attr( round( $mz_avg / 5 * 100 ) ); ?>%"
+					role="img" aria-label="<?php echo esc_attr( sprintf( '%s out of 5 stars', number_format_i18n( $mz_avg, 1 ) ) ); ?>">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+				<strong><?php echo esc_html( number_format_i18n( $mz_avg, 1 ) ); ?>/5</strong>
+			</div>
+			<?php if ( ! empty( $s['reviews_subtitle'] ) ) : ?>
+				<p class="mz-home-reviews__sub"><?php echo esc_html( $s['reviews_subtitle'] ); ?></p>
+			<?php endif; ?>
+
 			<button class="mz-home-arrow mz-home-arrow--prev mz-home-arrow--reviews-prev" type="button"
 				aria-label="<?php esc_attr_e( 'Previous reviews', 'medzuro' ); ?>" data-mz-reviews-prev>
 				<span aria-hidden="true">&#8249;</span>
@@ -247,7 +259,7 @@ $s = medzuro_home()['settings'];
 						$stars = (int) ( $block['rating'] ?? 5 );
 						?>
 						<li class="mz-home-review">
-							<span class="mz-home-review__quote" aria-hidden="true">"</span>
+							<span class="mz-home-review__quote" aria-hidden="true">&ldquo;</span>
 							<span class="mz-home-rating"
 								aria-label="<?php echo esc_attr( sprintf( '%d out of 5 stars', $stars ) ); ?>">
 								<span aria-hidden="true"><?php echo esc_html( str_repeat( "\u{2605}", $stars ) ); ?></span>
@@ -260,7 +272,13 @@ $s = medzuro_home()['settings'];
 								<?php else : ?>
 									<span class="mz-home-avatar mz-home-avatar--<?php echo esc_attr( $block['avatar'] ); ?>"></span>
 								<?php endif; ?>
-								<strong><?php echo esc_html( $block['author'] ); ?><small><?php echo esc_html( $block['location'] ); ?></small></strong>
+								<div class="mz-home-review__who">
+									<strong><?php echo esc_html( $block['author'] ); ?></strong>
+									<span class="mz-home-review__verified"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="currentColor" stroke="none"/><path d="m7 12.5 3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><?php esc_html_e( 'Verified Purchase', 'medzuro' ); ?></span>
+									<?php if ( ! empty( $block['location'] ) ) : ?>
+										<span class="mz-home-review__loc"><?php medzuro_ref_icon( 'pin' ); ?><?php echo esc_html( $block['location'] ); ?></span>
+									<?php endif; ?>
+								</div>
 							</div>
 						</li>
 					<?php endforeach; ?>

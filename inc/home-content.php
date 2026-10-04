@@ -60,6 +60,7 @@ function medzuro_home() {
 			'lab_brand_tagline'      => 'The global trusted lab',
 			'lab_link_label'         => 'Learn more',
 			'reviews_title'          => 'What Fiji Customers Are Saying',
+			'reviews_subtitle'       => 'Based on verified customer reviews',
 			'show_newsletter'        => true,
 			'newsletter_heading'     => 'Stay in the loop',
 			'newsletter_text'        => 'New products. Special offers. Wellness updates.',
