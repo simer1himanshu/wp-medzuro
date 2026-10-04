@@ -320,11 +320,11 @@ $s = medzuro_home()['settings'];
 		<div class="page-width mz-home-help">
 			<ul class="mz-home-help__list" role="list">
 				<?php foreach ( $help as $block ) : ?>
-					<li>
+					<li class="mz-home-help__item mz-home-help__item--<?php echo esc_attr( $block['icon'] ); ?>">
 						<?php medzuro_ref_icon( $block['icon'] ); ?>
 						<span>
 							<strong><?php echo esc_html( $block['title'] ); ?></strong>
-							<small><?php echo esc_html( str_replace( '[phone]', $s['phone'], $block['text'] ) ); ?></small>
+							<small<?php echo false !== strpos( $block['text'], '[phone]' ) ? ' class="mz-home-help__phone"' : ''; ?>><?php echo esc_html( str_replace( '[phone]', $s['phone'], $block['text'] ) ); ?></small>
 						</span>
 					</li>
 				<?php endforeach; ?>
@@ -339,7 +339,14 @@ $s = medzuro_home()['settings'];
 					<span class="mz-home-newsletter__icon" aria-hidden="true">
 						<svg viewBox="0 0 24 24" focusable="false"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
 					</span>
-					<strong><?php echo esc_html( $s['newsletter_text'] ); ?></strong>
+					<div class="mz-home-newsletter__text">
+						<span class="mz-home-newsletter__bar" aria-hidden="true"></span>
+						<h2><?php echo esc_html( $s['newsletter_heading'] ); ?></h2>
+						<strong><?php echo esc_html( $s['newsletter_text'] ); ?></strong>
+						<?php if ( ! empty( $s['newsletter_note'] ) ) : ?>
+							<p><?php echo esc_html( $s['newsletter_note'] ); ?></p>
+						<?php endif; ?>
+					</div>
 				</div>
 
 				<?php
@@ -358,11 +365,17 @@ $s = medzuro_home()['settings'];
 						<input type="hidden" name="action" value="medzuro_newsletter_subscribe">
 						<?php wp_nonce_field( 'medzuro_newsletter_subscribe', 'medzuro_newsletter_nonce' ); ?>
 						<label class="mz-home-newsletter__trap" aria-hidden="true">Company<input type="text" name="company" tabindex="-1" autocomplete="off"></label>
-						<label class="v-hidden" for="mz-newsletter-email"><?php esc_html_e( 'Email address', 'medzuro' ); ?></label>
-						<input id="mz-newsletter-email" type="email" name="email" autocomplete="email"
-							placeholder="<?php echo esc_attr( $s['newsletter_placeholder'] ); ?>" required>
+						<label class="mz-home-newsletter__field">
+							<span class="mz-home-newsletter__label"><?php esc_html_e( 'Email address', 'medzuro' ); ?></span>
+							<?php medzuro_ref_icon( 'mail' ); ?>
+							<input id="mz-newsletter-email" type="email" name="email" autocomplete="email"
+								placeholder="<?php echo esc_attr( $s['newsletter_placeholder'] ); ?>" required>
+						</label>
 						<button type="submit"><?php echo esc_html( $s['newsletter_button'] ); ?></button>
 					</form>
+					<?php if ( ! empty( $s['newsletter_privacy'] ) ) : ?>
+						<p class="mz-home-newsletter__privacy"><?php medzuro_ref_icon( 'shield' ); ?><?php echo esc_html( $s['newsletter_privacy'] ); ?></p>
+					<?php endif; ?>
 					<?php if ( isset( $messages[ $status ] ) ) : ?>
 						<p class="mz-home-newsletter__message mz-home-newsletter__message--<?php echo esc_attr( $status ); ?>" role="status">
 							<?php echo esc_html( $messages[ $status ] ); ?>
