@@ -1055,7 +1055,7 @@
     }
 
     .mz-pdp-top {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .mz-pdp-buybox {
@@ -1099,7 +1099,7 @@
     }
 
     .mz-pdp-gallery {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .mz-pdp-thumbs {
@@ -1345,7 +1345,7 @@
 
   @media (max-width:989px) {
     .mz-pdp-shell { width:min(100% - 32px,780px); }
-    .mz-pdp-top { grid-template-columns:1fr; gap:32px; padding-top:28px; }
+    .mz-pdp-top { grid-template-columns:minmax(0,1fr); gap:32px; padding-top:28px; }
     .mz-pdp-info-grid { grid-template-columns:1fr; }
   }
 
@@ -1353,9 +1353,9 @@
     .mz-pdp-shell { width:min(100% - 32px,560px); }
     .mz-pdp-breadcrumb { padding:12px 0; font-size:13px; }
     .mz-pdp-top { gap:24px; padding:16px 0 40px; }
-    .mz-pdp-gallery { grid-template-columns:1fr; gap:10px; }
-    .mz-pdp-thumbs-wrap { order:2; }
-    .mz-pdp-thumbs { position:static; flex-direction:row; gap:10px; }
+    .mz-pdp-gallery { grid-template-columns:minmax(0,1fr); gap:10px; }
+    .mz-pdp-thumbs-wrap { order:2; min-width:0; max-width:100%; }
+    .mz-pdp-thumbs { position:static; flex-direction:row; gap:10px; max-width:100%; }
     .mz-pdp-thumb { flex:0 0 72px; width:72px; height:auto; }
     .mz-pdp-thumbs-nav { display:none; }
     .mz-pdp-main-media { min-height:0; }
@@ -1499,8 +1499,9 @@
   .mz-pdp .mz-pdp-features li:nth-child(3) { border-left: 0; padding-left: 0; }
 }
 @media (max-width: 700px) {
-  .mz-pdp .mz-pdp-gallery { grid-template-columns: 1fr; }
-  .mz-pdp .mz-pdp-thumbs { flex-direction: row; order: 2; overflow-x: auto; overflow-y: hidden; }
+  .mz-pdp .mz-pdp-gallery { grid-template-columns: minmax(0, 1fr); }
+  .mz-pdp .mz-pdp-gallery-wrap, .mz-pdp .mz-pdp-thumbs-wrap { min-width: 0; max-width: 100%; }
+  .mz-pdp .mz-pdp-thumbs { flex-direction: row; order: 2; overflow-x: auto; overflow-y: hidden; max-width: 100%; }
   .mz-pdp .mz-pdp-thumb { width: 72px; height: 72px; }
   .mz-pdp .mz-pdp-meta-row { flex-direction: column; align-items: flex-start; gap: 8px; }
   .mz-pdp .mz-pdp-rating { border: 0; padding: 0; }
