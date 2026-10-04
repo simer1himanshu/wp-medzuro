@@ -1465,14 +1465,15 @@
 
 /* Buy any 2 banner */
 .mz-pdp .mz-pdp-promo {
-  display: flex; align-items: center; gap: 28px; margin-top: 14px; padding: 18px 28px;
+  display: flex; align-items: center; gap: 16px; margin-top: 12px; padding: 10px 18px;
   border: 1.5px solid var(--pdp-gold-line); border-radius: 10px; background: linear-gradient(90deg, #fdf3df, #fbe9c4);
 }
-.mz-pdp .mz-pdp-promo__icon { flex: none; color: #d62828; padding-right: 28px; border-right: 2px solid #e2b866; }
+.mz-pdp .mz-pdp-promo__icon { flex: none; color: #d62828; padding-right: 16px; border-right: 2px solid #e2b866; }
+.mz-pdp .mz-pdp-promo__icon svg { width: 34px; height: 34px; display: block; }
 .mz-pdp .mz-pdp-promo__text { display: grid; line-height: 1.05; }
-.mz-pdp .mz-pdp-promo__text strong { color: var(--pdp-navy); font-size: 30px; font-weight: 800; }
-.mz-pdp .mz-pdp-promo__text em { color: #c81e1e; font-style: normal; font-size: 40px; font-weight: 900; }
-.mz-pdp .mz-pdp-promo__text span { color: #c81e1e; font-size: 20px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+.mz-pdp .mz-pdp-promo__text strong { color: var(--pdp-navy); font-size: 18px; font-weight: 800; }
+.mz-pdp .mz-pdp-promo__text em { color: #c81e1e; font-style: normal; font-size: 24px; font-weight: 900; }
+.mz-pdp .mz-pdp-promo__text span { color: #c81e1e; font-size: 12px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
 
 /* DHL delivery row */
 .mz-pdp .mz-pdp-delivery { display: flex; align-items: center; gap: 18px; margin-top: 20px; }
@@ -1507,11 +1508,11 @@
   .mz-pdp .mz-pdp-trust li { padding: 0; border: 0; }
   .mz-pdp .mz-pdp-purchase form.cart { gap: 12px; }
   .mz-pdp .single_add_to_cart_button { min-height: 56px; font-size: 17px !important; }
-  .mz-pdp .mz-pdp-promo { gap: 16px; padding: 14px 16px; }
-  .mz-pdp .mz-pdp-promo__icon { padding-right: 16px; }
-  .mz-pdp .mz-pdp-promo__text strong { font-size: 22px; }
-  .mz-pdp .mz-pdp-promo__text em { font-size: 30px; }
-  .mz-pdp .mz-pdp-promo__text span { font-size: 15px; }
+  .mz-pdp .mz-pdp-promo { gap: 12px; padding: 10px 14px; }
+  .mz-pdp .mz-pdp-promo__icon { padding-right: 12px; }
+  .mz-pdp .mz-pdp-promo__text strong { font-size: 16px; }
+  .mz-pdp .mz-pdp-promo__text em { font-size: 21px; }
+  .mz-pdp .mz-pdp-promo__text span { font-size: 11px; }
   .mz-pdp .mz-pdp-features { grid-template-columns: 1fr; padding: 18px; }
   .mz-pdp .mz-pdp-features li { border: 0; padding: 0; }
   .mz-pdp .mz-pdp-features__icon { width: 56px; height: 56px; }
