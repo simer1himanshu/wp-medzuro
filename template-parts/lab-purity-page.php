@@ -66,7 +66,7 @@ defined( 'ABSPATH' ) || exit;
       </div>
 
       <div class="lt-page__facility" aria-label="Eurofins laboratory facility exterior">
-        <img class="lt-page__facility-photo" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-eurofins-building.png' ); ?>" alt="Modern laboratory testing facility exterior" loading="lazy" width="1792" height="1024">
+        <img class="lt-page__facility-photo" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-eurofins-building-v2.png' ); ?>" alt="Modern laboratory testing facility exterior" loading="lazy" width="1419" height="1108">
         <div class="lt-page__facility-badge">
           <span class="lt-page__euro-dots" aria-hidden="true">
             <span></span><span></span><span></span><span></span>

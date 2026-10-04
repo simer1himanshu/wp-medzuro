@@ -221,7 +221,7 @@ $flags = medzuro_home_blocks( 'flag' );
 				<div><?php esc_html_e( 'Checked before it reaches you', 'medzuro' ); ?></div>
 			</div>
 		</div>
-		<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-eurofins-building.png' ); ?>" alt="<?php esc_attr_e( 'Eurofins independent testing laboratory', 'medzuro' ); ?>" loading="lazy" width="1773" height="887">
+		<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/medzuro-eurofins-building-v2.png' ); ?>" alt="<?php esc_attr_e( 'Eurofins independent testing laboratory', 'medzuro' ); ?>" loading="lazy" width="1419" height="1108">
 	</div>
 </div>
 

@@ -256,7 +256,7 @@
     display:grid; grid-template-columns:1.02fr 1.55fr; overflow:hidden; border-radius:8px; min-height:300px;
     background:linear-gradient(90deg,#f7f9fb 0%,#eef3f9 100%); border:1px solid #e5ebf1;
   }
-  .mz-home-lab__image { min-height:300px; background:url(../img/medzuro-eurofins-building.png) center / cover no-repeat; }
+  .mz-home-lab__image { min-height:300px; background:url(../img/medzuro-eurofins-building-v2.png) center / cover no-repeat; }
   .mz-home-lab__copy { position:relative; padding:38px 44px; min-width:0; }
   .mz-home-lab__copy h2 { margin:0; color:var(--mz-navy); font-size:35px; line-height:1.14; letter-spacing:0; font-weight:900; }
   .mz-home-lab__copy h2 span { color:var(--mz-green); }
