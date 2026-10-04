@@ -445,8 +445,15 @@
     .mz-home-reviews .mz-home-section-title h2 { font-size:26px; }
     .mz-home-reviews__avg-stars,
     .mz-home-reviews__summary strong { font-size:26px; }
-    .mz-home-arrow--reviews-prev { left:-4px; }
-    .mz-home-arrow--reviews-next { right:-4px; }
+    .mz-home-arrow--reviews-prev,
+    .mz-home-arrow--reviews-next { display:none; }
+    .mz-home-reviews__viewport { scroll-snap-type:x mandatory; }
+    .mz-home-review { scroll-snap-align:start; padding:20px 18px 18px; }
+    .mz-home-review p { font-size:15px; }
+    .mz-home-review__person { gap:12px; }
+    .mz-home-avatar { width:52px; height:52px; }
+    .mz-home-review__who strong { font-size:16px; }
+    .mz-home-review__verified, .mz-home-review__loc { font-size:13px; white-space:nowrap; }
     .mz-home-newsletter__text h2 { font-size:24px; }
     .mz-home-newsletter__text strong { font-size:16px; }
     .mz-home-blog__grid { grid-template-columns:1fr; }
