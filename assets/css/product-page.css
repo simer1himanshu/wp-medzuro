@@ -1425,7 +1425,7 @@
 .mz-pdp .mz-pdp-stars { --mz-star: #e2a33b; font-size: 22px; }
 .mz-pdp .mz-pdp-tagline { margin: 0; color: var(--pdp-muted); font-size: 16px; line-height: 1.45; }
 .mz-pdp .mz-pdp-rating:only-child { border: 0; }
-.mz-pdp .mz-pdp-desc { margin-top: 18px; color: var(--pdp-muted); font-size: 16px; line-height: 1.7; }
+.mz-pdp .mz-pdp-desc { margin-top: 4px; color: var(--pdp-muted); font-size: 16px; line-height: 1.7; }
 .mz-pdp .mz-pdp-desc p { margin: 0; }
 .mz-pdp .mz-pdp-availability { margin: 12px 0 0; }
 
