@@ -81,6 +81,8 @@ $s = medzuro_home()['settings'];
 							<a class="mz-home-product__media" href="<?php echo esc_url( $link ); ?>">
 								<?php if ( $coming_soon ) : ?>
 									<span class="mz-home-coming-badge"><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></span>
+								<?php else : ?>
+									<span class="mz-home-ribbon"><?php echo esc_html( $pricing['discount'] ); ?>% <?php esc_html_e( 'OFF', 'medzuro' ); ?></span>
 								<?php endif; ?>
 								<?php if ( $card_image ) : ?>
 									<img class="mz-home-product__img" src="<?php echo esc_url( $card_image ); ?>"
@@ -118,9 +120,10 @@ $s = medzuro_home()['settings'];
 
 									<?php if ( $s['show_ratings'] ) : ?>
 										<span class="mz-home-rating" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'medzuro' ); ?>">
-											<span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small><?php echo esc_html( $reviews ); ?> <?php esc_html_e( 'reviews', 'medzuro' ); ?></small>
+											<span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span><small>4.8 (<?php echo esc_html( $reviews ); ?> <?php esc_html_e( 'reviews', 'medzuro' ); ?>)</small>
 										</span>
 									<?php endif; ?>
+									<span class="mz-home-product__delivery"><?php medzuro_ref_icon( 'truck' ); ?><?php esc_html_e( 'Fast delivery across Fiji', 'medzuro' ); ?></span>
 								<?php endif; ?>
 
 								<?php if ( $coming_soon ) : ?>
@@ -130,12 +133,12 @@ $s = medzuro_home()['settings'];
 										action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $link ) ); ?>">
 										<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>">
 										<input type="hidden" name="quantity" value="1">
-										<button class="mz-home-add" type="submit"><?php echo esc_html( $s['add_label'] ); ?></button>
+										<button class="mz-home-add" type="submit"><?php medzuro_ref_icon( 'cart' ); ?><?php echo esc_html( $s['add_label'] ); ?></button>
 									</form>
 								<?php elseif ( ! $product->is_in_stock() ) : ?>
 									<button class="mz-home-add" type="button" disabled><?php echo esc_html( $s['soldout_label'] ); ?></button>
 								<?php else : ?>
-									<a class="mz-home-add" href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $s['add_label'] ); ?></a>
+									<a class="mz-home-add" href="<?php echo esc_url( $link ); ?>"><?php medzuro_ref_icon( 'cart' ); ?><?php echo esc_html( $s['add_label'] ); ?></a>
 								<?php endif; ?>
 							</div>
 						</li>
