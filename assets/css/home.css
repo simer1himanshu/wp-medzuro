@@ -375,29 +375,6 @@
   .mz-home-newsletter__message { margin:8px 0 0; color:#fff; font-size:12px; font-weight:700; }
   .mz-home-newsletter__message--invalid { color:#fff; }
 
-  .template-index .mz-foot {
-    background:#fff !important; color:#111b34 !important; padding:24px 0 30px !important; border-top:0 !important;
-  }
-  .template-index .mz-foot a { color:#111b34 !important; }
-  .template-index .mz-foot a:hover { color:#557d31 !important; }
-  .template-index .mz-foot .page-width { max-width:1280px !important; padding-left:54px !important; padding-right:54px !important; }
-  .template-index .mz-foot__top { grid-template-columns:1.1fr 2.6fr !important; gap:52px !important; padding-bottom:16px !important; }
-  .template-index .mz-foot__brand { gap:9px !important; }
-  .template-index .mz-foot__logo img { width:184px !important; max-width:184px !important; filter:none !important; }
-  .template-index .mz-foot__blurb { color:#2d3a52 !important; font-size:12px !important; line-height:1.55 !important; max-width:260px !important; }
-  .template-index .mz-foot__badge,
-  .template-index .mz-foot__contact,
-  .template-index .mz-foot__policies,
-  .template-index .mz-foot__social { display:none !important; }
-  .template-index .mz-foot__cols { grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:44px !important; }
-  .template-index .mz-foot__ttl { color:#111b34 !important; font-size:12px !important; letter-spacing:0 !important; }
-  .template-index .mz-foot__links { gap:6px !important; font-size:12px !important; color:#26364e !important; }
-  .template-index .mz-foot__rte { color:#26364e !important; font-size:12px !important; line-height:1.6 !important; }
-  .template-index .mz-foot__col--wide { display:none !important; }
-  .template-index .mz-foot__bottom { border:0 !important; padding-top:0 !important; justify-content:flex-start !important; }
-  .template-index .mz-foot__copy { color:#26364e !important; font-size:12px !important; }
-  .template-index .mz-foot__pay { gap:8px !important; }
-  .template-index .mz-foot__payicon { width:42px !important; height:26px !important; }
 
   @media (max-width:1180px) {
     .template-index #siteNav { gap:10px !important; }
@@ -437,8 +414,6 @@
     .mz-home-lab__copy { padding:30px 24px; }
     .mz-home-lab__checks { grid-template-columns:1fr 1fr; gap:20px 0; }
     .mz-home-newsletter__panel { grid-template-columns:1fr; }
-    .template-index .mz-foot .page-width { padding-left:24px !important; padding-right:24px !important; }
-    .template-index .mz-foot__top { grid-template-columns:1fr !important; gap:26px !important; }
   }
   @media (max-width:640px) {
     .template-index .top-header .left-hdr,
@@ -475,5 +450,4 @@
     .mz-home-newsletter__text h2 { font-size:24px; }
     .mz-home-newsletter__text strong { font-size:16px; }
     .mz-home-blog__grid { grid-template-columns:1fr; }
-    .template-index .mz-foot__cols { grid-template-columns:1fr 1fr !important; }
   }

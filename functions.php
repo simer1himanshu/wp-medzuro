@@ -35,6 +35,7 @@ require_once get_template_directory() . '/inc/home-admin.php';
 require_once get_template_directory() . '/inc/ref-icons.php';
 require_once get_template_directory() . '/inc/home.php';
 require_once get_template_directory() . '/inc/cart.php';
+require_once get_template_directory() . '/inc/footer.php';
 require_once get_template_directory() . '/inc/delivery.php';
 require_once get_template_directory() . '/inc/checkout-flow.php';
 require_once get_template_directory() . '/inc/mpaisa-gateway.php';
