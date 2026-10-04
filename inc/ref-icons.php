@@ -57,6 +57,8 @@ function medzuro_ref_icon_paths() {
 		'store'     => '<path d="M4 9.5 5.5 4h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12.5V20h13v-7.5"/><path d="M10 20v-4.5h4V20"/>',
 		'doc'       => '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5"/><path d="M10 16h5"/>',
 		'snowflake' => '<path d="M12 3v18"/><path d="m4.2 7.5 15.6 9"/><path d="m4.2 16.5 15.6-9"/><path d="m9.5 4.5 2.5 2 2.5-2"/><path d="m9.5 19.5 2.5-2 2.5 2"/>',
+		'pill'      => '<rect x="3.5" y="8.5" width="17" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="m9.2 9.2 5.6 5.6"/>',
+		'leaf2'     => '<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-5 6-8 10-10"/>',
 		'clock'   => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/>',
 	);
 }

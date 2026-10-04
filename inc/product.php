@@ -546,3 +546,74 @@ function medzuro_apply_bundle_offer( $cart ) {
 	$cart->add_fee( sprintf( __( 'Buy 2+ offer (%d%% off)', 'medzuro' ), (int) round( $rate * 100 ) ), -$discount, false );
 }
 add_action( 'woocommerce_cart_calculate_fees', 'medzuro_apply_bundle_offer' );
+
+
+/**
+ * Spec chips for the product details intro (count, strength, testing, type).
+ *
+ * Built only from data the product already has, so a chip is omitted rather
+ * than guessed when the information is missing.
+ *
+ * @param WC_Product $product    Product.
+ * @param bool       $is_holyoak Whether the Eurofins testing claim applies.
+ * @return array<int,array{icon:string,value:string,label:string}>
+ */
+function medzuro_pdp_spec_chips( $product, $is_holyoak ) {
+	$chips   = array();
+	$serving = (string) medzuro_field( 'serving', medzuro_home()['settings']['product_meta'] ?? '', $product->get_id() );
+	$unit    = '';
+
+	if ( preg_match( '/(\d+)\s*([A-Za-z]+)/', $serving, $m ) ) {
+		$unit    = strtolower( $m[2] );
+		$chips[] = array(
+			'icon'  => 'pill',
+			'value' => $m[1],
+			'label' => ucfirst( $m[2] ),
+		);
+	}
+
+	$text = $product->get_name() . ' ' . wp_strip_all_tags( $product->get_description() . ' ' . $product->get_short_description() );
+
+	if ( 'capsules' === $unit && preg_match( '/(\d+(?:\.\d+)?)\s?mg\b/i', $text, $m ) ) {
+		$chips[] = array(
+			'icon'  => 'leaf',
+			'value' => $m[1] . ' mg',
+			'label' => __( 'per capsule', 'medzuro' ),
+		);
+	}
+
+	if ( $is_holyoak ) {
+		$chips[] = array(
+			'icon'  => 'lab',
+			'value' => __( 'Third-Party', 'medzuro' ),
+			'label' => __( 'Lab Tested', 'medzuro' ),
+		);
+	}
+
+	$chips[] = array(
+		'icon'  => 'leaf2',
+		'value' => __( 'Dietary', 'medzuro' ),
+		'label' => __( 'Supplement', 'medzuro' ),
+	);
+
+	return $chips;
+}
+
+/**
+ * First published page matching one of several slugs, else a fallback URL.
+ *
+ * @param string[] $slugs    Candidate page slugs.
+ * @param string   $fallback Fallback URL.
+ * @return string
+ */
+function medzuro_page_url( $slugs, $fallback ) {
+	foreach ( $slugs as $slug ) {
+		$page = get_page_by_path( $slug );
+
+		if ( $page && 'publish' === $page->post_status ) {
+			return get_permalink( $page );
+		}
+	}
+
+	return $fallback;
+}

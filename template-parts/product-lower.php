@@ -44,39 +44,88 @@ $is_holyoak = false !== stripos( $brand, 'holyoak' )
 	|| has_term( 'holyoak', 'product_cat', $product->get_id() );
 ?>
 
+<?php
+$mz_title  = ( false !== stripos( $product->get_name(), $brand ) || '' === $brand ) ? $product->get_name() : trim( $brand . ' ' . $product->get_name() );
+$mz_image  = medzuro_card_image_url( $product );
+$mz_image  = $mz_image ?: wp_get_attachment_image_url( $product->get_image_id(), 'large' );
+$mz_chips  = medzuro_pdp_spec_chips( $product, $is_holyoak );
+$mz_has_specs = $product->has_attributes() || $product->has_weight() || $product->has_dimensions();
+$mz_cards  = array(
+	array(
+		'icon'  => 'shield',
+		'title' => __( 'Quality You Can Trust', 'medzuro' ),
+		'text'  => __( 'Made with carefully selected ingredients and quality-focused manufacturing standards. Batch testing documentation can be provided where applicable.', 'medzuro' ),
+		'label' => __( 'Quality & Testing', 'medzuro' ),
+		'url'   => medzuro_page_url( array( 'lab-test-and-purity', 'lab-purity', 'lab-testing' ), home_url( '/lab-purity/' ) ),
+	),
+	array(
+		'icon'  => 'truck',
+		'title' => __( 'Delivered Across Fiji', 'medzuro' ),
+		'text'  => __( 'Convenient delivery to customers across Fiji through our reliable shipping partner DHL, with local pickup options available in Suva where offered.', 'medzuro' ),
+		'label' => __( 'Delivery Information', 'medzuro' ),
+		'url'   => medzuro_page_url( array( 'delivery', 'delivery-information' ), home_url( '/delivery-information/' ) ),
+	),
+	array(
+		'icon'  => 'headset',
+		'title' => __( "We're Here to Help", 'medzuro' ),
+		'text'  => __( 'Need help with your order, delivery, product information or availability? Our Fiji support team is ready to assist you.', 'medzuro' ),
+		'label' => __( 'Contact Our Team', 'medzuro' ),
+		'url'   => medzuro_page_url( array( 'contact' ), home_url( '/contact/' ) ),
+	),
+	array(
+		'icon'  => 'doc',
+		'title' => __( "What's Inside", 'medzuro' ),
+		'text'  => __( 'View ingredients, serving size, suggested use, storage information and important product guidance to help you make an informed choice.', 'medzuro' ),
+		'label' => __( 'Product Information', 'medzuro' ),
+		'url'   => $mz_has_specs ? '#mz-pdp-specifications' : '#mz-faq-title',
+	),
+);
+?>
 <section class="mz-pdp-details" aria-label="<?php esc_attr_e( 'Product information', 'medzuro' ); ?>">
 	<div class="mz-pdp-shell">
-		<?php if ( $description ) : ?>
-			<div class="mz-pdp-description">
+		<div class="mz-pdp-intro">
+			<div class="mz-pdp-intro__copy">
 				<p class="mz-pdp-kicker"><?php esc_html_e( 'Product details', 'medzuro' ); ?></p>
-				<h2><?php esc_html_e( 'About this product', 'medzuro' ); ?></h2>
-				<div class="rte"><?php echo wp_kses_post( wpautop( $description ) ); ?></div>
+				<h2><?php
+					/* translators: %s: product name */
+					echo esc_html( sprintf( __( 'Why Choose %s?', 'medzuro' ), $mz_title ) );
+				?></h2>
+				<p class="mz-pdp-intro__tag"><?php esc_html_e( 'Pure. Convenient. Made for your daily wellness routine.', 'medzuro' ); ?></p>
+				<?php if ( $description ) : ?>
+					<div class="mz-pdp-intro__body rte"><?php echo wp_kses_post( wpautop( $description ) ); ?></div>
+				<?php endif; ?>
+
+				<ul class="mz-pdp-chips" role="list">
+					<?php foreach ( $mz_chips as $chip ) : ?>
+						<li>
+							<span class="mz-pdp-chips__icon"><?php medzuro_ref_icon( $chip['icon'] ); ?></span>
+							<strong><?php echo esc_html( $chip['value'] ); ?></strong>
+							<small><?php echo esc_html( $chip['label'] ); ?></small>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
-		<?php endif; ?>
+
+			<?php if ( $mz_image ) : ?>
+				<div class="mz-pdp-intro__media">
+					<img src="<?php echo esc_url( $mz_image ); ?>" alt="<?php echo esc_attr( $mz_title ); ?>" loading="lazy">
+				</div>
+			<?php endif; ?>
+		</div>
 
 		<div class="mz-pdp-info-grid">
-			<article>
-				<span class="mz-pdp-info-icon"><?php medzuro_icon( 'shield', 26 ); ?></span>
-				<h3><?php esc_html_e( 'Quality first', 'medzuro' ); ?></h3>
-				<p><?php esc_html_e( 'We source genuine wellness products and provide local support before and after your order.', 'medzuro' ); ?></p>
-				<a href="<?php echo esc_url( get_permalink( get_page_by_path( 'lab-test-and-purity' ) ) ); ?>"><?php esc_html_e( 'Quality and purity', 'medzuro' ); ?></a>
-			</article>
-			<article>
-				<span class="mz-pdp-info-icon"><?php medzuro_icon( 'truck', 26 ); ?></span>
-				<h3><?php esc_html_e( 'Fiji delivery', 'medzuro' ); ?></h3>
-				<p><?php esc_html_e( 'Delivery is available across Fiji, with local pickup available by arrangement in Suva.', 'medzuro' ); ?></p>
-				<a href="<?php echo esc_url( get_permalink( get_page_by_path( 'delivery' ) ) ); ?>"><?php esc_html_e( 'Delivery information', 'medzuro' ); ?></a>
-			</article>
-			<article>
-				<span class="mz-pdp-info-icon"><?php medzuro_icon( 'headset', 26 ); ?></span>
-				<h3><?php esc_html_e( 'Need help?', 'medzuro' ); ?></h3>
-				<p><?php esc_html_e( 'Our Fiji team can help with availability, pickup, delivery, and product questions.', 'medzuro' ); ?></p>
-				<a href="<?php echo esc_url( get_permalink( get_page_by_path( 'contact' ) ) ); ?>"><?php esc_html_e( 'Contact our team', 'medzuro' ); ?></a>
-			</article>
+			<?php foreach ( $mz_cards as $card ) : ?>
+				<article>
+					<span class="mz-pdp-info-icon"><?php medzuro_ref_icon( $card['icon'] ); ?></span>
+					<h3><?php echo esc_html( $card['title'] ); ?></h3>
+					<p><?php echo esc_html( $card['text'] ); ?></p>
+					<a href="<?php echo esc_url( $card['url'] ); ?>"><?php echo esc_html( $card['label'] ); ?></a>
+				</article>
+			<?php endforeach; ?>
 		</div>
 
 		<?php if ( $product->has_attributes() || $product->has_weight() || $product->has_dimensions() ) : ?>
-			<div class="mz-pdp-specifications">
+			<div class="mz-pdp-specifications" id="mz-pdp-specifications">
 				<h2><?php esc_html_e( 'Product information', 'medzuro' ); ?></h2>
 				<?php wc_display_product_attributes( $product ); ?>
 			</div>
