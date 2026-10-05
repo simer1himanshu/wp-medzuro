@@ -351,9 +351,14 @@
 .mz-commerce.mz-commerce .checkout-button { background: var(--co-navy); color: #fff; border-color: var(--co-navy); }
 
 /* Select pickup location */
-.mz-store { position: relative; display: grid; grid-template-columns: 22px 1fr; gap: 12px; padding: 14px; border: 1.5px solid var(--co-blue); border-radius: 10px; background: var(--co-wash); cursor: pointer; }
+.mz-stores { display: grid; gap: 12px; margin-bottom: 16px; }
+.mz-store-opt .mz-store__map { margin: 8px 0 0; }
+.mz-store { position: relative; display: grid; grid-template-columns: 22px 1fr; gap: 12px; padding: 14px; border: 1.5px solid var(--co-line, #d6deea); border-radius: 10px; background: #fff; cursor: pointer; }
+.mz-store:has(input:checked) { border-color: var(--co-blue); background: var(--co-wash); }
+.mz-store:has(input:focus-visible) { outline: 2px solid var(--co-blue); outline-offset: 2px; }
 .mz-store input { position: absolute; opacity: 0; }
-.mz-store__radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--co-blue); background: var(--co-blue); box-shadow: inset 0 0 0 4px #fff; align-self: center; }
+.mz-store__radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--co-blue); background: #fff; align-self: center; }
+.mz-store input:checked + .mz-store__radio { background: var(--co-blue); box-shadow: inset 0 0 0 4px #fff; }
 .mz-store__body { display: grid; gap: 6px; }
 .mz-store__name { color: var(--co-navy); font-size: 16px; }
 .mz-store__img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; }
