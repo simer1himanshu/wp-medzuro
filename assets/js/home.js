@@ -33,8 +33,23 @@
       next.addEventListener('click', function () {
         scrollByCard(1);
       });
+
+      // Show an arrow only when there is something to scroll to in that
+      // direction, so a rail whose cards all fit shows no arrows at all.
+      function updateArrows() {
+        var max = viewport.scrollWidth - viewport.clientWidth;
+        var overflow = max > 4;
+
+        prev.hidden = !overflow || viewport.scrollLeft <= 4;
+        next.hidden = !overflow || viewport.scrollLeft >= max - 4;
+      }
+
+      viewport.addEventListener('scroll', updateArrows, { passive: true });
+      window.addEventListener('resize', updateArrows);
+      updateArrows();
     }
 
+    bindScroller('[data-mz-home-products]', '[data-mz-home-prev]', '[data-mz-home-next]');
     bindScroller('[data-mz-reviews]', '[data-mz-reviews-prev]', '[data-mz-reviews-next]');
   });
 })();

@@ -62,7 +62,13 @@ $s = medzuro_home()['settings'];
 			<h2 id="mz-home-products-title"><?php echo esc_html( $s['products_title'] ); ?></h2>
 		</div>
 
-		<div class="mz-home-products__viewport">
+		<div class="mz-home-products__rail">
+		<button class="mz-home-arrow mz-home-arrow--prev" type="button" hidden
+			aria-label="<?php esc_attr_e( 'Previous products', 'medzuro' ); ?>" data-mz-home-prev>
+			<span aria-hidden="true">&#8249;</span>
+		</button>
+
+		<div class="mz-home-products__viewport" data-mz-home-products>
 			<ul class="mz-home-products__track" role="list">
 				<?php
 				$products = medzuro_home_products();
@@ -149,6 +155,12 @@ $s = medzuro_home()['settings'];
 				endif;
 				?>
 			</ul>
+		</div>
+
+		<button class="mz-home-arrow mz-home-arrow--next" type="button" hidden
+			aria-label="<?php esc_attr_e( 'Next products', 'medzuro' ); ?>" data-mz-home-next>
+			<span aria-hidden="true">&#8250;</span>
+		</button>
 		</div>
 	</section>
 
