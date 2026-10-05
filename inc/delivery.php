@@ -27,8 +27,8 @@ function medzuro_delivery_defaults() {
 		'dhl_cost'       => '0',
 		'dhl_eta'        => __( '3-7 working days', 'medzuro' ),
 		'pickup_enabled' => 'yes',
-		'pickup_address' => __( 'Nakasi or Princes Road, Suva', 'medzuro' ),
-		'pickup_note'    => __( 'Collect your order from one of our two Suva stores', 'medzuro' ),
+		'pickup_address' => __( 'Multiple Pickup Locations Available Across Suva', 'medzuro' ),
+		'pickup_note'    => __( 'Choose Nakasi or Princes Road at checkout', 'medzuro' ),
 		'pickup_hours'   => __( 'Mon - Sat, 9:00 AM - 5:00 PM', 'medzuro' ),
 	);
 }
