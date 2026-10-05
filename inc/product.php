@@ -219,12 +219,28 @@ function medzuro_pdp_qty_plus() {
 add_action( 'woocommerce_after_quantity_input_field', 'medzuro_pdp_qty_plus' );
 
 /**
+ * Image for product cards in grids (homepage, shop, collections).
+ *
+ * The product's first (featured) image is used for the grid only; the product
+ * page gallery skips it. Falls back to the bundled catalog image, then to
+ * an empty string so callers use their own placeholder.
+ *
+ * @param WC_Product $product Product being displayed.
+ * @return string Image URL, or an empty string.
+ */
+function medzuro_card_image_url( $product ) {
+	$featured = $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'large' ) : '';
+
+	return $featured ?: medzuro_catalog_image_url( $product );
+}
+
+/**
  * Return the coordinated square catalog image for a product when available.
  *
  * @param WC_Product $product Product being displayed.
  * @return string Catalog image URL, or an empty string for the Woo fallback.
  */
-function medzuro_card_image_url( $product ) {
+function medzuro_catalog_image_url( $product ) {
 	$images = array(
 		'holyoak-capsules'                 => 'holyoak-capsules.png',
 		'holyoak-gummies'                  => 'holyoak-gummies.png',

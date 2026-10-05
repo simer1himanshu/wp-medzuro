@@ -46,8 +46,10 @@ $is_holyoak = false !== stripos( $brand, 'holyoak' )
 
 <?php
 $mz_title  = ( false !== stripos( $product->get_name(), $brand ) || '' === $brand ) ? $product->get_name() : trim( $brand . ' ' . $product->get_name() );
-$mz_image  = medzuro_card_image_url( $product );
-$mz_image  = $mz_image ?: wp_get_attachment_image_url( $product->get_image_id(), 'large' );
+// Not the featured image: that one is reserved for grid cards.
+$mz_gallery_ids = $product->get_gallery_image_ids();
+$mz_image       = medzuro_catalog_image_url( $product );
+$mz_image       = $mz_image ?: ( $mz_gallery_ids ? wp_get_attachment_image_url( $mz_gallery_ids[0], 'large' ) : wp_get_attachment_image_url( $product->get_image_id(), 'large' ) );
 $mz_chips  = medzuro_pdp_spec_chips( $product, $is_holyoak );
 $mz_has_specs = $product->has_attributes() || $product->has_weight() || $product->has_dimensions();
 $mz_cards  = array(

@@ -27,13 +27,11 @@ while ( have_posts() ) :
 	$coming_soon  = medzuro_is_coming_soon( $product );
 	$in_stock     = $product->is_in_stock();
 	$cards        = $coming_soon ? null : medzuro_pdp_variation_cards( $product );
-	$image_ids    = array_values(
-		array_unique(
-			array_filter(
-				array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() )
-			)
-		)
-	);
+	// The product's first image (its featured image) is the grid/card image
+	// only. The product page gallery is built from the gallery images, and
+	// falls back to the featured image when a product has no gallery.
+	$mz_gallery   = array_values( array_unique( array_filter( $product->get_gallery_image_ids() ) ) );
+	$image_ids    = $mz_gallery ?: array_values( array_filter( array( $product->get_image_id() ) ) );
 
 	// The price block starts on the preselected card, so the page shows the
 	// same option the form will submit.
