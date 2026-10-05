@@ -39,6 +39,8 @@ if ( ! $descriptor ) {
 		aria-label="<?php echo esc_attr( $product->get_name() ); ?>">
 		<?php if ( $coming_soon ) : ?>
 			<span class="mz-product-card__coming-badge"><?php esc_html_e( 'Coming Soon', 'medzuro' ); ?></span>
+		<?php else : ?>
+			<span class="mz-product-card__ribbon"><?php echo esc_html( $pricing['discount'] ); ?>% <?php esc_html_e( 'OFF', 'medzuro' ); ?></span>
 		<?php endif; ?>
 		<?php if ( $card_image ) : ?>
 			<img src="<?php echo esc_url( $card_image ); ?>" alt="<?php echo esc_attr( $product->get_name() ); ?>"
@@ -84,6 +86,8 @@ if ( ! $descriptor ) {
 					<small><?php echo esc_html( sprintf( _n( '%d review', '%d reviews', $reviews, 'medzuro' ), $reviews ) ); ?></small>
 				</div>
 			<?php endif; ?>
+
+			<span class="mz-product-card__delivery"><?php medzuro_ref_icon( 'truck' ); ?><?php esc_html_e( 'Fast delivery across Fiji', 'medzuro' ); ?></span>
 		<?php endif; ?>
 
 		<?php if ( $coming_soon ) : ?>
@@ -102,7 +106,7 @@ if ( ! $descriptor ) {
 				<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>">
 				<input type="hidden" name="quantity" value="1">
 				<button class="mz-product-card__button" type="submit">
-					<?php esc_html_e( 'Add To Cart', 'medzuro' ); ?>
+					<?php medzuro_ref_icon( 'cart' ); ?><?php esc_html_e( 'Add To Cart', 'medzuro' ); ?>
 				</button>
 			</form>
 
