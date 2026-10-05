@@ -186,7 +186,7 @@ if ( class_exists( 'WC_Payment_Gateway' ) && ! class_exists( 'WC_Gateway_Medzuro
 				'description' => array(
 					'title'   => __( 'Description', 'medzuro' ),
 					'type'    => 'textarea',
-					'default' => __( 'Pay in full when you collect from our Nakasi store. Reservations are not guaranteed and are held for a limited time.', 'medzuro' ),
+					'default' => __( 'Pay in full when you collect from your chosen store. Reservations are not guaranteed and are held for a limited time.', 'medzuro' ),
 				),
 			);
 		}
@@ -290,7 +290,12 @@ add_action( 'woocommerce_order_status_shipped', 'medzuro_email_shipped', 10, 2 )
 function medzuro_email_ready_pickup( $order_id, $order ) {
 	$balance = (float) $order->get_total() - medzuro_order_amount_paid( $order );
 	$body    = '<p>' . sprintf( esc_html__( 'Hi %s,', 'medzuro' ), esc_html( $order->get_billing_first_name() ) ) . '</p>';
-	$body   .= '<p>' . sprintf( esc_html__( 'Order #%s is ready for pickup at our Nakasi, Suva store.', 'medzuro' ), esc_html( $order->get_order_number() ) ) . '</p>';
+	$store   = medzuro_order_pickup_store( $order );
+	/* translators: 1: order number, 2: store name, 3: store address */
+	$body   .= '<p>' . sprintf( esc_html__( 'Order #%1$s is ready for pickup at %2$s (%3$s).', 'medzuro' ), esc_html( $order->get_order_number() ), esc_html( $store['name'] ), esc_html( $store['street'] ) ) . '</p>';
+	if ( $store['map'] ) {
+		$body .= '<p><a href="' . esc_url( $store['map'] ) . '">' . esc_html__( 'View on Google Maps', 'medzuro' ) . '</a></p>';
+	}
 
 	if ( $balance > 0 ) {
 		$body .= '<p><strong>' . esc_html__( 'Amount to pay at pickup:', 'medzuro' ) . '</strong> ' . wp_kses_post( wc_price( $balance ) ) . '</p>';
@@ -606,7 +611,7 @@ function medzuro_followup_meta_box_html( $post_or_order ) {
 	$phone   = preg_replace( '/\D+/', '', $order->get_billing_phone() );
 	$contact = $order->get_meta( '_billing_contact_method' );
 	$paid    = medzuro_order_amount_paid( $order );
-	$store   = medzuro_pickup_store();
+	$store   = medzuro_order_pickup_store( $order );
 	$action  = function ( $do ) use ( $order ) {
 		return wp_nonce_url( admin_url( 'admin-post.php?action=medzuro_order_action&do=' . $do . '&order_id=' . $order->get_id() ), 'medzuro_order_action_' . $order->get_id() );
 	};
@@ -617,7 +622,7 @@ function medzuro_followup_meta_box_html( $post_or_order ) {
 			<tr><th><?php esc_html_e( 'Customer', 'medzuro' ); ?></th><td><?php echo esc_html( $order->get_formatted_billing_full_name() ); ?><br /><?php echo esc_html( $order->get_billing_phone() ); ?><br /><?php echo esc_html( $order->get_billing_email() ); ?><?php echo $contact ? '<br /><em>' . esc_html( sprintf( __( 'Prefers %s', 'medzuro' ), ucfirst( $contact ) ) ) . '</em>' : ''; ?></td></tr>
 			<tr><th><?php esc_html_e( 'Order type', 'medzuro' ); ?></th><td><?php echo esc_html( $pickup ? __( 'Pickup', 'medzuro' ) : __( 'Home delivery (DHL)', 'medzuro' ) ); ?></td></tr>
 			<?php if ( $pickup ) : ?>
-				<tr><th><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></th><td><?php echo esc_html( $store['name'] ); ?></td></tr>
+				<tr><th><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></th><td><?php echo esc_html( $store['name'] ); ?><br /><small><?php echo esc_html( $store['street'] ); ?></small></td></tr>
 				<tr><th><?php esc_html_e( 'Payment option', 'medzuro' ); ?></th><td><?php echo esc_html( isset( $labels[ $option ] ) ? $labels[ $option ]['short'] : __( 'Full payment', 'medzuro' ) ); ?></td></tr>
 			<?php endif; ?>
 			<tr><th><?php esc_html_e( 'Total', 'medzuro' ); ?></th><td><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></td></tr>
@@ -678,11 +683,11 @@ add_action( 'admin_post_medzuro_order_action', 'medzuro_handle_order_action' );
  * @param WC_Order $order    Order.
  */
 function medzuro_email_confirmed( $order_id, $order ) {
-	$store = medzuro_pickup_store();
+	$store = medzuro_order_pickup_store( $order );
 	$body  = '<p>' . sprintf( esc_html__( 'Hi %s,', 'medzuro' ), esc_html( $order->get_billing_first_name() ) ) . '</p>';
 	$body .= '<p>' . sprintf( esc_html__( 'Good news - we have confirmed stock for order #%s and reserved it for you.', 'medzuro' ), esc_html( $order->get_order_number() ) ) . '</p>';
 	$body .= '<p><strong>' . esc_html__( 'Pay at pickup:', 'medzuro' ) . '</strong> ' . wp_kses_post( wc_price( (float) $order->get_total() ) ) . '<br />';
-	$body .= '<strong>' . esc_html__( 'Pickup:', 'medzuro' ) . '</strong> ' . esc_html( $store['name'] ) . ', ' . esc_html( $store['hours'] ) . '</p>';
+	$body .= '<strong>' . esc_html__( 'Pickup:', 'medzuro' ) . '</strong> ' . esc_html( $store['name'] ) . ', ' . esc_html( $store['street'] ) . ' (' . esc_html( $store['hours'] ) . ')</p>';
 
 	/* translators: %s: order number */
 	medzuro_send_customer_email( $order, sprintf( __( 'Your Medzuro order #%s is confirmed', 'medzuro' ), $order->get_order_number() ), __( 'Reservation confirmed', 'medzuro' ), $body );

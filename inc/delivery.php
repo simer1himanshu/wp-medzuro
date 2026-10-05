@@ -3,7 +3,7 @@
  * Delivery or pickup: the shipping method and its helpers.
  *
  * Implements the client's "Initial Flow": the customer chooses DHL Express
- * home delivery or store pickup in Nakasi, Suva. Every other shipping rate is
+ * home delivery or store pickup in Suva (Nakasi or Princes Road). Every other shipping rate is
  * removed so the cart and checkout always show exactly those two choices.
  *
  * The method can optionally be added to the Fiji shipping zone
@@ -27,29 +27,22 @@ function medzuro_delivery_defaults() {
 		'dhl_cost'       => '0',
 		'dhl_eta'        => __( '3-7 working days', 'medzuro' ),
 		'pickup_enabled' => 'yes',
-		'pickup_address' => __( 'Nakasi, Suva', 'medzuro' ),
-		'pickup_note'    => __( 'Collect your order from our pickup location', 'medzuro' ),
-		'pickup_name'    => __( 'Medzuro Retail - Nakasi, Suva', 'medzuro' ),
-		'pickup_street'  => __( 'Lot 1, Nakasi Shopping Centre, Nakasi, Suva, Fiji Islands', 'medzuro' ),
+		'pickup_address' => __( 'Nakasi or Princes Road, Suva', 'medzuro' ),
+		'pickup_note'    => __( 'Collect your order from one of our two Suva stores', 'medzuro' ),
 		'pickup_hours'   => __( 'Mon - Sat, 9:00 AM - 5:00 PM', 'medzuro' ),
-		'pickup_map'     => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Nakasi Shopping Centre, Nakasi, Fiji' ),
 	);
 }
 
 /**
- * The pickup store's details, from the shipping method settings when the
- * method is set up in the Fiji zone, otherwise the defaults above.
+ * Saved settings of the Medzuro method in the Fiji zone, when it was added
+ * there. Empty values are left out so the defaults apply.
  *
- * Also used on the thank-you page, emails and the admin follow-up box.
- * Drop a photo of the store at assets/img/pickup-store.jpg to show it on
- * the "Select pickup location" step.
- *
- * @return array{name:string, street:string, hours:string, map:string, area:string, image:string}
+ * @return array
  */
-function medzuro_pickup_store() {
-	static $store = null;
-	if ( null !== $store ) {
-		return $store;
+function medzuro_delivery_saved_settings() {
+	static $settings = null;
+	if ( null !== $settings ) {
+		return $settings;
 	}
 
 	$settings = array();
@@ -69,25 +62,100 @@ function medzuro_pickup_store() {
 		}
 	}
 
-	$s     = wp_parse_args( $settings, medzuro_delivery_defaults() );
-	$image = '';
-	foreach ( array( 'jpg', 'jpeg', 'png', 'webp' ) as $ext ) {
-		if ( file_exists( get_theme_file_path( '/assets/img/pickup-store.' . $ext ) ) ) {
-			$image = get_theme_file_uri( '/assets/img/pickup-store.' . $ext );
-			break;
-		}
+	return $settings;
+}
+
+/**
+ * The pickup stores the customer can choose from, keyed by a stable id that
+ * is posted as "mz_pickup_store" and saved on the order as _mz_pickup_store.
+ * The first store is the default.
+ *
+ * Drop a photo at assets/img/pickup-store-{id}.jpg (e.g.
+ * pickup-store-princes-road.jpg) to show it on the "Select pickup location"
+ * step. assets/img/pickup-store.jpg is used for Nakasi as before.
+ *
+ * @return array[] id => array{id:string, name:string, street:string, hours:string, map:string, area:string, image:string}
+ */
+function medzuro_pickup_stores() {
+	static $stores = null;
+	if ( null !== $stores ) {
+		return $stores;
 	}
 
-	$store = array(
-		'name'   => $s['pickup_name'],
-		'street' => $s['pickup_street'],
-		'hours'  => $s['pickup_hours'],
-		'map'    => $s['pickup_map'],
-		'area'   => $s['pickup_address'],
-		'image'  => $image,
+	$s     = wp_parse_args( medzuro_delivery_saved_settings(), medzuro_delivery_defaults() );
+	$hours = $s['pickup_hours'];
+
+	$stores = array(
+		'nakasi'       => array(
+			'name'   => __( 'Medzuro Retail - Nakasi', 'medzuro' ),
+			'street' => __( '18, Valili Street, Vishnu Deo Road, Nakasi, Suva', 'medzuro' ),
+			'area'   => __( 'Nakasi, Suva', 'medzuro' ),
+			'hours'  => $hours,
+			'map'    => 'https://maps.app.goo.gl/68wbiqEhmbqoQcXH6',
+			'photos' => array( 'pickup-store-nakasi', 'pickup-store' ),
+		),
+		'princes-road' => array(
+			'name'   => __( 'Medzuro Retail - Princes Road', 'medzuro' ),
+			'street' => __( '204, Princes Road, Suva, Fiji', 'medzuro' ),
+			'area'   => __( 'Princes Road, Suva', 'medzuro' ),
+			'hours'  => $hours,
+			'map'    => 'https://maps.app.goo.gl/4Jqa1znBGrMrSnRYA',
+			'photos' => array( 'pickup-store-princes-road' ),
+		),
 	);
 
-	return $store;
+	foreach ( $stores as $id => $store ) {
+		$image = '';
+		foreach ( $store['photos'] as $base ) {
+			foreach ( array( 'jpg', 'jpeg', 'png', 'webp' ) as $ext ) {
+				if ( file_exists( get_theme_file_path( '/assets/img/' . $base . '.' . $ext ) ) ) {
+					$image = get_theme_file_uri( '/assets/img/' . $base . '.' . $ext );
+					break 2;
+				}
+			}
+		}
+		unset( $store['photos'] );
+		$stores[ $id ] = array( 'id' => $id ) + $store + array( 'image' => $image );
+	}
+
+	$stores = apply_filters( 'medzuro_pickup_stores', $stores );
+
+	return $stores;
+}
+
+/**
+ * One pickup store's details. Unknown or empty ids give the first store,
+ * which is also what orders placed before the choice existed used.
+ *
+ * Also used on the thank-you page, emails and the admin follow-up box.
+ *
+ * @param string $id Store id (see medzuro_pickup_stores()).
+ * @return array{id:string, name:string, street:string, hours:string, map:string, area:string, image:string}
+ */
+function medzuro_pickup_store( $id = '' ) {
+	$stores = medzuro_pickup_stores();
+	return isset( $stores[ $id ] ) ? $stores[ $id ] : reset( $stores );
+}
+
+/**
+ * The pickup store chosen for an order.
+ *
+ * @param WC_Order $order Order.
+ * @return array See medzuro_pickup_store().
+ */
+function medzuro_order_pickup_store( $order ) {
+	return medzuro_pickup_store( (string) $order->get_meta( '_mz_pickup_store' ) );
+}
+
+/**
+ * The store id posted with the checkout form, or '' when missing/invalid.
+ *
+ * @return string
+ */
+function medzuro_posted_pickup_store() {
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce verifies the checkout nonce.
+	$id = isset( $_POST['mz_pickup_store'] ) ? sanitize_key( wp_unslash( $_POST['mz_pickup_store'] ) ) : '';
+	return array_key_exists( $id, medzuro_pickup_stores() ) ? $id : '';
 }
 
 /**
@@ -143,7 +211,7 @@ function medzuro_register_delivery_method() {
 			$this->id                 = 'medzuro_delivery';
 			$this->instance_id        = absint( $instance_id );
 			$this->method_title       = __( 'Medzuro Delivery / Pickup', 'medzuro' );
-			$this->method_description = __( 'Offers DHL Express home delivery and Nakasi store pickup as two rates.', 'medzuro' );
+			$this->method_description = __( 'Offers DHL Express home delivery and store pickup (Nakasi or Princes Road) as two rates.', 'medzuro' );
 			$this->supports           = array( 'shipping-zones', 'instance-settings' );
 
 			$this->init_instance_form_fields();
@@ -188,7 +256,7 @@ function medzuro_register_delivery_method() {
 					'default' => $d['pickup_enabled'],
 				),
 				'pickup_address' => array(
-					'title'   => __( 'Pickup location', 'medzuro' ),
+					'title'   => __( 'Pickup locations (shown on the option)', 'medzuro' ),
 					'type'    => 'text',
 					'default' => $d['pickup_address'],
 				),
@@ -197,25 +265,10 @@ function medzuro_register_delivery_method() {
 					'type'    => 'text',
 					'default' => $d['pickup_note'],
 				),
-				'pickup_name'    => array(
-					'title'   => __( 'Store name', 'medzuro' ),
-					'type'    => 'text',
-					'default' => $d['pickup_name'],
-				),
-				'pickup_street'  => array(
-					'title'   => __( 'Store address', 'medzuro' ),
-					'type'    => 'text',
-					'default' => $d['pickup_street'],
-				),
 				'pickup_hours'   => array(
 					'title'   => __( 'Opening hours', 'medzuro' ),
 					'type'    => 'text',
 					'default' => $d['pickup_hours'],
-				),
-				'pickup_map'     => array(
-					'title'   => __( 'Google Maps link', 'medzuro' ),
-					'type'    => 'text',
-					'default' => $d['pickup_map'],
 				),
 			);
 		}

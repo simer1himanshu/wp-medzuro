@@ -380,6 +380,9 @@ function medzuro_validate_checkout( $data, $errors ) {
 	}
 
 	if ( true === medzuro_chosen_is_pickup() ) {
+		if ( '' === medzuro_posted_pickup_store() ) {
+			$errors->add( 'mz_pickup_store', __( 'Please choose a pickup location.', 'medzuro' ) );
+		}
 		if ( 'reserve' === $option && 'medzuro_reserve' !== $gateway ) {
 			$errors->add( 'payment', __( 'Please choose "Reserve without payment" again.', 'medzuro' ) );
 		}
@@ -406,6 +409,9 @@ function medzuro_save_checkout_meta( $order, $data ) {
 	$order->update_meta_data( '_mz_fulfilment', $is_pickup ? 'pickup' : 'delivery' );
 
 	if ( $is_pickup ) {
+		$store = medzuro_pickup_store( medzuro_posted_pickup_store() );
+		$order->update_meta_data( '_mz_pickup_store', $store['id'] );
+
 		$option = medzuro_pickup_payment_choice();
 		$order->update_meta_data( '_mz_pickup_payment', $option );
 
@@ -431,6 +437,11 @@ function medzuro_admin_order_details( $order ) {
 	$method = $order->get_meta( '_billing_contact_method' );
 	if ( $method ) {
 		echo '<p><strong>' . esc_html__( 'Preferred contact:', 'medzuro' ) . '</strong> ' . esc_html( ucfirst( $method ) ) . '</p>';
+	}
+
+	if ( medzuro_order_is_pickup( $order ) ) {
+		$store = medzuro_order_pickup_store( $order );
+		echo '<p><strong>' . esc_html__( 'Pickup location:', 'medzuro' ) . '</strong> ' . esc_html( $store['name'] ) . '<br />' . esc_html( $store['street'] ) . '</p>';
 	}
 
 	$option = $order->get_meta( '_mz_pickup_payment' );
@@ -554,6 +565,13 @@ function medzuro_store_pickup_choice( $post_data ) {
 		if ( array_key_exists( $choice, medzuro_pickup_payment_options() ) ) {
 			WC()->session->set( 'mz_pickup_payment', $choice );
 			$_POST['mz_pickup_payment'] = $choice; // So gateway filtering in this request sees it.
+		}
+	}
+
+	if ( isset( $form['mz_pickup_store'] ) && WC()->session ) {
+		$store = sanitize_key( $form['mz_pickup_store'] );
+		if ( array_key_exists( $store, medzuro_pickup_stores() ) ) {
+			WC()->session->set( 'mz_pickup_store', $store );
 		}
 	}
 }

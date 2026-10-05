@@ -29,7 +29,7 @@ function medzuro_faq_items() {
 		array(
 			'icon' => 'store',
 			'q'    => __( 'Can I pick up my order?', 'medzuro' ),
-			'a'    => __( 'Yes. Choose Store Pickup at checkout to collect from Nakasi, Suva. We will let you know when your order is ready.', 'medzuro' ),
+			'a'    => __( 'Yes. Choose Store Pickup at checkout to collect from our Nakasi or Princes Road store in Suva. We will let you know when your order is ready.', 'medzuro' ),
 		),
 		array(
 			'icon' => 'pin',
