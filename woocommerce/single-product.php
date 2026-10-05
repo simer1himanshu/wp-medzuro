@@ -23,7 +23,8 @@ while ( have_posts() ) :
 	$review_count = (int) $product->get_review_count();
 	$short_desc   = $product->get_short_description();
 	$mz_desc      = medzuro_pdp_split_description( $short_desc );
-	$mz_cur       = apply_filters( 'medzuro_pdp_currency_prefix', 'FJD ' );
+	// Formatted prices already carry "FJD $" (see medzuro_fjd_currency_symbol()), so no prefix here.
+	$mz_cur       = apply_filters( 'medzuro_pdp_currency_prefix', '' );
 	$coming_soon  = medzuro_is_coming_soon( $product );
 	$in_stock     = $product->is_in_stock();
 	$cards        = $coming_soon ? null : medzuro_pdp_variation_cards( $product );

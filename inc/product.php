@@ -666,3 +666,21 @@ function medzuro_product_serving( $product ) {
 
 	return (string) apply_filters( 'medzuro_product_serving', $defaults[ $product->get_slug() ] ?? '', $product );
 }
+
+
+/**
+ * Show "FJD $" with every price.
+ *
+ * WooCommerce prints the symbol it is given in front of the amount, so changing
+ * the symbol here makes every wc_price() output read "FJD $59.00": product
+ * cards, the product page, cart, checkout, order pages and emails. Templates
+ * must therefore NOT add their own "FJD" in front of a formatted price.
+ *
+ * @param string $symbol   Currency symbol.
+ * @param string $currency Currency code.
+ * @return string
+ */
+function medzuro_fjd_currency_symbol( $symbol, $currency ) {
+	return 'FJD' === $currency ? 'FJD $' : $symbol;
+}
+add_filter( 'woocommerce_currency_symbol', 'medzuro_fjd_currency_symbol', 10, 2 );
