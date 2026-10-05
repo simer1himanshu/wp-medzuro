@@ -52,7 +52,7 @@ defined( 'ABSPATH' ) || exit;
 			$mz_sub = __( 'Your order has been successfully reserved.', 'medzuro' );
 		}
 
-		$mz_store     = medzuro_pickup_store();
+		$mz_store     = medzuro_order_pickup_store( $order );
 		$mz_paid_note = 'deposit' === $mz_option ? __( '(10% payment)', 'medzuro' ) : __( '(Full payment)', 'medzuro' );
 		?>
 
@@ -75,7 +75,7 @@ defined( 'ABSPATH' ) || exit;
 				<?php endif; ?>
 				<div><dt><?php esc_html_e( 'Payment status', 'medzuro' ); ?></dt><dd class="mz-receipt__status"><?php echo esc_html( $mz_status ); ?></dd></div>
 				<?php if ( $mz_pickup ) : ?>
-					<div class="mz-receipt__stack"><dt><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></dt><dd><?php echo esc_html( $mz_store['name'] ); ?></dd></div>
+					<div class="mz-receipt__stack"><dt><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></dt><dd><?php echo esc_html( $mz_store['name'] ); ?><br /><small><?php echo esc_html( $mz_store['street'] ); ?></small><?php if ( $mz_store['map'] ) : ?><br /><small><a href="<?php echo esc_url( $mz_store['map'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View on Google Maps', 'medzuro' ); ?></a></small><?php endif; ?></dd></div>
 					<div class="mz-receipt__stack"><dt><?php esc_html_e( 'Pickup hours', 'medzuro' ); ?></dt><dd><?php echo esc_html( $mz_store['hours'] ); ?></dd></div>
 				<?php endif; ?>
 			</dl>

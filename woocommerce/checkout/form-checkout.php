@@ -38,7 +38,10 @@ $mz_is_pickup   = medzuro_rate_is_pickup( $mz_chosen );
 $mz_pickup_opts = medzuro_pickup_payment_options();
 $mz_pickup_pick = medzuro_pickup_payment_choice();
 $mz_pickup_rate = null;
-$mz_store       = medzuro_pickup_store();
+$mz_stores      = medzuro_pickup_stores();
+$mz_store_pick  = medzuro_posted_pickup_store();
+$mz_store_pick  = $mz_store_pick ? $mz_store_pick : (string) ( WC()->session ? WC()->session->get( 'mz_pickup_store', '' ) : '' );
+$mz_store       = medzuro_pickup_store( $mz_store_pick );
 
 foreach ( $mz_rates as $mz_rate ) {
 	if ( 'pickup' === ( $mz_rate->get_meta_data()['type'] ?? '' ) ) {
@@ -191,28 +194,34 @@ $mz_stages = array(
 
 			<div class="mz-only-pickup">
 				<h2 class="mz-panel__ttl"><?php esc_html_e( 'Select pickup location', 'medzuro' ); ?></h2>
-				<label class="mz-store">
-					<input type="radio" name="mz_pickup_store" value="nakasi" checked />
-					<span class="mz-store__radio" aria-hidden="true"></span>
-					<span class="mz-store__body">
-						<strong class="mz-store__name"><?php echo esc_html( $mz_store['name'] ); ?></strong>
-						<?php if ( $mz_store['image'] ) : ?>
-							<img class="mz-store__img" src="<?php echo esc_url( $mz_store['image'] ); ?>" alt="<?php echo esc_attr( $mz_store['name'] ); ?>" loading="lazy" />
-						<?php else : ?>
-							<span class="mz-store__img mz-store__img--ph"><?php medzuro_icon( 'store', 44 ); ?></span>
-						<?php endif; ?>
-						<span class="mz-store__addr"><?php echo esc_html( $mz_store['street'] ); ?></span>
-						<span class="mz-store__hours">
-							<?php
-							/* translators: %s: opening hours */
-							printf( esc_html__( 'Open: %s', 'medzuro' ), esc_html( $mz_store['hours'] ) );
-							?>
-						</span>
-					</span>
-				</label>
-				<?php if ( $mz_store['map'] ) : ?>
-					<p class="mz-store__map"><a href="<?php echo esc_url( $mz_store['map'] ); ?>" target="_blank" rel="noopener"><?php medzuro_icon( 'map', 16 ); ?> <?php esc_html_e( 'View on Google Maps', 'medzuro' ); ?></a></p>
-				<?php endif; ?>
+				<div class="mz-stores" role="radiogroup" aria-label="<?php esc_attr_e( 'Pickup location', 'medzuro' ); ?>">
+					<?php foreach ( $mz_stores as $mz_store_id => $mz_s ) : ?>
+						<div class="mz-store-opt">
+							<label class="mz-store">
+								<input type="radio" name="mz_pickup_store" value="<?php echo esc_attr( $mz_store_id ); ?>" data-name="<?php echo esc_attr( $mz_s['name'] ); ?>" <?php checked( $mz_store['id'], $mz_store_id ); ?> />
+								<span class="mz-store__radio" aria-hidden="true"></span>
+								<span class="mz-store__body">
+									<strong class="mz-store__name"><?php echo esc_html( $mz_s['name'] ); ?></strong>
+									<?php if ( $mz_s['image'] ) : ?>
+										<img class="mz-store__img" src="<?php echo esc_url( $mz_s['image'] ); ?>" alt="<?php echo esc_attr( $mz_s['name'] ); ?>" loading="lazy" />
+									<?php endif; ?>
+									<span class="mz-store__addr"><?php echo esc_html( $mz_s['street'] ); ?></span>
+									<?php if ( $mz_s['hours'] ) : ?>
+										<span class="mz-store__hours">
+											<?php
+											/* translators: %s: opening hours */
+											printf( esc_html__( 'Open: %s', 'medzuro' ), esc_html( $mz_s['hours'] ) );
+											?>
+										</span>
+									<?php endif; ?>
+								</span>
+							</label>
+							<?php if ( $mz_s['map'] ) : ?>
+								<p class="mz-store__map"><a href="<?php echo esc_url( $mz_s['map'] ); ?>" target="_blank" rel="noopener"><?php medzuro_icon( 'map', 16 ); ?> <?php esc_html_e( 'View on Google Maps', 'medzuro' ); ?></a></p>
+							<?php endif; ?>
+						</div>
+					<?php endforeach; ?>
+				</div>
 
 				<p class="form-row form-row-wide" id="mz_pickup_note_field">
 					<label for="mz_pickup_note"><?php esc_html_e( 'Pickup instructions', 'medzuro' ); ?> <span class="optional">(<?php esc_html_e( 'optional', 'medzuro' ); ?>)</span></label>
@@ -251,7 +260,7 @@ $mz_stages = array(
 					<strong><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></strong>
 					<button type="button" class="mz-link mz-goto" data-goto="address"><?php esc_html_e( 'Change', 'medzuro' ); ?></button>
 				</div>
-				<p class="mz-review-to__store"><?php medzuro_icon( 'store', 22 ); ?> <span><?php echo esc_html( $mz_store['name'] ); ?></span></p>
+				<p class="mz-review-to__store"><?php medzuro_icon( 'store', 22 ); ?> <span data-mz-summary="store"><?php echo esc_html( $mz_store['name'] ); ?></span></p>
 				<p class="mz-review-to__body" data-mz-summary="contact"></p>
 			</div>
 
