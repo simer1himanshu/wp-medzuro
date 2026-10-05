@@ -108,7 +108,7 @@ $s = medzuro_home()['settings'];
 							<div class="mz-home-product__body">
 								<a class="mz-home-product__title" href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $product->get_name() ); ?></a>
 								<span class="mz-home-product__meta">
-									<?php echo esc_html( medzuro_field( 'serving', $s['product_meta'], $product->get_id() ) ); ?>
+									<?php echo esc_html( medzuro_product_serving( $product ) ?: $s['product_meta'] ); ?>
 								</span>
 
 								<?php if ( ! $coming_soon ) : ?>

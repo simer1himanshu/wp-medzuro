@@ -560,15 +560,16 @@ add_action( 'woocommerce_cart_calculate_fees', 'medzuro_apply_bundle_offer' );
  */
 function medzuro_pdp_spec_chips( $product, $is_holyoak ) {
 	$chips   = array();
-	$serving = (string) medzuro_field( 'serving', medzuro_home()['settings']['product_meta'] ?? '', $product->get_id() );
+	$serving = medzuro_product_serving( $product ) ?: (string) ( medzuro_home()['settings']['product_meta'] ?? '' );
 	$unit    = '';
 
 	if ( preg_match( '/(\d+)\s*([A-Za-z]+)/', $serving, $m ) ) {
 		$unit    = strtolower( $m[2] );
+		$weight  = in_array( $unit, array( 'g', 'kg', 'ml' ), true );
 		$chips[] = array(
 			'icon'  => 'pill',
-			'value' => $m[1],
-			'label' => ucfirst( $m[2] ),
+			'value' => $weight ? $m[1] . ' ' . $m[2] : $m[1],
+			'label' => $weight ? __( 'Net weight', 'medzuro' ) : ucfirst( $m[2] ),
 		);
 	}
 
@@ -616,4 +617,31 @@ function medzuro_page_url( $slugs, $fallback ) {
 	}
 
 	return $fallback;
+}
+
+
+/**
+ * Pack size and servings line, e.g. "60 Capsules • 30 Servings".
+ *
+ * The medzuro_serving custom field wins. When it is empty the three live
+ * HolyOak products fall back to these values, so a product never shows another
+ * product's pack size.
+ *
+ * @param WC_Product $product Product.
+ * @return string
+ */
+function medzuro_product_serving( $product ) {
+	$value = (string) medzuro_field( 'serving', '', $product->get_id() );
+
+	if ( '' !== $value ) {
+		return $value;
+	}
+
+	$defaults = array(
+		'holyoak-resin'    => '30 g • 45 Servings',
+		'holyoak-capsules' => '60 Capsules • 30 Servings',
+		'holyoak-gummies'  => '60 Gummies • 30 Servings',
+	);
+
+	return (string) apply_filters( 'medzuro_product_serving', $defaults[ $product->get_slug() ] ?? '', $product );
 }

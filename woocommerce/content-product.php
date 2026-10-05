@@ -28,7 +28,7 @@ $reviews   = (int) $product->get_review_count();
 $coming_soon = medzuro_is_coming_soon( $product );
 $pricing   = medzuro_card_pricing( $product );
 $card_image = medzuro_card_image_url( $product );
-$descriptor = medzuro_field( 'serving', '', $product->get_id() );
+$descriptor = medzuro_product_serving( $product );
 
 if ( ! $descriptor ) {
 	$descriptor = wp_trim_words( wp_strip_all_tags( $product->get_short_description() ), 7, '' );
