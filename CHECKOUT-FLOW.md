@@ -20,7 +20,9 @@ Built to the client's "Initial Flow" and "Home Delivery" screens.
   classic field hooks, so it can't do this flow. Delete the
   `template_include` filter in `inc/checkout-flow.php` to go back to blocks.
 - Only two rates are ever shown: **Home Delivery (DHL Express)**, free, and
-  **Store Pickup, Nakasi, Suva**. Other zone rates (Free shipping, Flat rate)
+  **Store Pickup**, where the customer picks one of two Suva stores
+  (Nakasi or Princes Road; see `medzuro_pickup_stores()` in `inc/delivery.php`).
+  The choice is saved on the order as `_mz_pickup_store`. Other zone rates (Free shipping, Flat rate)
   are hidden. To change cost, delivery time or pickup address, add
   "Medzuro Delivery / Pickup" to the Fiji zone in
   *WooCommerce → Settings → Shipping*. Otherwise the defaults are used.
@@ -34,12 +36,19 @@ Built to the client's "Initial Flow" and "Home Delivery" screens.
 
 ## Pickup store details
 
-The "Select pickup location" step shows the store name, address, opening
-hours and a Google Maps link. The defaults are in `medzuro_delivery_defaults()`
-in `inc/delivery.php` and are placeholders until the client confirms the real
-address and hours. They can also be edited in the "Medzuro Delivery / Pickup"
-method in the Fiji shipping zone. Add a photo of the shop as
-`assets/img/pickup-store.jpg` to show it on that step.
+The "Select pickup location" step lists both stores as radio options, each
+with its name, address, opening hours and Google Maps link:
+
+- **Medzuro Retail - Nakasi**: 18, Valili Street, Vishnu Deo Road, Nakasi, Suva
+- **Medzuro Retail - Princes Road**: 204, Princes Road, Suva, Fiji
+
+The stores are defined in `medzuro_pickup_stores()` in `inc/delivery.php`
+(filterable with `medzuro_pickup_stores`). Opening hours come from the
+"Medzuro Delivery / Pickup" method settings when it is in the Fiji zone.
+The chosen store is shown in the order summary, on the thank-you page, in the
+confirmation and ready-for-pickup emails, and in the admin follow-up box.
+Add a photo as `assets/img/pickup-store-nakasi.jpg` or
+`assets/img/pickup-store-princes-road.jpg` to show it on that step.
 
 ## Running orders (staff)
 
