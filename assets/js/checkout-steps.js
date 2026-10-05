@@ -111,6 +111,11 @@
 
 		$form.find( '[data-mz-summary="address"]' ).text( address );
 		$form.find( '[data-mz-summary="contact"]' ).text( contact );
+
+		var $store = $form.find( 'input[name="mz_pickup_store"]:checked' );
+		if ( $store.length ) {
+			$form.find( '[data-mz-summary="store"]' ).text( $store.data( 'name' ) );
+		}
 	}
 
 	/* ------------------------------------------------------------------ */
@@ -291,6 +296,7 @@
 	} );
 
 	$form.on( 'change', 'input[name="mz_pickup_payment"]', applyOption );
+	$form.on( 'change', 'input[name="mz_pickup_store"]', updateSummaries );
 
 	/* ------------------------------------------------------------------ */
 	/* Start                                                               */
