@@ -54,10 +54,12 @@ function medzuro_content() {
 		),
 
 		'topbar' => array(
-			// settings.leftTxt / centerTxt / rightTxt — topbar was enabled.
-			'left'   => '',
-			'center' => 'Free shipping all over Fiji',
-			'right'  => '',
+			// Icon + short message pairs shown centred in the top bar.
+			'items' => array(
+				array( 'icon' => 'shield', 'text' => 'Genuine HolyOak Products' ),
+				array( 'icon' => 'truck', 'text' => 'Fast Delivery Across Fiji' ),
+				array( 'icon' => 'store', 'text' => 'Local Pickup Available in Suva' ),
+			),
 		),
 
 		'footer' => array(

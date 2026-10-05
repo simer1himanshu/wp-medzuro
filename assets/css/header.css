@@ -13,28 +13,64 @@
 .mz-topbar {
   background: var(--mz-navy);
   color: #fff;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .mz-topbar__inner {
+  list-style: none;
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 38px;
+  justify-content: center;
+  min-height: 54px;
   padding-block: 8px;
 }
 
-.mz-topbar__cell { flex: 1 1 0; }
-.mz-topbar__cell--center { text-align: center; }
-.mz-topbar__cell--right { text-align: right; }
+.mz-topbar__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 34px;
+  white-space: nowrap;
+}
+
+.mz-topbar__item + .mz-topbar__item { border-left: 1px solid rgba(255, 255, 255, .35); }
+
+.mz-topbar__item svg {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mz-topbar__item--shield svg { fill: #f2b84b; stroke: #0b2b6b; }
 
 .mz-topbar a { color: #fff; }
 
+/* Tablet: tighter spacing. Phone: one swipeable row. */
+@media (max-width: 1023px) {
+  .mz-topbar { font-size: 13px; }
+  .mz-topbar__item { padding: 0 18px; gap: 8px; }
+  .mz-topbar__item svg { width: 22px; height: 22px; flex-basis: 22px; }
+}
+
 @media (max-width: 767px) {
-  .mz-topbar__cell--left,
-  .mz-topbar__cell--right { display: none; }
-  .mz-topbar__cell--center { text-align: center; }
+  .mz-topbar__inner {
+    justify-content: flex-start;
+    min-height: 44px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .mz-topbar__inner::-webkit-scrollbar { display: none; }
+  .mz-topbar__item { flex: 0 0 auto; scroll-snap-align: start; padding: 0 16px; }
+  .mz-topbar__item:first-child { padding-left: 0; }
 }
 
 /* Header bar */

@@ -37,14 +37,17 @@ defined( 'ABSPATH' ) || exit;
 
 <a class="skip-link mz-visually-hidden" href="#MainContent"><?php esc_html_e( 'Skip to content', 'medzuro' ); ?></a>
 
-<?php $topbar = medzuro_content()['topbar']; ?>
-<?php if ( array_filter( $topbar ) ) : ?>
+<?php $topbar = medzuro_content()['topbar']['items'] ?? array(); ?>
+<?php if ( $topbar ) : ?>
 	<div class="mz-topbar">
-		<div class="page-width mz-topbar__inner">
-			<div class="mz-topbar__cell mz-topbar__cell--left"><?php echo wp_kses_post( $topbar['left'] ); ?></div>
-			<div class="mz-topbar__cell mz-topbar__cell--center"><?php echo wp_kses_post( $topbar['center'] ); ?></div>
-			<div class="mz-topbar__cell mz-topbar__cell--right"><?php echo wp_kses_post( $topbar['right'] ); ?></div>
-		</div>
+		<ul class="page-width mz-topbar__inner" role="list">
+			<?php foreach ( $topbar as $item ) : ?>
+				<li class="mz-topbar__item mz-topbar__item--<?php echo esc_attr( $item['icon'] ); ?>">
+					<?php medzuro_ref_icon( $item['icon'] ); ?>
+					<span><?php echo esc_html( $item['text'] ); ?></span>
+				</li>
+			<?php endforeach; ?>
+		</ul>
 	</div>
 <?php endif; ?>
 
