@@ -221,17 +221,22 @@ add_action( 'woocommerce_after_quantity_input_field', 'medzuro_pdp_qty_plus' );
 /**
  * Image for product cards in grids (homepage, shop, collections).
  *
- * The product's first (featured) image is used for the grid only; the product
- * page gallery skips it. Falls back to the bundled catalog image, then to
- * an empty string so callers use their own placeholder.
+ * Uses the coordinated square catalog picture bundled with the theme, so every
+ * card has the same framing. Products without one fall back to their
+ * WooCommerce featured image, then to an empty string so callers use their own
+ * placeholder. The product page gallery does not show the featured image.
  *
  * @param WC_Product $product Product being displayed.
  * @return string Image URL, or an empty string.
  */
 function medzuro_card_image_url( $product ) {
-	$featured = $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'large' ) : '';
+	$catalog = medzuro_catalog_image_url( $product );
 
-	return $featured ?: medzuro_catalog_image_url( $product );
+	if ( $catalog ) {
+		return $catalog;
+	}
+
+	return $product->get_image_id() ? (string) wp_get_attachment_image_url( $product->get_image_id(), 'large' ) : '';
 }
 
 /**
