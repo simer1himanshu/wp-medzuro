@@ -426,3 +426,20 @@ function medzuro_fiji_locale( $locale ) {
 	return $locale;
 }
 add_filter( 'woocommerce_get_country_locale', 'medzuro_fiji_locale' );
+
+/**
+ * WooCommerce caches shipping rates in each customer's session, keyed by a
+ * hash of the package. Adding a version here changes that hash, so carts
+ * started before a change to the rate labels/notes pick up the new text.
+ * Bump it whenever medzuro_delivery_rate_args() output changes.
+ *
+ * @param array $packages Shipping packages.
+ * @return array
+ */
+function medzuro_rates_cache_version( $packages ) {
+	foreach ( $packages as $i => $package ) {
+		$packages[ $i ]['medzuro_rates_version'] = 2;
+	}
+	return $packages;
+}
+add_filter( 'woocommerce_cart_shipping_packages', 'medzuro_rates_cache_version' );
