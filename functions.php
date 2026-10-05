@@ -37,6 +37,7 @@ require_once get_template_directory() . '/inc/home.php';
 require_once get_template_directory() . '/inc/cart.php';
 require_once get_template_directory() . '/inc/footer.php';
 require_once get_template_directory() . '/inc/faq.php';
+require_once get_template_directory() . '/inc/contact.php';
 require_once get_template_directory() . '/inc/terms-content.php';
 require_once get_template_directory() . '/inc/delivery.php';
 require_once get_template_directory() . '/inc/checkout-flow.php';
