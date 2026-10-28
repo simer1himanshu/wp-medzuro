@@ -20,9 +20,10 @@
 	var STAGES = [ 'delivery', 'details', 'payment' ];
 	var current = 0;
 
-	// Pickup adds "How would you like to pay?" before the payment step.
+	// Pickup adds "How would you like to pay?" before the payment step,
+	// unless there is only one pickup payment option (pay at pickup).
 	function panels() {
-		return isPickup()
+		return isPickup() && $form.find( 'input[name="mz_pickup_payment"]' ).length > 1
 			? [ 'delivery', 'details', 'address', 'review', 'payopt', 'payment' ]
 			: [ 'delivery', 'details', 'address', 'review', 'payment' ];
 	}
