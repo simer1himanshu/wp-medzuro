@@ -8,7 +8,7 @@ Built to the client's "Initial Flow" and "Home Delivery" screens.
 | Checkout stepper: Delivery → Details → Payment | `woocommerce/checkout/form-checkout.php`, `assets/js/checkout-steps.js` |
 | Fiji fields, +679 mobile, contact preference, payment rules | `inc/checkout-flow.php` |
 | DHL Express / Store Pickup rates | `inc/delivery.php` |
-| Pickup options: full, 10% deposit, reserve without payment | `inc/checkout-flow.php`, `inc/order-flow.php` |
+| Pickup options: pay at pickup (default) or pay online now | `inc/checkout-flow.php`, `inc/order-flow.php` |
 | "Payment successful!" page | `woocommerce/checkout/thankyou.php` |
 | Statuses, DHL tracking, emails, progress timeline | `inc/order-flow.php` |
 
@@ -20,35 +20,36 @@ Built to the client's "Initial Flow" and "Home Delivery" screens.
   classic field hooks, so it can't do this flow. Delete the
   `template_include` filter in `inc/checkout-flow.php` to go back to blocks.
 - Only two rates are ever shown: **Home Delivery (DHL Express)**, free, and
-  **Store Pickup**, where the customer picks one of two Suva stores
-  (Nakasi or Princes Road; see `medzuro_pickup_stores()` in `inc/delivery.php`).
+  **Store Pickup**, where the customer picks one of the locations set up in
+  *WooCommerce → Settings → Shipping → Local pickup* (see
+  `medzuro_wc_pickup_locations()` in `inc/delivery.php`).
   The choice is saved on the order as `_mz_pickup_store`. Other zone rates (Free shipping, Flat rate)
   are hidden. To change cost, delivery time or pickup address, add
   "Medzuro Delivery / Pickup" to the Fiji zone in
   *WooCommerce → Settings → Shipping*. Otherwise the defaults are used.
 - **Home delivery** is M-PAiSA only.
-- **Pickup** offers:
-  - **Full payment:** M-PAiSA for the whole amount.
-  - **10% to reserve:** M-PAiSA charges 10% and the order becomes
-    *Deposit paid*. The balance is collected in store.
-  - **Reserve without payment:** the order becomes *Reserved*. This is not
-    guaranteed and nothing is charged.
+- **Pickup is pay at the store only**: nothing is charged online, the order
+  becomes *Reserved* and is paid when collected (gateway `medzuro_reserve`).
+  The "How would you like to pay?" step is skipped. Online payment and the
+  old 10% deposit can be offered again with the
+  `medzuro_pickup_payment_offered` filter (see `medzuro_pickup_payment_choices()`).
+- **Cash** (`medzuro_cash`) is a staff-only payment method: it appears when
+  creating/editing orders (wp-admin and the Shop Manager dashboard) and on
+  PDF invoices, never at checkout.
 
-## Pickup store details
+## Pickup locations
 
-The "Select pickup location" step lists both stores as radio options, each
-with its name, address, opening hours and Google Maps link:
+Managed in *WooCommerce → Settings → Shipping → Local pickup*. Every enabled
+location is offered at checkout and listed on the **Pickup Locations** page
+(page slug `pickup-locations`, template `page-pickup-locations.php`, or the
+`[medzuro_pickup_locations]` shortcode anywhere). A location's "Pickup
+details" text is shown as its opening hours; empty uses the default hours.
+Locations whose name contains "Nakasi" / "Princes" keep the ids `nakasi` /
+`princes-road` so older orders still match. Add a photo as
+`assets/img/pickup-store-{id}.jpg` to show it.
 
-- **Medzuro Retail - Nakasi**: 18, Valili Street, Vishnu Deo Road, Nakasi, Suva
-- **Medzuro Retail - Princes Road**: 204, Princes Road, Suva, Fiji
-
-The stores are defined in `medzuro_pickup_stores()` in `inc/delivery.php`
-(filterable with `medzuro_pickup_stores`). Opening hours come from the
-"Medzuro Delivery / Pickup" method settings when it is in the Fiji zone.
-The chosen store is shown in the order summary, on the thank-you page, in the
-confirmation and ready-for-pickup emails, and in the admin follow-up box.
-Add a photo as `assets/img/pickup-store-nakasi.jpg` or
-`assets/img/pickup-store-princes-road.jpg` to show it on that step.
+The two WPCode snippets "Pickup locations from WooCommerce settings" did the
+same job before and can be switched off once this theme version is live.
 
 ## Running orders (staff)
 
@@ -63,7 +64,8 @@ Every order has an **Order follow-up** box beside it in the admin, with:
 | Order | What to do |
 |---|---|
 | Home delivery | Paid orders arrive as *Processing*. Type the DHL waybill into the **DHL Express tracking** box on the order and save. The order becomes *Shipped* and the customer is emailed the tracking link. Set *Completed* when delivered. |
-| Pickup | When packed, set *Ready for pickup*. The customer is emailed, with any balance due. Set *Completed* when collected, after taking the balance. |
+| Pickup | When packed, set *Ready for pickup*. The customer is emailed, with any balance due. When the customer collects and pays, click **Cash received - mark collected** in the follow-up box: the payment is recorded as Cash, the paid date is set and the order is Completed. |
+| Walk-in / phone order | Create the order (wp-admin or Shop Manager), choose payment **Cash** and status *Completed* (paid now) or *Ready for pickup* (paid on collection). |
 
 Customers see a progress timeline on the thank-you page and in
 *My Account → Orders* (Placed → Paid → Shipped/Ready → Delivered/Collected).
@@ -76,7 +78,7 @@ the badge everywhere.
 
 ## Not included
 
-- MyCash (Digicel), parked for now.
+- MyCash (Digicel), waiting on the client's merchant account and API documentation.
 - The design's step 4 ("Open M-PAiSA, enter merchant number…") describes a
   manual flow. The live integration sends the customer to Vodafone's hosted
   M-PAiSA page instead, which confirms with their number + PIN and returns
