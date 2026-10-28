@@ -13,7 +13,7 @@
  *   details  (Details)  - name, +679 mobile, email, contact preference
  *   address  (Details)  - delivery address, or pickup location + instructions
  *   review   (Details)  - order summary
- *   payopt   (Payment)  - pickup only: full / 10% / reserve without payment
+ *   payopt   (Payment)  - pickup only, when more than one pickup payment option is offered
  *   payment  (Payment)  - payment method, amount or notice, place order
  *
  * @package Medzuro
@@ -35,7 +35,7 @@ $mz_fields      = $checkout->get_checkout_fields();
 $mz_billing     = isset( $mz_fields['billing'] ) ? $mz_fields['billing'] : array();
 $mz_panel_keys  = medzuro_checkout_panel_fields();
 $mz_is_pickup   = medzuro_rate_is_pickup( $mz_chosen );
-$mz_pickup_opts = medzuro_pickup_payment_options();
+$mz_pickup_opts = medzuro_pickup_payment_choices();
 $mz_pickup_pick = medzuro_pickup_payment_choice();
 $mz_pickup_rate = null;
 $mz_stores      = medzuro_pickup_stores();
@@ -267,7 +267,7 @@ $mz_stages = array(
 			<div class="mz-panel__actions">
 				<button type="button" class="button mz-back"><?php esc_html_e( 'Back', 'medzuro' ); ?></button>
 				<button type="button" class="button alt mz-next">
-					<span class="mz-only-pickup"><?php esc_html_e( 'Continue to payment options', 'medzuro' ); ?></span>
+					<span class="mz-only-pickup"><?php echo esc_html( count( $mz_pickup_opts ) > 1 ? __( 'Continue to payment options', 'medzuro' ) : __( 'Continue', 'medzuro' ) ); ?></span>
 					<span class="mz-only-delivery"><?php esc_html_e( 'Continue', 'medzuro' ); ?></span>
 				</button>
 			</div>
