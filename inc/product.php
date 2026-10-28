@@ -540,33 +540,133 @@ function medzuro_bundle_offer_rate() {
 }
 
 /**
- * Apply the offer: with 2 or more items in the cart, take 10% off the
- * items (after any coupons) as a negative fee, shown as its own line in the
- * cart, checkout and order.
+ * Code of the automatic coupon that carries the offer. It is not created in
+ * WooCommerce > Marketing > Coupons; it exists only in code (see below).
+ *
+ * The offer used to be a negative fee. A coupon spreads the discount over
+ * the product lines instead, so per-product revenue in reports and the Shop
+ * Manager dashboard adds up to the order total.
+ *
+ * @return string
+ */
+function medzuro_bundle_offer_code() {
+	return (string) apply_filters( 'medzuro_bundle_offer_code', 'buy2-offer' );
+}
+
+/**
+ * Whether the cart qualifies: 2 or more items.
+ *
+ * @param WC_Cart|null $cart Cart.
+ * @return bool
+ */
+function medzuro_bundle_offer_eligible( $cart = null ) {
+	$cart = $cart ? $cart : ( function_exists( 'WC' ) ? WC()->cart : null );
+	return $cart && medzuro_bundle_offer_enabled() && $cart->get_cart_contents_count() >= 2;
+}
+
+/**
+ * Define the virtual coupon: a percentage off the products.
+ *
+ * @param mixed  $data Coupon data (false when not handled).
+ * @param string $code Coupon code.
+ * @return mixed
+ */
+function medzuro_bundle_offer_coupon_data( $data, $code ) {
+	if ( wc_format_coupon_code( $code ) !== medzuro_bundle_offer_code() ) {
+		return $data;
+	}
+	return array(
+		'code'           => medzuro_bundle_offer_code(),
+		'discount_type'  => 'percent',
+		'amount'         => round( medzuro_bundle_offer_rate() * 100, 2 ),
+		'individual_use' => false,
+		'usage_limit'    => 0,
+		'description'    => __( 'Buy 2+ offer (automatic)', 'medzuro' ),
+	);
+}
+add_filter( 'woocommerce_get_shop_coupon_data', 'medzuro_bundle_offer_coupon_data', 10, 2 );
+
+/**
+ * Add or remove the coupon before totals are calculated, without notices.
  *
  * @param WC_Cart $cart Cart.
  */
 function medzuro_apply_bundle_offer( $cart ) {
-	if ( ! medzuro_bundle_offer_enabled() || ( is_admin() && ! wp_doing_ajax() ) ) {
+	if ( ! $cart instanceof WC_Cart || ( is_admin() && ! wp_doing_ajax() ) ) {
 		return;
 	}
 
-	if ( $cart->get_cart_contents_count() < 2 ) {
-		return;
+	$code    = medzuro_bundle_offer_code();
+	$applied = $cart->get_applied_coupons();
+	$has     = in_array( $code, $applied, true );
+
+	if ( medzuro_bundle_offer_eligible( $cart ) && ! $has ) {
+		$applied[] = $code;
+		$cart->set_applied_coupons( $applied );
+	} elseif ( ! medzuro_bundle_offer_eligible( $cart ) && $has ) {
+		$cart->set_applied_coupons( array_values( array_diff( $applied, array( $code ) ) ) );
 	}
-
-	$base = (float) $cart->get_subtotal() - (float) $cart->get_discount_total();
-	if ( $base <= 0 ) {
-		return;
-	}
-
-	$rate     = medzuro_bundle_offer_rate();
-	$discount = round( $base * $rate, wc_get_price_decimals() );
-
-	/* translators: %d: percent */
-	$cart->add_fee( sprintf( __( 'Buy 2+ offer (%d%% off)', 'medzuro' ), (int) round( $rate * 100 ) ), -$discount, false );
 }
-add_action( 'woocommerce_cart_calculate_fees', 'medzuro_apply_bundle_offer' );
+add_action( 'woocommerce_before_calculate_totals', 'medzuro_apply_bundle_offer', 5 );
+
+/**
+ * Only valid while the cart qualifies (also blocks typing the code by hand).
+ *
+ * @param bool      $valid  Valid.
+ * @param WC_Coupon $coupon Coupon.
+ * @return bool
+ */
+function medzuro_bundle_offer_valid( $valid, $coupon ) {
+	if ( $coupon->get_code() === medzuro_bundle_offer_code() ) {
+		return medzuro_bundle_offer_eligible();
+	}
+	return $valid;
+}
+add_filter( 'woocommerce_coupon_is_valid', 'medzuro_bundle_offer_valid', 10, 2 );
+
+/**
+ * Show "Buy 2+ offer (10% off)" instead of "Coupon: buy2-offer".
+ *
+ * @param string    $label  Label.
+ * @param WC_Coupon $coupon Coupon.
+ * @return string
+ */
+function medzuro_bundle_offer_label( $label, $coupon ) {
+	if ( $coupon->get_code() === medzuro_bundle_offer_code() ) {
+		/* translators: %d: percent */
+		return sprintf( __( 'Buy 2+ offer (%d%% off)', 'medzuro' ), (int) round( medzuro_bundle_offer_rate() * 100 ) );
+	}
+	return $label;
+}
+add_filter( 'woocommerce_cart_totals_coupon_label', 'medzuro_bundle_offer_label', 10, 2 );
+
+/**
+ * No "[Remove]" link for the automatic offer.
+ *
+ * @param string    $html   Coupon amount HTML.
+ * @param WC_Coupon $coupon Coupon.
+ * @return string
+ */
+function medzuro_bundle_offer_html( $html, $coupon ) {
+	if ( $coupon->get_code() === medzuro_bundle_offer_code() ) {
+		$amount = WC()->cart ? WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax ) : 0;
+		return '-' . wc_price( $amount );
+	}
+	return $html;
+}
+add_filter( 'woocommerce_cart_totals_coupon_html', 'medzuro_bundle_offer_html', 10, 2 );
+
+/**
+ * Coupons must be switched on for the offer to apply, even though the store
+ * does not use typed coupon codes. Keep them on while the offer runs.
+ *
+ * @param string $value Option value.
+ * @return string
+ */
+function medzuro_bundle_offer_needs_coupons( $value ) {
+	return medzuro_bundle_offer_enabled() ? 'yes' : $value;
+}
+add_filter( 'option_woocommerce_enable_coupons', 'medzuro_bundle_offer_needs_coupons' );
 
 
 /**
