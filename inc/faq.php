@@ -29,7 +29,7 @@ function medzuro_faq_items() {
 		array(
 			'icon' => 'store',
 			'q'    => __( 'Can I pick up my order?', 'medzuro' ),
-			'a'    => __( 'Yes. Choose Store Pickup at checkout to collect from our Nakasi or Princes Road store in Suva. We will let you know when your order is ready.', 'medzuro' ),
+			'a'    => __( 'Yes. Choose Store Pickup at checkout and choose one of our pickup locations. There is nothing to pay in advance - you pay when you collect. We will let you know when your order is ready.', 'medzuro' ),
 		),
 		array(
 			'icon' => 'pin',
@@ -39,7 +39,7 @@ function medzuro_faq_items() {
 		array(
 			'icon' => 'card',
 			'q'    => __( 'What payment methods are available?', 'medzuro' ),
-			'a'    => __( 'Home delivery orders are paid online with M-PAiSA. Pickup orders can be paid in full, with a 10% deposit, or reserved without payment (reservations are not guaranteed).', 'medzuro' ),
+			'a'    => __( 'Home delivery orders are paid online with M-PAiSA. Pickup orders need no advance payment: you pay at the store when you collect.', 'medzuro' ),
 		),
 		array(
 			'icon' => 'package',
