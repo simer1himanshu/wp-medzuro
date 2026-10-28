@@ -1,0 +1,17 @@
+/* Pickup Locations page / [medzuro_pickup_locations] */
+.mz-pl { margin: 0 0 56px; }
+.mz-pl__intro p { max-width: 720px; color: var(--mz-muted); font-size: 1.05rem; line-height: 1.6; margin: 0 0 28px; }
+.mz-pl__grid { list-style: none; margin: 0 0 48px; padding: 0; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.mz-pl__card { border: 1px solid var(--mz-rule); border-radius: 14px; background: var(--mz-white); overflow: hidden; display: flex; flex-direction: column; }
+.mz-pl__img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.mz-pl__body { padding: 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.mz-pl__name { font-size: 1.1rem; color: var(--mz-navy); margin: 0 0 4px; }
+.mz-pl__row { display: flex; gap: 8px; align-items: flex-start; margin: 0; color: var(--mz-ink); line-height: 1.45; }
+.mz-pl__row svg { flex: 0 0 auto; margin-top: 2px; color: var(--mz-navy); }
+.mz-pl__map { margin-top: auto; align-self: flex-start; display: inline-flex; gap: 6px; align-items: center; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--mz-navy); color: var(--mz-navy); background: transparent; text-decoration: none; font-weight: 600; }
+.mz-pl__map:hover { background: var(--mz-navy); color: #fff; }
+.mz-pl__how { background: var(--mz-wash); border-radius: 14px; padding: 28px; }
+.mz-pl__how h2 { font-size: 1.3rem; margin-bottom: 12px; }
+.mz-pl__how ol { margin: 0 0 20px; padding-left: 20px; line-height: 1.7; }
+.mz-pl__how .button.alt { display: inline-block; background: var(--mz-navy); color: #fff; padding: 12px 22px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+@media (max-width: 600px) { .mz-pl__how { padding: 20px; } }
