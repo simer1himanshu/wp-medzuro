@@ -157,7 +157,7 @@ if ( class_exists( 'WC_Payment_Gateway' ) && ! class_exists( 'WC_Gateway_Medzuro
 
 		public function __construct() {
 			$this->id                 = 'medzuro_reserve';
-			$this->method_title       = __( 'Reserve without payment (pickup)', 'medzuro' );
+			$this->method_title       = __( 'Pay at pickup (no advance payment)', 'medzuro' );
 			$this->method_description = __( 'Lets pickup customers reserve an order and pay when they collect it. Only offered for store pickup.', 'medzuro' );
 			$this->has_fields         = false;
 
@@ -181,12 +181,12 @@ if ( class_exists( 'WC_Payment_Gateway' ) && ! class_exists( 'WC_Gateway_Medzuro
 				'title'       => array(
 					'title'   => __( 'Title', 'medzuro' ),
 					'type'    => 'text',
-					'default' => __( 'Reserve without payment', 'medzuro' ),
+					'default' => __( 'Pay at pickup', 'medzuro' ),
 				),
 				'description' => array(
 					'title'   => __( 'Description', 'medzuro' ),
 					'type'    => 'textarea',
-					'default' => __( 'Pay in full when you collect from your chosen store. Reservations are not guaranteed and are held for a limited time.', 'medzuro' ),
+					'default' => __( 'No advance payment. Pay in full when you collect from your chosen store.', 'medzuro' ),
 				),
 			);
 		}
@@ -211,6 +211,149 @@ if ( class_exists( 'WC_Payment_Gateway' ) && ! class_exists( 'WC_Gateway_Medzuro
 			$gateways[] = 'WC_Gateway_Medzuro_Reserve';
 			return $gateways;
 		}
+	);
+}
+
+
+/* -------------------------------------------------------------------------
+ * "Cash" gateway (staff-created orders and invoices only)
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Whether the current request is the customer checkout (page, its AJAX
+ * refreshes, the final submit or the order-pay page).
+ *
+ * @return bool
+ */
+function medzuro_is_customer_checkout() {
+	if ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT ) {
+		return true;
+	}
+	if ( is_admin() && ! wp_doing_ajax() ) {
+		return false;
+	}
+	return ( function_exists( 'is_checkout' ) && is_checkout() ) || ( function_exists( 'is_checkout_pay_page' ) && is_checkout_pay_page() );
+}
+
+if ( class_exists( 'WC_Payment_Gateway' ) && ! class_exists( 'WC_Gateway_Medzuro_Cash' ) ) {
+
+	/**
+	 * Cash paid in store. Offered when staff create or edit an order
+	 * (WooCommerce > Orders, or the Shop Manager dashboard) so the order and
+	 * its PDF invoice say "Cash". Never offered to customers at checkout.
+	 */
+	class WC_Gateway_Medzuro_Cash extends WC_Payment_Gateway {
+
+		public function __construct() {
+			$this->id                 = 'medzuro_cash';
+			$this->method_title       = __( 'Cash (staff orders only)', 'medzuro' );
+			$this->method_description = __( 'For orders created by staff and paid in cash in store. Shown when creating/editing orders and on invoices; never shown to customers at checkout.', 'medzuro' );
+			$this->has_fields         = false;
+
+			$this->init_form_fields();
+			$this->init_settings();
+
+			$this->title       = $this->get_option( 'title' );
+			$this->description = $this->get_option( 'description' );
+
+			add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		}
+
+		public function init_form_fields() {
+			$this->form_fields = array(
+				'enabled'     => array(
+					'title'   => __( 'Enable', 'medzuro' ),
+					'type'    => 'checkbox',
+					'label'   => __( 'Offer "Cash" when staff create orders', 'medzuro' ),
+					'default' => 'yes',
+				),
+				'title'       => array(
+					'title'   => __( 'Title', 'medzuro' ),
+					'type'    => 'text',
+					'default' => __( 'Cash', 'medzuro' ),
+				),
+				'description' => array(
+					'title'   => __( 'Description', 'medzuro' ),
+					'type'    => 'textarea',
+					'default' => __( 'Paid in cash in store.', 'medzuro' ),
+				),
+			);
+		}
+
+		public function is_available() {
+			if ( medzuro_is_customer_checkout() ) {
+				return false;
+			}
+			return parent::is_available();
+		}
+
+		public function process_payment( $order_id ) {
+			$order = wc_get_order( $order_id );
+			$order->payment_complete();
+
+			return array(
+				'result'   => 'success',
+				'redirect' => $this->get_return_url( $order ),
+			);
+		}
+	}
+
+	add_filter(
+		'woocommerce_payment_gateways',
+		function ( $gateways ) {
+			$gateways[] = 'WC_Gateway_Medzuro_Cash';
+			return $gateways;
+		}
+	);
+}
+
+/**
+ * Staff created a cash order already marked Processing/Completed: record
+ * when it was paid so reports and the follow-up box show it as paid.
+ *
+ * @param int      $order_id Order id.
+ * @param WC_Order $order    Order.
+ */
+function medzuro_cash_order_paid_date( $order_id, $order = null ) {
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
+	if ( $order && 'medzuro_cash' === $order->get_payment_method() && ! $order->get_date_paid() ) {
+		$order->set_date_paid( time() );
+		$order->save();
+	}
+}
+add_action( 'woocommerce_order_status_processing', 'medzuro_cash_order_paid_date', 5, 2 );
+add_action( 'woocommerce_order_status_completed', 'medzuro_cash_order_paid_date', 5, 2 );
+
+/**
+ * Record the balance as paid in cash at pickup and complete the order.
+ * Used by the "Cash received" button in the follow-up box.
+ *
+ * @param WC_Order $order Order.
+ */
+function medzuro_record_cash_payment( $order ) {
+	$due = max( 0, (float) $order->get_total() - medzuro_order_amount_paid( $order ) );
+
+	if ( in_array( $order->get_payment_method(), array( '', 'medzuro_reserve' ), true ) ) {
+		$gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array();
+		$order->set_payment_method( isset( $gateways['medzuro_cash'] ) ? $gateways['medzuro_cash'] : 'medzuro_cash' );
+		if ( ! isset( $gateways['medzuro_cash'] ) ) {
+			$order->set_payment_method_title( __( 'Cash', 'medzuro' ) );
+		}
+	}
+
+	$user = wp_get_current_user();
+	$order->update_meta_data( '_mz_cash_received', wc_format_decimal( $due, wc_get_price_decimals() ) );
+	$order->update_meta_data( '_mz_cash_received_at', time() );
+	$order->update_meta_data( '_mz_cash_received_by', $user ? $user->display_name : '' );
+	if ( ! $order->get_date_paid() ) {
+		$order->set_date_paid( time() );
+	}
+	$order->save();
+
+	$order->update_status(
+		'completed',
+		/* translators: 1: amount, 2: staff name */
+		sprintf( __( 'Cash received at pickup: %1$s (recorded by %2$s). Order collected.', 'medzuro' ), wp_strip_all_tags( wc_price( $due, array( 'currency' => $order->get_currency() ) ) ), $user ? $user->display_name : '-' )
 	);
 }
 
@@ -548,6 +691,13 @@ function medzuro_order_totals_rows( $rows, $order ) {
 				'value' => wc_price( (float) $order->get_total() - $deposit, array( 'currency' => $order->get_currency() ) ),
 			);
 		}
+	}
+
+	if ( (float) $order->get_meta( '_mz_cash_received' ) > 0 ) {
+		$rows['mz_cash'] = array(
+			'label' => __( 'Paid in cash at pickup:', 'medzuro' ),
+			'value' => wc_price( (float) $order->get_meta( '_mz_cash_received' ), array( 'currency' => $order->get_currency() ) ),
+		);
 	} elseif ( 'reserve' === $option && ! $order->has_status( 'completed' ) ) {
 		$rows['mz_balance'] = array(
 			'label' => __( 'Pay at pickup:', 'medzuro' ),
@@ -620,8 +770,8 @@ function medzuro_followup_meta_box_html( $post_or_order ) {
 		<p><span class="mz-fu__badge mz-fu__badge--<?php echo esc_attr( $tone ); ?>"><?php echo esc_html( $label ); ?></span></p>
 		<table class="mz-fu__table">
 			<tr><th><?php esc_html_e( 'Customer', 'medzuro' ); ?></th><td><?php echo esc_html( $order->get_formatted_billing_full_name() ); ?><br /><?php echo esc_html( $order->get_billing_phone() ); ?><br /><?php echo esc_html( $order->get_billing_email() ); ?><?php echo $contact ? '<br /><em>' . esc_html( sprintf( __( 'Prefers %s', 'medzuro' ), ucfirst( $contact ) ) ) . '</em>' : ''; ?></td></tr>
-			<tr><th><?php esc_html_e( 'Order type', 'medzuro' ); ?></th><td><?php echo esc_html( $pickup ? __( 'Pickup', 'medzuro' ) : __( 'Home delivery (DHL)', 'medzuro' ) ); ?></td></tr>
-			<?php if ( $pickup ) : ?>
+			<tr><th><?php esc_html_e( 'Order type', 'medzuro' ); ?></th><td><?php echo esc_html( medzuro_order_type_label( $order ) ); ?></td></tr>
+			<?php if ( $pickup && ( $order->get_meta( '_mz_pickup_store' ) || 'checkout' === $order->get_created_via() ) ) : ?>
 				<tr><th><?php esc_html_e( 'Pickup location', 'medzuro' ); ?></th><td><?php echo esc_html( $store['name'] ); ?><br /><small><?php echo esc_html( $store['street'] ); ?></small></td></tr>
 				<tr><th><?php esc_html_e( 'Payment option', 'medzuro' ); ?></th><td><?php echo esc_html( isset( $labels[ $option ] ) ? $labels[ $option ]['short'] : __( 'Full payment', 'medzuro' ) ); ?></td></tr>
 			<?php endif; ?>
@@ -640,6 +790,9 @@ function medzuro_followup_meta_box_html( $post_or_order ) {
 			<?php endif; ?>
 			<?php if ( $order->has_status( 'reserved' ) ) : ?>
 				<a class="button button-primary" href="<?php echo esc_url( $action( 'confirm' ) ); ?>"><?php esc_html_e( 'Mark as confirmed', 'medzuro' ); ?></a>
+			<?php endif; ?>
+			<?php if ( $order->has_status( array( 'reserved', 'confirmed', 'ready-pickup', 'deposit-paid', 'on-hold', 'processing' ) ) && medzuro_order_amount_paid( $order ) < (float) $order->get_total() ) : ?>
+				<a class="button button-primary" href="<?php echo esc_url( $action( 'cash' ) ); ?>" onclick="return confirm('<?php echo esc_js( sprintf( __( 'Record %s received in cash and mark the order collected (Completed)?', 'medzuro' ), wp_strip_all_tags( wc_price( (float) $order->get_total() - medzuro_order_amount_paid( $order ) ) ) ) ); ?>');"><?php esc_html_e( 'Cash received - mark collected', 'medzuro' ); ?></a>
 			<?php endif; ?>
 			<?php if ( ! $order->has_status( array( 'completed', 'cancelled', 'refunded' ) ) ) : ?>
 				<a class="button mz-fu__cancel" href="<?php echo esc_url( $action( 'cancel' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Cancel this order? Stock will be returned.', 'medzuro' ) ); ?>');"><?php esc_html_e( 'Cancel order', 'medzuro' ); ?></a>
@@ -666,6 +819,8 @@ function medzuro_handle_order_action() {
 	if ( $order ) {
 		if ( 'confirm' === $do && $order->has_status( 'reserved' ) ) {
 			$order->update_status( 'confirmed', __( 'Reservation confirmed by staff.', 'medzuro' ) );
+		} elseif ( 'cash' === $do && ! $order->has_status( array( 'completed', 'cancelled', 'refunded', 'failed' ) ) ) {
+			medzuro_record_cash_payment( $order );
 		} elseif ( 'cancel' === $do && ! $order->has_status( array( 'completed', 'cancelled', 'refunded' ) ) ) {
 			$order->update_status( 'cancelled', __( 'Cancelled from the follow-up box.', 'medzuro' ) );
 		}

@@ -384,7 +384,7 @@ function medzuro_validate_checkout( $data, $errors ) {
 			$errors->add( 'mz_pickup_store', __( 'Please choose a pickup location.', 'medzuro' ) );
 		}
 		if ( 'reserve' === $option && 'medzuro_reserve' !== $gateway ) {
-			$errors->add( 'payment', __( 'Please choose "Reserve without payment" again.', 'medzuro' ) );
+			$errors->add( 'payment', __( 'Please choose "Pay at pickup" again.', 'medzuro' ) );
 		}
 		if ( 'reserve' !== $option && 'medzuro_reserve' === $gateway ) {
 			$errors->add( 'payment', __( 'Please choose a payment method.', 'medzuro' ) );
@@ -493,13 +493,21 @@ add_filter( 'woocommerce_order_item_get_formatted_meta_data', 'medzuro_hide_rate
  */
 function medzuro_pickup_payment_options() {
 	return array(
+		'reserve' => array(
+			'title'   => __( 'Pay at Pickup', 'medzuro' ),
+			'short'   => __( 'Pay at pickup', 'medzuro' ),
+			'badge'   => __( 'No advance payment', 'medzuro' ),
+			'icon'    => 'store',
+			'desc'    => __( 'Nothing to pay now. Pay when you collect your order from the store.', 'medzuro' ),
+			'bullets' => array( __( 'No advance payment', 'medzuro' ), __( 'Pay by cash at the store', 'medzuro' ), __( 'We will contact you when it is ready', 'medzuro' ) ),
+		),
 		'full'    => array(
-			'title'   => __( 'Full Payment (Recommended)', 'medzuro' ),
-			'short'   => __( 'Full payment', 'medzuro' ),
-			'badge'   => __( 'Recommended', 'medzuro' ),
+			'title'   => __( 'Pay Online Now', 'medzuro' ),
+			'short'   => __( 'Paid online', 'medzuro' ),
+			'badge'   => '',
 			'icon'    => 'card',
-			'desc'    => __( 'Pay the full amount now and confirm your order.', 'medzuro' ),
-			'bullets' => array( __( 'Order reserved immediately', 'medzuro' ), __( 'Fast pickup', 'medzuro' ), __( 'No pending balance', 'medzuro' ) ),
+			'desc'    => __( 'Optional: pay the full amount now with M-PAiSA.', 'medzuro' ),
+			'bullets' => array( __( 'Order confirmed immediately', 'medzuro' ), __( 'Faster collection', 'medzuro' ), __( 'Nothing to pay at the store', 'medzuro' ) ),
 		),
 		'deposit' => array(
 			'title'   => __( 'Pay 10% and Reserve', 'medzuro' ),
@@ -509,15 +517,31 @@ function medzuro_pickup_payment_options() {
 			'desc'    => __( 'Pay just 10% now to reserve your order.', 'medzuro' ),
 			'bullets' => array( __( 'Reserve your order', 'medzuro' ), __( 'Pay remaining later', 'medzuro' ), __( 'Stock will be kept for you', 'medzuro' ) ),
 		),
-		'reserve' => array(
-			'title'   => __( 'Reserve Without Payment', 'medzuro' ),
-			'short'   => __( 'Reserve without payment', 'medzuro' ),
-			'badge'   => '',
-			'icon'    => 'calendar',
-			'desc'    => __( 'Place order request without payment.', 'medzuro' ),
-			'bullets' => array( __( 'We cannot guarantee reservation', 'medzuro' ), __( 'Subject to stock availability', 'medzuro' ), __( 'Our team will contact you', 'medzuro' ) ),
-		),
 	);
+}
+
+/**
+ * The pickup payment options offered at checkout, in display order.
+ *
+ * The client asked for pickup to be pay-at-store only: no deposit and no
+ * online payment. The other options stay defined so older orders still show
+ * correctly. To offer online payment for pickup again:
+ *   add_filter( 'medzuro_pickup_payment_offered', fn() => array( 'reserve', 'full' ) );
+ * (add 'deposit' to bring back the 10% option). With a single option the
+ * "How would you like to pay?" step is skipped.
+ *
+ * @return array Same shape as medzuro_pickup_payment_options().
+ */
+function medzuro_pickup_payment_choices() {
+	$offered = (array) apply_filters( 'medzuro_pickup_payment_offered', array( 'reserve' ) );
+	$all     = medzuro_pickup_payment_options();
+	$out     = array();
+	foreach ( $offered as $key ) {
+		if ( isset( $all[ $key ] ) ) {
+			$out[ $key ] = $all[ $key ];
+		}
+	}
+	return $out ? $out : array( 'reserve' => $all['reserve'] );
 }
 
 /**
@@ -549,7 +573,8 @@ function medzuro_pickup_payment_choice() {
 	$posted = isset( $_POST['mz_pickup_payment'] ) ? sanitize_key( wp_unslash( $_POST['mz_pickup_payment'] ) ) : '';
 	$choice = $posted ? $posted : ( function_exists( 'WC' ) && WC()->session ? WC()->session->get( 'mz_pickup_payment' ) : '' );
 
-	return array_key_exists( (string) $choice, medzuro_pickup_payment_options() ) ? $choice : 'full';
+	$choices = medzuro_pickup_payment_choices();
+	return array_key_exists( (string) $choice, $choices ) ? $choice : (string) key( $choices );
 }
 
 /**
@@ -562,7 +587,7 @@ function medzuro_store_pickup_choice( $post_data ) {
 
 	if ( isset( $form['mz_pickup_payment'] ) && WC()->session ) {
 		$choice = sanitize_key( $form['mz_pickup_payment'] );
-		if ( array_key_exists( $choice, medzuro_pickup_payment_options() ) ) {
+		if ( array_key_exists( $choice, medzuro_pickup_payment_choices() ) ) {
 			WC()->session->set( 'mz_pickup_payment', $choice );
 			$_POST['mz_pickup_payment'] = $choice; // So gateway filtering in this request sees it.
 		}
@@ -591,16 +616,18 @@ add_action( 'woocommerce_checkout_process', 'medzuro_store_pickup_choice_on_subm
  * Payment rules.
  *
  * Home delivery: online payment only (M-PAiSA).
- * Pickup, full or 10%: M-PAiSA.
- * Pickup, reserve: "Reserve without payment" only.
+ * Pickup, pay online (full, or 10% if re-enabled): M-PAiSA.
+ * Pickup, pay at pickup: "Reserve without payment" (pay at pickup) only.
+ * "Cash" (medzuro_cash) is for staff-created orders and never shown here.
  *
  * @param array $gateways Available gateways.
  * @return array
  */
 function medzuro_gateways_by_delivery( $gateways ) {
-	if ( is_admin() && ! wp_doing_ajax() ) {
+	if ( ! medzuro_is_customer_checkout() ) {
 		return $gateways;
 	}
+	unset( $gateways['medzuro_cash'] );
 
 	// Order-pay page (retrying a failed payment): online only.
 	if ( function_exists( 'is_checkout_pay_page' ) && is_checkout_pay_page() ) {
@@ -700,7 +727,7 @@ function medzuro_order_button_text() {
 
 	$a = medzuro_checkout_amounts();
 	if ( 'reserve' === $a['option'] ) {
-		return __( 'Confirm order request', 'medzuro' );
+		return __( 'Place order - pay at pickup', 'medzuro' );
 	}
 
 	/* translators: %s: amount */
@@ -727,19 +754,22 @@ function medzuro_payment_summary() {
 	echo '<div class="mz-pay-summary mz-pay-summary--' . esc_attr( $a['option'] ) . '" data-option="' . esc_attr( $a['option'] ) . '">';
 
 	if ( 'reserve' === $a['option'] ) {
-		echo '<div class="mz-notice mz-notice--warn">';
-		echo '<span class="mz-notice__icon">';
-		medzuro_icon( 'alert', 30 );
-		echo '</span><h3>' . esc_html__( 'Important notice', 'medzuro' ) . '</h3>';
-		echo '<p class="mz-notice__lead">' . esc_html__( 'Your order has not been reserved.', 'medzuro' ) . '</p>';
-		echo '<p>' . esc_html__( 'We have received your order request, but we cannot guarantee stock availability without payment. Our team will contact you to confirm availability and payment.', 'medzuro' ) . '</p>';
-		echo '</div>';
-		echo '<div class="mz-notice mz-notice--note"><strong>' . esc_html__( 'Please note:', 'medzuro' ) . '</strong><ul>';
-		echo '<li>' . esc_html__( 'Stock is subject to availability.', 'medzuro' ) . '</li>';
-		echo '<li>' . esc_html__( 'Your order will be confirmed after payment.', 'medzuro' ) . '</li>';
-		echo '<li>' . esc_html__( 'Our team will contact you on your mobile or Viber.', 'medzuro' ) . '</li>';
+		echo '<div class="mz-amount"><h3>' . esc_html__( 'Pay at pickup', 'medzuro' ) . '</h3>';
+		echo '<div class="mz-amount__row"><span>' . esc_html__( 'Pay now', 'medzuro' ) . '</span><strong>' . wp_kses_post( wc_price( 0 ) ) . '</strong></div>';
+		echo '<div class="mz-amount__row mz-amount__row--hl"><span>' . esc_html__( 'Pay when you collect', 'medzuro' ) . '</span><strong>' . wp_kses_post( wc_price( $a['total'] ) ) . '</strong></div>';
+		echo '<p>' . esc_html__( 'No advance payment is needed. Our team will confirm stock and contact you on your mobile or Viber when your order is ready to collect.', 'medzuro' ) . '</p></div>';
+		$trust = array(
+			array( 'coin', __( 'No advance payment', 'medzuro' ) ),
+			array( 'store', __( 'Pay at the store', 'medzuro' ) ),
+			array( 'check', __( 'We confirm by phone', 'medzuro' ) ),
+		);
+		echo '<ul class="mz-trust">';
+		foreach ( $trust as $t ) {
+			echo '<li>';
+			medzuro_icon( $t[0], 20 );
+			echo '<span>' . esc_html( $t[1] ) . '</span></li>';
+		}
 		echo '</ul></div>';
-		echo '</div>';
 		return;
 	}
 
@@ -782,7 +812,7 @@ add_action( 'woocommerce_review_order_before_submit', 'medzuro_payment_summary',
  * "Go back & pay 10%" under the reserve button (design 7C).
  */
 function medzuro_payment_after_submit() {
-	if ( 'reserve' !== medzuro_checkout_amounts()['option'] ) {
+	if ( 'reserve' !== medzuro_checkout_amounts()['option'] || ! isset( medzuro_pickup_payment_choices()['deposit'] ) ) {
 		return;
 	}
 	echo '<button type="button" class="button mz-switch-option" data-option="deposit">' . esc_html__( 'Go back & pay 10% (recommended)', 'medzuro' ) . '</button>';
@@ -947,8 +977,8 @@ function medzuro_gateway_cards() {
 			'tone' => 'red',
 		),
 		'medzuro_reserve' => array(
-			'name' => __( 'Reserve without payment', 'medzuro' ),
-			'sub'  => __( 'Pay when you collect', 'medzuro' ),
+			'name' => __( 'Pay at pickup', 'medzuro' ),
+			'sub'  => __( 'No advance payment - pay when you collect', 'medzuro' ),
 			'logo' => '',
 			'icon' => 'calendar',
 			'tone' => 'navy',

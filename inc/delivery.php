@@ -27,8 +27,8 @@ function medzuro_delivery_defaults() {
 		'dhl_cost'       => '0',
 		'dhl_eta'        => __( '3-7 working days', 'medzuro' ),
 		'pickup_enabled' => 'yes',
-		'pickup_address' => __( 'Multiple Pickup Locations Available Across Suva', 'medzuro' ),
-		'pickup_note'    => __( 'Choose Nakasi or Princes Road at checkout', 'medzuro' ),
+		'pickup_address' => __( 'Multiple Pickup Locations Available Across Fiji', 'medzuro' ),
+		'pickup_note'    => __( 'Choose your pickup location at checkout', 'medzuro' ),
 		'pickup_hours'   => __( 'Mon - Sat, 9:00 AM - 5:00 PM', 'medzuro' ),
 	);
 }
@@ -104,6 +104,13 @@ function medzuro_pickup_stores() {
 		),
 	);
 
+	// Locations managed in WooCommerce > Settings > Shipping > Local pickup
+	// replace the built-in two when any are set up there.
+	$managed = medzuro_wc_pickup_locations( $stores, $hours );
+	if ( $managed ) {
+		$stores = $managed;
+	}
+
 	foreach ( $stores as $id => $store ) {
 		$image = '';
 		foreach ( $store['photos'] as $base ) {
@@ -119,6 +126,86 @@ function medzuro_pickup_stores() {
 	}
 
 	$stores = apply_filters( 'medzuro_pickup_stores', $stores );
+
+	return $stores;
+}
+
+/**
+ * Pickup locations from WooCommerce > Settings > Shipping > Local pickup,
+ * in the same shape as medzuro_pickup_stores(). Staff add, edit, disable or
+ * reorder locations there and the checkout, the Pickup Locations page, the
+ * emails and the admin all follow.
+ *
+ * Ids stay "nakasi" and "princes-road" for those two stores so orders placed
+ * before this keep matching their store.
+ *
+ * Each location's "Pickup details" text is shown as its opening hours /
+ * note; when empty the default opening hours are used.
+ *
+ * @param array  $builtin Built-in stores (to keep their map links).
+ * @param string $hours   Default opening hours.
+ * @return array[] Stores keyed by id, or an empty array when none are set up.
+ */
+function medzuro_wc_pickup_locations( $builtin = array(), $hours = '' ) {
+	$locations = get_option( 'pickup_location_pickup_locations', array() );
+	if ( empty( $locations ) || ! is_array( $locations ) ) {
+		return array();
+	}
+
+	$countries = ( function_exists( 'WC' ) && WC()->countries ) ? WC()->countries->get_countries() : array();
+	$stores    = array();
+
+	foreach ( $locations as $loc ) {
+		if ( empty( $loc['enabled'] ) || empty( $loc['name'] ) ) {
+			continue;
+		}
+
+		$name = trim( (string) $loc['name'] );
+		$addr = ( isset( $loc['address'] ) && is_array( $loc['address'] ) ) ? $loc['address'] : array();
+
+		if ( false !== stripos( $name, 'nakasi' ) ) {
+			$id = 'nakasi';
+		} elseif ( false !== stripos( $name, 'princes' ) ) {
+			$id = 'princes-road';
+		} else {
+			$id = sanitize_title( $name );
+		}
+		if ( isset( $stores[ $id ] ) ) {
+			$id .= '-' . ( count( $stores ) + 1 );
+		}
+
+		$country = '';
+		if ( ! empty( $addr['country'] ) ) {
+			$code    = strtok( (string) $addr['country'], ':' );
+			$country = isset( $countries[ $code ] ) ? $countries[ $code ] : $code;
+		}
+
+		$street = implode(
+			', ',
+			array_filter(
+				array_map(
+					'trim',
+					array(
+						isset( $addr['address_1'] ) ? (string) $addr['address_1'] : '',
+						isset( $addr['city'] ) ? (string) $addr['city'] : '',
+						$country,
+					)
+				)
+			)
+		);
+
+		$details = isset( $loc['details'] ) ? trim( wp_strip_all_tags( (string) $loc['details'] ) ) : '';
+		$old     = isset( $builtin[ $id ] ) ? $builtin[ $id ] : array();
+
+		$stores[ $id ] = array(
+			'name'   => $name,
+			'street' => $street,
+			'area'   => isset( $addr['city'] ) ? trim( (string) $addr['city'] ) : '',
+			'hours'  => $details ? $details : $hours,
+			'map'    => ! empty( $old['map'] ) ? $old['map'] : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $name . ', ' . $street ),
+			'photos' => ! empty( $old['photos'] ) ? $old['photos'] : array( 'pickup-store-' . $id ),
+		);
+	}
 
 	return $stores;
 }
@@ -211,7 +298,7 @@ function medzuro_register_delivery_method() {
 			$this->id                 = 'medzuro_delivery';
 			$this->instance_id        = absint( $instance_id );
 			$this->method_title       = __( 'Medzuro Delivery / Pickup', 'medzuro' );
-			$this->method_description = __( 'Offers DHL Express home delivery and store pickup (Nakasi or Princes Road) as two rates.', 'medzuro' );
+			$this->method_description = __( 'Offers DHL Express home delivery and store pickup (locations from Local pickup settings) as two rates.', 'medzuro' );
 			$this->supports           = array( 'shipping-zones', 'instance-settings' );
 
 			$this->init_instance_form_fields();
@@ -382,6 +469,16 @@ function medzuro_chosen_is_pickup() {
  * @return bool
  */
 function medzuro_order_is_pickup( $order ) {
+	if ( 'pickup' === $order->get_meta( '_mz_fulfilment' ) ) {
+		return true;
+	}
+	if ( 'delivery' === $order->get_meta( '_mz_fulfilment' ) ) {
+		return false;
+	}
+	// Staff orders with no shipping line, paid at the store.
+	if ( ! $order->get_shipping_methods() && in_array( $order->get_payment_method(), array( 'medzuro_reserve', 'medzuro_cash' ), true ) ) {
+		return true;
+	}
 	// Rate meta ("type") is copied onto the order's shipping line item.
 	foreach ( $order->get_shipping_methods() as $item ) {
 		if ( 'pickup' === $item->get_meta( 'type' ) || 'local_pickup' === $item->get_method_id() || 'pickup_location' === $item->get_method_id() ) {
@@ -389,6 +486,19 @@ function medzuro_order_is_pickup( $order ) {
 		}
 	}
 	return false;
+}
+
+/**
+ * How an order is fulfilled, for staff screens.
+ *
+ * @param WC_Order $order Order.
+ * @return string
+ */
+function medzuro_order_type_label( $order ) {
+	if ( ! $order->get_shipping_methods() && 'checkout' !== $order->get_created_via() && ! $order->get_meta( '_mz_fulfilment' ) ) {
+		return __( 'In-store order (created by staff)', 'medzuro' );
+	}
+	return medzuro_order_is_pickup( $order ) ? __( 'Pickup', 'medzuro' ) : __( 'Home delivery (DHL)', 'medzuro' );
 }
 
 /**
@@ -438,7 +548,7 @@ add_filter( 'woocommerce_get_country_locale', 'medzuro_fiji_locale' );
  */
 function medzuro_rates_cache_version( $packages ) {
 	foreach ( $packages as $i => $package ) {
-		$packages[ $i ]['medzuro_rates_version'] = 2;
+		$packages[ $i ]['medzuro_rates_version'] = 3;
 	}
 	return $packages;
 }
