@@ -42,7 +42,7 @@ defined( 'ABSPATH' ) || exit;
 		$mz_copy = array(
 			'paid'     => array( __( 'Payment successful!', 'medzuro' ), __( 'Your order has been placed.', 'medzuro' ), __( 'Completed', 'medzuro' ) ),
 			'deposit'  => array( __( 'Payment successful!', 'medzuro' ), __( 'Your order has been successfully reserved.', 'medzuro' ), __( '10% paid', 'medzuro' ) ),
-			'reserved' => array( __( 'Order request received!', 'medzuro' ), __( 'We have received your order request. Stock is subject to availability until payment is received.', 'medzuro' ), __( 'Payment pending', 'medzuro' ) ),
+			'reserved' => array( __( 'Order placed!', 'medzuro' ), __( 'Thank you! No payment is needed now. You pay at the store when you collect your order.', 'medzuro' ), __( 'Pay at pickup', 'medzuro' ) ),
 			'waiting'  => array( __( 'Waiting for payment confirmation', 'medzuro' ), __( 'If you completed the payment on your phone, this can take a minute. Refresh this page to check.', 'medzuro' ), __( 'Awaiting payment', 'medzuro' ) ),
 			'failed'   => array( __( 'Payment not completed', 'medzuro' ), __( 'Your payment was declined or cancelled. You can try again below.', 'medzuro' ), __( 'Failed', 'medzuro' ) ),
 		);
@@ -69,7 +69,9 @@ defined( 'ABSPATH' ) || exit;
 				<?php if ( $order->get_payment_method_title() ) : ?>
 					<div><dt><?php esc_html_e( 'Payment method', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( $order->get_payment_method_title() ); ?></dd></div>
 				<?php endif; ?>
-				<div><dt><?php esc_html_e( 'Payment made', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( wc_price( $mz_paid, array( 'currency' => $order->get_currency() ) ) ); ?><?php if ( $mz_pickup && $mz_paid > 0 ) : ?> <small><?php echo esc_html( $mz_paid_note ); ?></small><?php endif; ?></dd></div>
+				<?php if ( 'reserved' !== $mz_state ) : ?>
+					<div><dt><?php esc_html_e( 'Payment made', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( wc_price( $mz_paid, array( 'currency' => $order->get_currency() ) ) ); ?><?php if ( $mz_pickup && $mz_paid > 0 ) : ?> <small><?php echo esc_html( $mz_paid_note ); ?></small><?php endif; ?></dd></div>
+				<?php endif; ?>
 				<?php if ( $mz_balance > 0 && in_array( $mz_state, array( 'deposit', 'reserved' ), true ) ) : ?>
 					<div><dt><?php esc_html_e( 'Balance at pickup', 'medzuro' ); ?></dt><dd><?php echo wp_kses_post( wc_price( $mz_balance, array( 'currency' => $order->get_currency() ) ) ); ?></dd></div>
 				<?php endif; ?>
@@ -79,13 +81,6 @@ defined( 'ABSPATH' ) || exit;
 					<div class="mz-receipt__stack"><dt><?php esc_html_e( 'Pickup hours', 'medzuro' ); ?></dt><dd><?php echo esc_html( $mz_store['hours'] ); ?></dd></div>
 				<?php endif; ?>
 			</dl>
-
-			<?php if ( 'reserved' === $mz_state ) : ?>
-				<div class="mz-receipt__alert" role="note">
-					<?php medzuro_icon( 'alert', 20 ); ?>
-					<span><?php esc_html_e( 'This is not a confirmed reservation. Our team will contact you shortly to confirm availability and payment.', 'medzuro' ); ?></span>
-				</div>
-			<?php endif; ?>
 
 			<?php if ( 'failed' === $mz_state || ( 'waiting' === $mz_state && $order->needs_payment() ) ) : ?>
 				<p class="mz-receipt__actions">
@@ -97,14 +92,19 @@ defined( 'ABSPATH' ) || exit;
 				<div class="mz-receipt__next">
 					<h2><?php esc_html_e( 'What happens next?', 'medzuro' ); ?></h2>
 					<ol class="mz-receipt__steps">
-						<li><?php esc_html_e( 'Our team will review your order.', 'medzuro' ); ?></li>
+						<li><?php esc_html_e( 'We check your items and get your order ready.', 'medzuro' ); ?></li>
 						<li>
 							<?php
 							/* translators: %s: Viber / Phone / Email */
-							printf( esc_html__( 'We may contact you by %s to confirm availability.', 'medzuro' ), esc_html( $mz_contact ) );
+							printf( esc_html__( 'We message you by %s when it is ready to collect.', 'medzuro' ), esc_html( $mz_contact ) );
 							?>
 						</li>
-						<li><?php esc_html_e( 'Once payment is received, your order will be reserved.', 'medzuro' ); ?></li>
+						<li>
+							<?php
+							/* translators: %s: amount */
+							printf( esc_html__( 'Pay %s at the store when you pick it up.', 'medzuro' ), wp_kses_post( wc_price( $mz_balance, array( 'currency' => $order->get_currency() ) ) ) );
+							?>
+						</li>
 					</ol>
 				</div>
 			<?php elseif ( 'failed' !== $mz_state ) : ?>
