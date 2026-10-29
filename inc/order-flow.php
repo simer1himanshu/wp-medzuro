@@ -698,11 +698,6 @@ function medzuro_order_totals_rows( $rows, $order ) {
 			'label' => __( 'Paid in cash at pickup:', 'medzuro' ),
 			'value' => wc_price( (float) $order->get_meta( '_mz_cash_received' ), array( 'currency' => $order->get_currency() ) ),
 		);
-	} elseif ( 'reserve' === $option && ! $order->has_status( 'completed' ) ) {
-		$rows['mz_balance'] = array(
-			'label' => __( 'Pay at pickup:', 'medzuro' ),
-			'value' => wc_price( (float) $order->get_total(), array( 'currency' => $order->get_currency() ) ),
-		);
 	}
 
 	return $rows;
