@@ -83,3 +83,12 @@ the badge everywhere.
   manual flow. The live integration sends the customer to Vodafone's hosted
   M-PAiSA page instead, which confirms with their number + PIN and returns
   them to the thank-you page, so that screen isn't needed.
+
+## Pickups by store (staff)
+
+*WooCommerce → Orders* shows a "Pickups waiting to be collected" box with a
+count per store (Reserved, Reservation confirmed, Ready for pickup, Deposit
+paid), a **Pickup store** column and an "All pickup stores" filter
+(`inc/pickup-admin.php`). A location's "Pickup details" text is shown as its
+opening hours only when it looks like hours (a time or weekday); otherwise the
+default opening hours from the delivery settings are used.
