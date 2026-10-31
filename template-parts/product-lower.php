@@ -63,7 +63,7 @@ $mz_cards  = array(
 	array(
 		'icon'  => 'truck',
 		'title' => __( 'Delivered Across Fiji', 'medzuro' ),
-		'text'  => __( 'Convenient delivery to customers across Fiji through our reliable shipping partner DHL, with local pickup options available in Suva where offered.', 'medzuro' ),
+		'text'  => __( 'Convenient delivery to customers across Fiji through our reliable shipping partner DHL, with local pickup available at our stores across Fiji.', 'medzuro' ),
 		'label' => __( 'Delivery Information', 'medzuro' ),
 		'url'   => medzuro_page_url( array( 'delivery', 'delivery-information' ), home_url( '/delivery-information/' ) ),
 	),
@@ -247,7 +247,7 @@ $flags = medzuro_home_blocks( 'flag' );
 			<article>
 				<span>03</span>
 				<h3><?php esc_html_e( 'Local to Fiji', 'medzuro' ); ?></h3>
-				<p><?php esc_html_e( 'Delivered locally, with pickup available in Suva by arrangement.', 'medzuro' ); ?></p>
+				<p><?php esc_html_e( 'Delivered across Fiji, with pickup available at our stores across Fiji.', 'medzuro' ); ?></p>
 			</article>
 			<article>
 				<span>04</span>

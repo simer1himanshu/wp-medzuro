@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 	<div class="mz-collection-highlight">
 		<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-5.2 7-12a7 7 0 0 0-14 0c0 6.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
-		<span><strong>Local pickup</strong><small>Collect from our Suva location</small></span>
+		<span><strong>Local pickup</strong><small>Collect from our stores across Fiji</small></span>
 	</div>
 	<div class="mz-collection-highlight">
 		<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.7-3 8.4-7 10-4-1.6-7-5.3-7-10V6z"/><path d="M9 12l2 2 4-5"/></svg>
