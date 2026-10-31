@@ -42,7 +42,7 @@ defined( 'ABSPATH' ) || exit;
 		$mz_copy = array(
 			'paid'     => array( __( 'Payment successful!', 'medzuro' ), __( 'Your order has been placed.', 'medzuro' ), __( 'Completed', 'medzuro' ) ),
 			'deposit'  => array( __( 'Payment successful!', 'medzuro' ), __( 'Your order has been successfully reserved.', 'medzuro' ), __( '10% paid', 'medzuro' ) ),
-			'reserved' => array( __( 'Order placed!', 'medzuro' ), __( 'Thank you! No payment is needed now. You pay at the store when you collect your order.', 'medzuro' ), __( 'Pay at pickup', 'medzuro' ) ),
+			'reserved' => array( __( 'Order placed!', 'medzuro' ), __( 'Thank you! No payment is needed now. You pay at the store when you collect your order.', 'medzuro' ), __( 'Payment pending', 'medzuro' ) ),
 			'waiting'  => array( __( 'Waiting for payment confirmation', 'medzuro' ), __( 'If you completed the payment on your phone, this can take a minute. Refresh this page to check.', 'medzuro' ), __( 'Awaiting payment', 'medzuro' ) ),
 			'failed'   => array( __( 'Payment not completed', 'medzuro' ), __( 'Your payment was declined or cancelled. You can try again below.', 'medzuro' ), __( 'Failed', 'medzuro' ) ),
 		);
@@ -102,7 +102,7 @@ defined( 'ABSPATH' ) || exit;
 						<li>
 							<?php
 							/* translators: %s: amount */
-							printf( esc_html__( 'Pay %s at the store when you pick it up.', 'medzuro' ), wp_kses_post( wc_price( $mz_balance, array( 'currency' => $order->get_currency() ) ) ) );
+							echo '<span>' . sprintf( esc_html__( 'Visit the pickup location, pay %s and collect your order.', 'medzuro' ), wp_kses_post( wc_price( $mz_balance, array( 'currency' => $order->get_currency() ) ) ) ) . '</span>';
 							?>
 						</li>
 					</ol>
