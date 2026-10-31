@@ -79,7 +79,7 @@ function medzuro_home() {
 				array(
 					'icon'  => 'pin',
 					'title' => 'Local pickup',
-					'text'  => 'Collect from our Suva location',
+					'text'  => 'Collect from our stores across Fiji',
 				),
 				array(
 					'icon'  => 'shield',

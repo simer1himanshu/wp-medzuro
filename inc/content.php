@@ -58,7 +58,7 @@ function medzuro_content() {
 			'items' => array(
 				array( 'icon' => 'shield', 'text' => 'Genuine HolyOak Products' ),
 				array( 'icon' => 'truck', 'text' => 'Fast Delivery Across Fiji' ),
-				array( 'icon' => 'store', 'text' => 'Local Pickup Available in Suva' ),
+				array( 'icon' => 'store', 'text' => 'Local Pickup Available Across Fiji' ),
 			),
 		),
 

@@ -139,8 +139,9 @@ function medzuro_pickup_stores() {
  * Ids stay "nakasi" and "princes-road" for those two stores so orders placed
  * before this keep matching their store.
  *
- * Each location's "Pickup details" text is shown as its opening hours /
- * note; when empty the default opening hours are used.
+ * Each location's "Pickup details" text is shown as its opening hours when it
+ * looks like hours; otherwise (empty, or just the address) the default opening
+ * hours are used.
  *
  * @param array  $builtin Built-in stores (to keep their map links).
  * @param string $hours   Default opening hours.
@@ -201,13 +202,28 @@ function medzuro_wc_pickup_locations( $builtin = array(), $hours = '' ) {
 			'name'   => $name,
 			'street' => $street,
 			'area'   => isset( $addr['city'] ) ? trim( (string) $addr['city'] ) : '',
-			'hours'  => $details ? $details : $hours,
+			'hours'  => medzuro_details_look_like_hours( $details ) ? $details : $hours,
 			'map'    => ! empty( $old['map'] ) ? $old['map'] : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $name . ', ' . $street ),
 			'photos' => ! empty( $old['photos'] ) ? $old['photos'] : array( 'pickup-store-' . $id ),
 		);
 	}
 
 	return $stores;
+}
+
+/**
+ * Whether a location's "Pickup details" text reads like opening hours
+ * (a time, a weekday or "open 24 hours"). Staff often type the address there
+ * instead; then the default opening hours are shown.
+ *
+ * @param string $text Pickup details text.
+ * @return bool
+ */
+function medzuro_details_look_like_hours( $text ) {
+	if ( '' === trim( (string) $text ) ) {
+		return false;
+	}
+	return (bool) preg_match( '/\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)|\d{1,2}:\d{2}|\b(?:mon|tues?|wed|wednes|thu|thurs?|fri|sat|satur|sun)(?:day)?s?\b|24\s*(?:hours|hrs|\/\s*7)|\bclosed\b/i', (string) $text );
 }
 
 /**
