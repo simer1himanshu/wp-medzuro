@@ -389,16 +389,17 @@ add_action( 'woocommerce_order_status_pending_to_reserved', 'medzuro_new_status_
  * @param string   $subject Subject.
  * @param string   $heading Heading.
  * @param string   $body    HTML body.
+ * @return bool Whether the email was sent.
  */
 function medzuro_send_customer_email( $order, $subject, $heading, $body ) {
 	$to = $order->get_billing_email();
 	if ( ! $to ) {
-		return;
+		return false;
 	}
 
 	$mailer  = WC()->mailer();
 	$message = $mailer->wrap_message( $heading, $body );
-	$mailer->send( $to, $subject, $message, "Content-Type: text/html\r\n" );
+	return (bool) $mailer->send( $to, $subject, $message, "Content-Type: text/html\r\n" );
 }
 
 /**
@@ -447,7 +448,9 @@ function medzuro_email_ready_pickup( $order_id, $order ) {
 	$body .= '<p>' . esc_html__( 'Please bring your order number when you collect.', 'medzuro' ) . '</p>';
 
 	/* translators: %s: order number */
-	medzuro_send_customer_email( $order, sprintf( __( 'Your Medzuro order #%s is ready for pickup', 'medzuro' ), $order->get_order_number() ), __( 'Ready for pickup', 'medzuro' ), $body );
+	if ( medzuro_send_customer_email( $order, sprintf( __( 'Your Medzuro order #%s is ready for pickup', 'medzuro' ), $order->get_order_number() ), __( 'Ready for pickup', 'medzuro' ), $body ) ) {
+		$order->add_order_note( __( 'Email "Ready for pickup" sent.', 'medzuro' ) );
+	}
 }
 add_action( 'woocommerce_order_status_ready-pickup', 'medzuro_email_ready_pickup', 10, 2 );
 
