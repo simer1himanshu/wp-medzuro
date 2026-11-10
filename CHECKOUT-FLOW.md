@@ -92,3 +92,19 @@ paid), a **Pickup store** column and an "All pickup stores" filter
 (`inc/pickup-admin.php`). A location's "Pickup details" text is shown as its
 opening hours only when it looks like hours (a time or weekday); otherwise the
 default opening hours from the delivery settings are used.
+
+## Follow-up emails
+
+`inc/followup-emails.php`, scheduled with Action Scheduler (group
+`medzuro-followup`, see *WooCommerce → Status → Scheduled Actions*):
+
+| Email | When |
+|---|---|
+| Pickup reminder | Order still *Ready for pickup* 2 days after it was marked ready. Stops once it is Completed or Cancelled. |
+| Auto-cancel (off by default) | Order still *Ready for pickup* after N days → Cancelled, stock returned. |
+| Rebuy reminder | 30 days after an order is *Completed*: "Time to restock?" with a one-click **Buy again** link and an unsubscribe link. Skipped if the customer already reordered the product. |
+
+Settings: *WooCommerce → Settings → Emails → Medzuro follow-up emails*
+(reminder days, e.g. `2, 5`; auto-cancel days; rebuy on/off and default days).
+Per product: *Product data → General → Rebuy reminder (days)* (empty =
+default, 0 = never). Every email sent is added as a note on the order.
