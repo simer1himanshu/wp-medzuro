@@ -383,6 +383,19 @@ add_action( 'woocommerce_order_status_failed_to_deposit-paid', 'medzuro_new_stat
 add_action( 'woocommerce_order_status_pending_to_reserved', 'medzuro_new_status_emails' );
 
 /**
+ * Register the theme's customer notice email with WooCommerce.
+ *
+ * @param WC_Email[] $emails Email classes.
+ * @return WC_Email[]
+ */
+function medzuro_register_notice_email( $emails ) {
+	require_once get_template_directory() . '/inc/class-medzuro-email-notice.php';
+	$emails['Medzuro_Email_Customer_Notice'] = new Medzuro_Email_Customer_Notice();
+	return $emails;
+}
+add_filter( 'woocommerce_email_classes', 'medzuro_register_notice_email' );
+
+/**
  * Send a short branded email using WooCommerce's email template.
  *
  * @param WC_Order $order   Order.
@@ -397,6 +410,12 @@ function medzuro_send_customer_email( $order, $subject, $heading, $body ) {
 		return false;
 	}
 
+	$emails = WC()->mailer()->get_emails();
+	if ( isset( $emails['Medzuro_Email_Customer_Notice'] ) ) {
+		return $emails['Medzuro_Email_Customer_Notice']->send_notice( $order, $subject, $heading, $body );
+	}
+
+	// Fallback if the email class is not registered.
 	$mailer  = WC()->mailer();
 	$message = $mailer->wrap_message( $heading, $body );
 	return (bool) $mailer->send( $to, $subject, $message, "Content-Type: text/html\r\n" );
