@@ -811,6 +811,9 @@ function medzuro_followup_meta_box_html( $post_or_order ) {
 			<?php if ( $order->has_status( array( 'reserved', 'confirmed', 'ready-pickup', 'deposit-paid', 'on-hold', 'processing' ) ) && medzuro_order_amount_paid( $order ) < (float) $order->get_total() ) : ?>
 				<a class="button button-primary" href="<?php echo esc_url( $action( 'cash' ) ); ?>" onclick="return confirm('<?php echo esc_js( sprintf( __( 'Record %s received in cash and mark the order collected (Completed)?', 'medzuro' ), wp_strip_all_tags( wc_price( (float) $order->get_total() - medzuro_order_amount_paid( $order ) ) ) ) ); ?>');"><?php esc_html_e( 'Cash received - mark collected', 'medzuro' ); ?></a>
 			<?php endif; ?>
+			<?php if ( $order->has_status( 'ready-pickup' ) && function_exists( 'medzuro_send_pickup_reminder' ) ) : ?>
+				<a class="button" href="<?php echo esc_url( $action( 'remind' ) ); ?>"><?php esc_html_e( 'Send pickup reminder now', 'medzuro' ); ?></a>
+			<?php endif; ?>
 			<?php if ( ! $order->has_status( array( 'completed', 'cancelled', 'refunded' ) ) ) : ?>
 				<a class="button mz-fu__cancel" href="<?php echo esc_url( $action( 'cancel' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Cancel this order? Stock will be returned.', 'medzuro' ) ); ?>');"><?php esc_html_e( 'Cancel order', 'medzuro' ); ?></a>
 			<?php endif; ?>
@@ -838,6 +841,8 @@ function medzuro_handle_order_action() {
 			$order->update_status( 'confirmed', __( 'Reservation confirmed by staff.', 'medzuro' ) );
 		} elseif ( 'cash' === $do && ! $order->has_status( array( 'completed', 'cancelled', 'refunded', 'failed' ) ) ) {
 			medzuro_record_cash_payment( $order );
+		} elseif ( 'remind' === $do && $order->has_status( 'ready-pickup' ) && function_exists( 'medzuro_send_pickup_reminder' ) ) {
+			medzuro_send_pickup_reminder( $order_id, 0 );
 		} elseif ( 'cancel' === $do && ! $order->has_status( array( 'completed', 'cancelled', 'refunded' ) ) ) {
 			$order->update_status( 'cancelled', __( 'Cancelled from the follow-up box.', 'medzuro' ) );
 		}
