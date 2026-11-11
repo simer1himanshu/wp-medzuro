@@ -223,8 +223,12 @@ function medzuro_send_pickup_reminder( $order_id, $n = 1 ) {
 	/* translators: %s: order number */
 	$subject = sprintf( __( 'Reminder: your Medzuro order #%s is waiting for pickup', 'medzuro' ), $order->get_order_number() );
 	if ( medzuro_send_customer_email( $order, $subject, __( 'Your order is waiting for you', 'medzuro' ), $body ) ) {
-		/* translators: %d: reminder number */
-		$order->add_order_note( sprintf( __( 'Pickup reminder email #%d sent.', 'medzuro' ), (int) $n ) );
+		$order->add_order_note(
+			$n > 0
+				/* translators: %d: reminder number */
+				? sprintf( __( 'Pickup reminder email #%d sent.', 'medzuro' ), (int) $n )
+				: __( 'Pickup reminder email sent manually by staff.', 'medzuro' )
+		);
 	}
 }
 add_action( 'medzuro_pickup_reminder', 'medzuro_send_pickup_reminder', 10, 2 );
