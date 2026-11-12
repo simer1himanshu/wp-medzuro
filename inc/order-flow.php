@@ -96,11 +96,68 @@ add_filter( 'woocommerce_order_is_paid_statuses', 'medzuro_paid_statuses' );
  */
 function medzuro_report_statuses( $statuses ) {
 	if ( is_array( $statuses ) ) {
-		$statuses = array_merge( $statuses, array( 'deposit-paid', 'ready-pickup', 'shipped' ) );
+		$statuses = array_merge( $statuses, array( 'deposit-paid', 'shipped' ) );
 	}
 	return $statuses;
 }
 add_filter( 'woocommerce_reports_order_statuses', 'medzuro_report_statuses' );
+
+/**
+ * Unpaid pickup reservations. They are not revenue until the customer
+ * collects and pays (order Completed).
+ *
+ * In WooCommerce Analytics these are excluded under
+ * Analytics -> Settings -> Excluded statuses.
+ *
+ * @return string[]
+ */
+function medzuro_reservation_statuses() {
+	return array( 'reserved', 'confirmed', 'ready-pickup' );
+}
+
+/**
+ * Remove the reservation statuses from a wc_get_order_statuses() list.
+ *
+ * @param array $statuses Statuses.
+ * @return array
+ */
+function medzuro_without_reservation_statuses( $statuses ) {
+	foreach ( medzuro_reservation_statuses() as $slug ) {
+		unset( $statuses[ 'wc-' . $slug ] );
+	}
+	return $statuses;
+}
+
+/**
+ * Shop Manager's dashboard (shop-manager/v1/dashboard-stats) counts every
+ * registered status except cancelled/failed/refunded, and has no setting or
+ * hook for it. It builds that list from wc_get_order_statuses(), so for that
+ * one request only, leave the reservation statuses out.
+ *
+ * @param mixed           $response Response.
+ * @param array           $handler  Route handler.
+ * @param WP_REST_Request $request  Request.
+ * @return mixed
+ */
+function medzuro_sm_stats_before( $response, $handler, $request ) {
+	if ( '/shop-manager/v1/dashboard-stats' === $request->get_route() ) {
+		add_filter( 'wc_order_statuses', 'medzuro_without_reservation_statuses', 999 );
+	}
+	return $response;
+}
+add_filter( 'rest_request_before_callbacks', 'medzuro_sm_stats_before', 10, 3 );
+
+/**
+ * Restore the full status list after the dashboard request.
+ *
+ * @param mixed $response Response.
+ * @return mixed
+ */
+function medzuro_sm_stats_after( $response ) {
+	remove_filter( 'wc_order_statuses', 'medzuro_without_reservation_statuses', 999 );
+	return $response;
+}
+add_filter( 'rest_request_after_callbacks', 'medzuro_sm_stats_after' );
 
 /* -------------------------------------------------------------------------
  * Deposit
