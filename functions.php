@@ -46,6 +46,7 @@ require_once get_template_directory() . '/inc/order-flow.php';
 require_once get_template_directory() . '/inc/pickup-locations.php';
 require_once get_template_directory() . '/inc/pickup-admin.php';
 require_once get_template_directory() . '/inc/followup-emails.php';
+require_once get_template_directory() . '/inc/sm-reserved.php';
 require_once get_template_directory() . '/inc/whatsapp.php';
 
 /**
