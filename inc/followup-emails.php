@@ -199,7 +199,7 @@ function medzuro_send_pickup_reminder( $order_id, $n = 1 ) {
 	$body  = '<p>' . sprintf( esc_html__( 'Hi %s,', 'medzuro' ), esc_html( $order->get_billing_first_name() ) ) . '</p>';
 	$body .= '<p>' . sprintf(
 		/* translators: 1: order number, 2: store name, 3: store address */
-		esc_html__( 'Just a friendly reminder - order #%1$s is ready and waiting for you at %2$s (%3$s).', 'medzuro' ),
+		esc_html__( 'Order #%1$s is still waiting for pickup at %2$s (%3$s).', 'medzuro' ),
 		esc_html( $order->get_order_number() ),
 		esc_html( $store['name'] ),
 		esc_html( $store['street'] )
@@ -218,11 +218,11 @@ function medzuro_send_pickup_reminder( $order_id, $n = 1 ) {
 		/* translators: %s: date */
 		$body .= '<p><strong>' . sprintf( esc_html__( 'Please collect it by %s - after that the reservation will be released.', 'medzuro' ), esc_html( date_i18n( wc_date_format(), $ready_at + $cancel * DAY_IN_SECONDS ) ) ) . '</strong></p>';
 	}
-	$body .= '<p>' . esc_html__( 'If you can no longer collect this order, just reply to this email and let us know.', 'medzuro' ) . '</p>';
+	$body .= '<p>' . esc_html__( 'Please bring your order number when you collect.', 'medzuro' ) . '</p>';
 
 	/* translators: %s: order number */
-	$subject = sprintf( __( 'Reminder: your Medzuro order #%s is waiting for pickup', 'medzuro' ), $order->get_order_number() );
-	if ( medzuro_send_customer_email( $order, $subject, __( 'Your order is waiting for you', 'medzuro' ), $body ) ) {
+	$subject = sprintf( __( 'Your Medzuro order #%s is still waiting for pickup', 'medzuro' ), $order->get_order_number() );
+	if ( medzuro_send_customer_email( $order, $subject, __( 'Still waiting for pickup', 'medzuro' ), $body ) ) {
 		$order->add_order_note(
 			$n > 0
 				/* translators: %d: reminder number */
@@ -330,19 +330,18 @@ function medzuro_send_rebuy_reminder( $order_id ) {
 
 	$buy_url   = add_query_arg( array( 'mz_rebuy' => $order->get_id(), 'key' => $order->get_order_key() ), home_url( '/' ) );
 	$unsub_url = add_query_arg( array( 'mz_unsub' => rawurlencode( base64_encode( $email ) ), 't' => medzuro_rebuy_unsub_token( $email ) ), home_url( '/' ) );
-	$color     = get_option( 'woocommerce_email_base_color', '#2e7d32' );
 
 	$body  = '<p>' . sprintf( esc_html__( 'Hi %s,', 'medzuro' ), esc_html( $order->get_billing_first_name() ) ) . '</p>';
-	$body .= '<p>' . esc_html__( 'It has been a little while since your last order. If you are running low, you can get the same items again in one click:', 'medzuro' ) . '</p><ul>';
+	$body .= '<p>' . sprintf( esc_html__( 'Thank you for your order #%s. If you would like the same items again, you can reorder them from the link below.', 'medzuro' ), esc_html( $order->get_order_number() ) ) . '</p><ul>';
 	foreach ( $order->get_items() as $item ) {
 		$body .= '<li>' . esc_html( $item->get_name() ) . ' &times; ' . esc_html( $item->get_quantity() ) . '</li>';
 	}
 	$body .= '</ul>';
-	$body .= '<p style="text-align:center;margin:28px 0;"><a href="' . esc_url( $buy_url ) . '" style="display:inline-block;padding:12px 28px;background:' . esc_attr( $color ) . ';color:#ffffff;text-decoration:none;border-radius:4px;font-weight:bold;">' . esc_html__( 'Buy again', 'medzuro' ) . '</a></p>';
+	$body .= '<p><a href="' . esc_url( $buy_url ) . '">' . esc_html__( 'Reorder these items', 'medzuro' ) . '</a></p>';
 	$body .= '<p>' . esc_html__( 'Thank you for shopping with Medzuro.', 'medzuro' ) . '</p>';
-	$body .= '<p style="font-size:12px;color:#888888;">' . esc_html__( "Don't want these reminders?", 'medzuro' ) . ' <a href="' . esc_url( $unsub_url ) . '" style="color:#888888;">' . esc_html__( 'Unsubscribe', 'medzuro' ) . '</a></p>';
+	$body .= '<p style="font-size:12px;color:#888888;">' . esc_html__( 'To stop receiving reorder emails,', 'medzuro' ) . ' <a href="' . esc_url( $unsub_url ) . '" style="color:#888888;">' . esc_html__( 'click here', 'medzuro' ) . '</a>.</p>';
 
-	if ( medzuro_send_customer_email( $order, __( 'Running low? Reorder from Medzuro in one click', 'medzuro' ), __( 'Time to restock?', 'medzuro' ), $body ) ) {
+	if ( medzuro_send_customer_email( $order, sprintf( __( 'Your Medzuro order #%s - reorder', 'medzuro' ), $order->get_order_number() ), __( 'Reorder', 'medzuro' ), $body ) ) {
 		$order->update_meta_data( '_mz_rebuy_sent', time() );
 		$order->save();
 		$order->add_order_note( __( 'Rebuy reminder email sent.', 'medzuro' ) );
